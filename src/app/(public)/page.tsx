@@ -16,6 +16,21 @@ const AktionMap = dynamic(() => import("@/components/AktionMap"), {
   ),
 });
 
+/**
+ * Erzeugt die Query-Parameter aus dem Filterzustand.
+ * Wird sowohl fuer die URL (teilbare Links) als auch fuer den API-Fetch genutzt,
+ * damit beide nicht auseinanderdriften.
+ */
+function buildFilterParams(filters: FilterState): URLSearchParams {
+  const params = new URLSearchParams();
+  if (filters.datum) params.set("datum", filters.datum);
+  if (filters.datumBis) params.set("datumBis", filters.datumBis);
+  if (filters.tageszeit.length > 0) params.set("tageszeit", filters.tageszeit.join(","));
+  if (filters.wahlkreise.length > 0) params.set("wahlkreis", filters.wahlkreise.join(","));
+  if (filters.kategorien.length > 0) params.set("kategorie", filters.kategorien.join(","));
+  return params;
+}
+
 interface Aktion {
   id: string;
   titel: string;
@@ -26,6 +41,7 @@ interface Aktion {
   latitude: number | null;
   longitude: number | null;
   wahlkreis: { nummer: number; name: string };
+  kategorie: string;
   ansprechpersonName: string;
   maxTeilnehmer: number | null;
   status: string;
@@ -45,16 +61,12 @@ function AktionenPageInner() {
     datumBis: searchParams.get("datumBis") ?? "",
     tageszeit: searchParams.get("tageszeit")?.split(",").filter(Boolean) ?? [],
     wahlkreise: searchParams.get("wahlkreis")?.split(",").map(Number).filter(Boolean) ?? [],
+    kategorien: searchParams.get("kategorie")?.split(",").filter(Boolean) ?? [],
   });
 
   function handleFilterChange(newFilters: FilterState) {
     setFilters(newFilters);
-    const params = new URLSearchParams();
-    if (newFilters.datum) params.set("datum", newFilters.datum);
-    if (newFilters.datumBis) params.set("datumBis", newFilters.datumBis);
-    if (newFilters.tageszeit.length > 0) params.set("tageszeit", newFilters.tageszeit.join(","));
-    if (newFilters.wahlkreise.length > 0) params.set("wahlkreis", newFilters.wahlkreise.join(","));
-    router.replace(`/?${params}`, { scroll: false });
+    router.replace(`/?${buildFilterParams(newFilters)}`, { scroll: false });
   }
 
   useEffect(() => {
@@ -65,14 +77,7 @@ function AktionenPageInner() {
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (filters.datum) params.set("datum", filters.datum);
-    if (filters.datumBis) params.set("datumBis", filters.datumBis);
-    if (filters.tageszeit.length > 0) params.set("tageszeit", filters.tageszeit.join(","));
-    if (filters.wahlkreise.length > 0) {
-      params.set("wahlkreis", filters.wahlkreise.join(","));
-    }
-
+    const params = buildFilterParams(filters);
     params.set("public", "true");
     fetch(`/api/aktionen?${params}`)
       .then((r) => r.json())

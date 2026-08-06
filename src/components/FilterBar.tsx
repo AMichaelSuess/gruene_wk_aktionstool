@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { KATEGORIEN } from "@/lib/kategorien";
 
 interface FilterState {
   datum: string;
   datumBis: string;
   tageszeit: string[];
   wahlkreise: number[];
+  kategorien: string[];
 }
 
 interface FilterBarProps {
@@ -41,10 +43,19 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
     onFilterChange({ ...filters, tageszeit: next });
   }
 
+  function toggleKategorie(value: string) {
+    const current = filters.kategorien;
+    const next = current.includes(value)
+      ? current.filter((k) => k !== value)
+      : [...current, value];
+    onFilterChange({ ...filters, kategorien: next });
+  }
+
   const activeFilterCount =
     (filters.datum ? 1 : 0) +
     (filters.tageszeit.length > 0 ? 1 : 0) +
-    (filters.wahlkreise.length > 0 ? 1 : 0);
+    (filters.wahlkreise.length > 0 ? 1 : 0) +
+    (filters.kategorien.length > 0 ? 1 : 0);
 
   return (
     <div className="bg-white border-b-2 border-black sticky top-[52px] z-40">
@@ -111,8 +122,9 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
               </div>
             </div>
 
-            {/* Clear (shown inline on lg+, only when row 1 has active filters) */}
-            {activeFilterCount > 0 && (filters.datum || filters.tageszeit.length > 0) && (
+            {/* Clear (shown inline on lg+, sobald Datum, Tageszeit oder Art gesetzt ist) */}
+            {activeFilterCount > 0 &&
+              (filters.datum || filters.tageszeit.length > 0 || filters.kategorien.length > 0) && (
               <button
                 onClick={() =>
                   onFilterChange({
@@ -120,6 +132,7 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
                     datumBis: "",
                     tageszeit: [],
                     wahlkreise: [],
+                    kategorien: [],
                   })
                 }
                 className="text-xs font-bold uppercase tracking-wide text-black underline lg:ml-auto hover:text-tanne focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black hidden lg:block"
@@ -129,8 +142,40 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
             )}
           </div>
 
-          {/* Row 2: Wahlkreise */}
-          <div className="flex items-center gap-2 mt-3">
+          {/* Row 2: Art (Kategorie) + Wahlkreise */}
+          <div className="flex items-center gap-x-6 gap-y-3 mt-3 flex-wrap">
+            {/* Art der Aktion */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="text-xs font-bold uppercase tracking-wide text-black shrink-0">Art:</label>
+              <div className="flex gap-1 flex-wrap">
+                <button
+                  onClick={() => onFilterChange({ ...filters, kategorien: [] })}
+                  className={`text-xs px-2 py-1 font-bold uppercase tracking-wide border-2 transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black ${
+                    filters.kategorien.length === 0
+                      ? "bg-tanne text-white border-black"
+                      : "bg-white text-black border-black hover:bg-black hover:text-white"
+                  }`}
+                >
+                  Alle
+                </button>
+                {KATEGORIEN.map((kat) => (
+                  <button
+                    key={kat.value}
+                    onClick={() => toggleKategorie(kat.value)}
+                    className={`text-xs px-2 py-1 font-bold uppercase tracking-wide border-2 transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black ${
+                      filters.kategorien.includes(kat.value)
+                        ? "bg-tanne text-white border-black"
+                        : "bg-white text-black border-black hover:bg-black hover:text-white"
+                    }`}
+                  >
+                    {kat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Wahlkreise */}
+            <div className="flex items-center gap-2 flex-wrap">
             <label className="text-xs font-bold uppercase tracking-wide text-black shrink-0">WK:</label>
             <div className="flex gap-1 flex-wrap">
               {wahlkreise.map((wk) => (
@@ -148,6 +193,7 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
                 </button>
               ))}
             </div>
+            </div>
 
             {/* Clear button (mobile/tablet: after WK row) */}
             {activeFilterCount > 0 && (
@@ -158,6 +204,7 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
                     datumBis: "",
                     tageszeit: [],
                     wahlkreise: [],
+                    kategorien: [],
                   })
                 }
                 className="text-xs font-bold uppercase tracking-wide text-black underline ml-auto hover:text-tanne focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black lg:hidden"

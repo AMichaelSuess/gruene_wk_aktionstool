@@ -92,6 +92,7 @@ Fülle das Formular aus:
 | **Endzeit** | Ja | Uhrzeit Ende |
 | **Adresse** | Ja | Vollständige Adresse inkl. PLZ, z.B. "Karl-Marx-Allee 1, 10178 Berlin" – wird automatisch auf der Karte verortet |
 | **Wahlkreis** | Ja | Aus der Dropdown-Liste wählen |
+| **Art der Aktion** | Ja | Haustür, Straße oder Sonstiges – danach kann öffentlich gefiltert werden |
 | **Team** | Nur wenn du mehreren Teams angehörst | Wähle das zuständige Team |
 
 #### Ansprechperson
@@ -123,6 +124,12 @@ Klicke auf den Link **Vorlage herunterladen** oben auf der Import-Seite. Du beko
 **Schritt 2: Vorlage ausfüllen**
 
 Fülle die Vorlage mit deinen Aktionen aus. Jede Zeile ist eine Aktion. Pflichtfelder müssen ausgefüllt sein.
+
+> **Pflichtspalte "Kategorie":** Trage hier die Art der Aktion ein. Erlaubt sind genau diese
+> drei Werte: **Haustür**, **Straße** oder **Sonstiges** (Schreibweise ohne Umlaute – also
+> "Haustuer" bzw. "Strasse" – funktioniert ebenfalls, Groß-/Kleinschreibung ist egal).
+> Bleibt die Spalte leer oder steht dort etwas anderes, wird die Zeile in der Vorschau als
+> Fehler markiert und nicht importiert.
 
 **Schritt 3: Datei hochladen**
 

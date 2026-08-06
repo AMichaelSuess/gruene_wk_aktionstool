@@ -30,6 +30,7 @@ interface AktionMapProps {
     latitude: number | null;
     longitude: number | null;
     wahlkreis: { nummer: number; name: string };
+    kategorie: string;
     ansprechpersonName: string;
     _count: { anmeldungen: number };
     maxTeilnehmer: number | null;

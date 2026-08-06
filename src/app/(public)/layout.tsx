@@ -32,21 +32,26 @@ export default async function PublicLayout({ children }: { children: ReactNode }
       <main className="flex-1">{children}</main>
 
       <footer className="bg-tanne text-white/70 text-sm border-t-[3px] border-black">
-        <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="font-bold uppercase tracking-wide">{districtConfig.orgFullName}</p>
-          <div className="flex gap-4">
-            {!session && (
-              <Link href="/login" className="hover:text-white transition-colors uppercase tracking-wide font-bold">
-                Login
+        <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="font-bold uppercase tracking-wide">{districtConfig.orgFullName}</p>
+            <div className="flex gap-4">
+              {!session && (
+                <Link href="/login" className="hover:text-white transition-colors uppercase tracking-wide font-bold">
+                  Login
+                </Link>
+              )}
+              <Link href="/datenschutz" className="hover:text-white transition-colors uppercase tracking-wide font-bold">
+                Datenschutz
               </Link>
-            )}
-            <Link href="/datenschutz" className="hover:text-white transition-colors uppercase tracking-wide font-bold">
-              Datenschutz
-            </Link>
-            <Link href={districtConfig.impressumUrl} className="hover:text-white transition-colors uppercase tracking-wide font-bold">
-              Impressum
-            </Link>
+              <Link href={districtConfig.impressumUrl} className="hover:text-white transition-colors uppercase tracking-wide font-bold">
+                Impressum
+              </Link>
+            </div>
           </div>
+          <p className="text-xs text-white/50 text-center">
+            Entwickelt vom Kreisvorstand BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte mit Unterstützung von künstlicher Intelligenz
+          </p>
         </div>
       </footer>
     </div>

@@ -142,6 +142,7 @@ describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
     (prisma.aktion.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: "aktion-1",
       titel: "Test Aktion",
+      kategorie: "SONSTIGES",
       wahlkreis: { id: "wk-1", name: "Mitte", nummer: 1 },
       team: null,
       _count: { anmeldungen: 0 },
@@ -164,6 +165,7 @@ describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
     (prisma.aktion.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: "aktion-1",
       titel: "Test Aktion",
+      kategorie: "SONSTIGES",
       wahlkreis: { id: "wk-1", name: "Mitte", nummer: 1 },
       team: null,
       _count: { anmeldungen: 0 },
@@ -193,6 +195,7 @@ describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
     (prisma.aktion.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: "aktion-1",
       titel: "Test Aktion",
+      kategorie: "SONSTIGES",
       wahlkreis: { id: "wk-1", name: "Mitte", nummer: 1 },
       team: null,
       _count: { anmeldungen: 0 },

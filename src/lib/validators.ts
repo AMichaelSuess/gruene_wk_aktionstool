@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getWahlkreisCount } from "@/lib/district-config";
+import { KATEGORIE_VALUES } from "@/lib/kategorien";
 
 export const loginSchema = z.object({
   email: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein"),
@@ -40,6 +41,7 @@ export const aktionSchema = z.object({
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
   wahlkreisId: z.string().min(1, "Bitte wähle einen Wahlkreis"),
+  kategorie: z.enum(KATEGORIE_VALUES, { error: "Bitte wähle eine Art der Aktion" }),
   ansprechpersonName: z.string().min(2, "Name der Ansprechperson erforderlich"),
   ansprechpersonEmail: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein"),
   ansprechpersonTelefon: z.string().min(5, "Telefonnummer erforderlich"),
@@ -94,6 +96,7 @@ export const excelRowSchema = z.object({
   endzeit: z.string().regex(/^\d{2}:\d{2}$/, "Endzeit im Format HH:MM"),
   adresse: z.string().min(1, "Adresse fehlt"),
   wahlkreis: z.number().int().min(1).max(getWahlkreisCount(), `Wahlkreis muss zwischen 1 und ${getWahlkreisCount()} liegen`),
+  kategorie: z.enum(KATEGORIE_VALUES, { error: "Kategorie fehlt oder ungültig (erlaubt: Haustür, Straße, Sonstiges)" }),
   ansprechpersonName: z.string().min(1, "Ansprechperson Name fehlt"),
   ansprechpersonEmail: z.string().email("Ungültige E-Mail der Ansprechperson"),
   ansprechpersonTelefon: z.string().min(1, "Telefon der Ansprechperson fehlt"),
@@ -102,6 +105,11 @@ export const excelRowSchema = z.object({
   (data) => data.startzeit < data.endzeit,
   { message: "Endzeit muss nach der Startzeit liegen", path: ["endzeit"] }
 );
+
+export const bulkKategorieSchema = z.object({
+  ids: z.array(z.string()).min(1, "Bitte wähle mindestens eine Aktion"),
+  kategorie: z.enum(KATEGORIE_VALUES, { error: "Bitte wähle eine Art der Aktion" }),
+});
 
 export const wahlkreisUpdateSchema = z.object({
   id: z.string().min(1, "ID fehlt"),
@@ -115,4 +123,5 @@ export type TeamInput = z.infer<typeof teamSchema>;
 export type AktionInput = z.infer<typeof aktionSchema>;
 export type AnmeldungInput = z.infer<typeof anmeldungSchema>;
 export type ExcelRowInput = z.infer<typeof excelRowSchema>;
+export type BulkKategorieInput = z.infer<typeof bulkKategorieSchema>;
 export type WahlkreisUpdateInput = z.infer<typeof wahlkreisUpdateSchema>;

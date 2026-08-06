@@ -13,7 +13,7 @@ vi.mock("@/lib/auth", () => ({
 
 vi.mock("@/lib/db", () => ({
   prisma: {
-    aktion: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), count: vi.fn() },
+    aktion: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn(), updateMany: vi.fn(), delete: vi.fn(), count: vi.fn() },
     anmeldung: { findMany: vi.fn(), create: vi.fn(), count: vi.fn() },
     user: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), count: vi.fn() },
     team: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), delete: vi.fn(), count: vi.fn() },
@@ -258,5 +258,74 @@ describe("Input-Validierung: PUT /api/admin/users (userUpdateSchema)", () => {
         data: expect.objectContaining({ active: false }),
       })
     );
+  });
+});
+
+describe("Input-Validierung: PATCH /api/aktionen/bulk-kategorie", () => {
+  it("Ungueltige Kategorie wird abgelehnt (400)", async () => {
+    await mockAuth(ADMIN_SESSION);
+    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { prisma } = await import("@/lib/db");
+
+    const req = createJsonRequest(
+      "/api/aktionen/bulk-kategorie",
+      { ids: ["aktion-1"], kategorie: "DROP TABLE aktionen" },
+      "PATCH"
+    );
+    const res = await PATCH(req as any);
+
+    expect(res.status).toBe(400);
+    expect(prisma.aktion.updateMany as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
+  });
+
+  it("Leeres ids-Array wird abgelehnt (400)", async () => {
+    await mockAuth(ADMIN_SESSION);
+    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { prisma } = await import("@/lib/db");
+
+    const req = createJsonRequest(
+      "/api/aktionen/bulk-kategorie",
+      { ids: [], kategorie: "HAUSTUER" },
+      "PATCH"
+    );
+    const res = await PATCH(req as any);
+
+    expect(res.status).toBe(400);
+    // Ohne diese Pruefung wuerde updateMany ohne id-Filter laufen
+    expect(prisma.aktion.updateMany as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
+  });
+
+  it("Fehlende Kategorie wird abgelehnt (400)", async () => {
+    await mockAuth(ADMIN_SESSION);
+    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { prisma } = await import("@/lib/db");
+
+    const req = createJsonRequest(
+      "/api/aktionen/bulk-kategorie",
+      { ids: ["aktion-1"] },
+      "PATCH"
+    );
+    const res = await PATCH(req as any);
+
+    expect(res.status).toBe(400);
+    expect(prisma.aktion.updateMany as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
+  });
+
+  it("Gueltige Eingabe wird akzeptiert (200)", async () => {
+    await mockAuth(ADMIN_SESSION);
+    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { prisma } = await import("@/lib/db");
+    (prisma.aktion.updateMany as ReturnType<typeof vi.fn>).mockResolvedValue({ count: 1 });
+
+    const req = createJsonRequest(
+      "/api/aktionen/bulk-kategorie",
+      { ids: ["aktion-1"], kategorie: "STRASSE" },
+      "PATCH"
+    );
+    const res = await PATCH(req as any);
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.count).toBe(1);
   });
 });

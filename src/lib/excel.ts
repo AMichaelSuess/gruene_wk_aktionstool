@@ -1,4 +1,17 @@
 import ExcelJS from "exceljs";
+import { parseKategorie } from "@/lib/kategorien";
+
+function kategorieEmoji(kategorie?: string): string {
+  switch (kategorie) {
+    case "Haustür":
+      return "🚪";
+    case "Sonstiges":
+      return "▶️";
+    case "Straße":
+    default:
+      return "📢";
+  }
+}
 
 export function formatSignalInfo(
   datumMitTag: string,
@@ -6,9 +19,11 @@ export function formatSignalInfo(
   endzeit: string,
   titel: string,
   adresse: string,
-  ansprechpersonName: string
+  ansprechpersonName: string,
+  kategorie?: string
 ): string {
-  return `📆 ${datumMitTag}: ${startzeit}-${endzeit} Uhr 📢 ${titel} 📍${adresse} 👋 mit ${ansprechpersonName}`;
+  const emoji = kategorieEmoji(kategorie);
+  return `📆 ${datumMitTag}: ${startzeit}-${endzeit} Uhr ${emoji} ${titel} 📍${adresse} 👋 mit ${ansprechpersonName}`;
 }
 
 interface ExcelRow {
@@ -18,6 +33,7 @@ interface ExcelRow {
   endzeit: string;
   adresse: string;
   wahlkreis: number;
+  kategorie: string;
   ansprechpersonName: string;
   ansprechpersonEmail: string;
   ansprechpersonTelefon: string;
@@ -31,6 +47,7 @@ const COLUMN_MAP: Record<string, keyof ExcelRow> = {
   "Endzeit": "endzeit",
   "Adresse": "adresse",
   "Wahlkreis": "wahlkreis",
+  "Kategorie": "kategorie",
   "Ansprechperson Name": "ansprechpersonName",
   "Ansprechperson E-Mail": "ansprechpersonEmail",
   "Ansprechperson Telefon": "ansprechpersonTelefon",
@@ -93,6 +110,11 @@ export async function parseExcelFile(buffer: ArrayBuffer): Promise<ExcelRow[]> {
         partial[key] = formatTime(value);
       } else if (key === "wahlkreis") {
         partial.wahlkreis = parseInt(String(value ?? ""), 10);
+      } else if (key === "kategorie") {
+        // Deutsche Labels ("Haustür", "Straße") in Enum-Werte übersetzen.
+        // Bei unbekannten Werten den Rohwert durchreichen, damit Zod eine
+        // verständliche Fehlermeldung für die Vorschau erzeugt.
+        partial.kategorie = parseKategorie(value) ?? String(value ?? "").trim();
       } else if (key === "maxTeilnehmer") {
         const num = parseInt(String(value ?? ""), 10);
         partial.maxTeilnehmer = isNaN(num) ? null : num;
@@ -191,6 +213,7 @@ export interface AktionExport {
   endzeit: string;
   adresse: string;
   wahlkreis: string;
+  kategorie: string;
   team: string;
   status: string;
   anmeldungen: number;
@@ -209,6 +232,7 @@ export async function createAktionenExcel(aktionen: AktionExport[]): Promise<Buf
     { header: "Endzeit", key: "endzeit", width: 10 },
     { header: "Adresse", key: "adresse", width: 40 },
     { header: "Wahlkreis", key: "wahlkreis", width: 10 },
+    { header: "Kategorie", key: "kategorie", width: 12 },
     { header: "Team", key: "team", width: 20 },
     { header: "Status", key: "status", width: 12 },
     { header: "Anmeldungen", key: "anmeldungen", width: 14 },
@@ -223,6 +247,7 @@ export async function createAktionenExcel(aktionen: AktionExport[]): Promise<Buf
       endzeit: a.endzeit,
       adresse: a.adresse,
       wahlkreis: a.wahlkreis,
+      kategorie: a.kategorie,
       team: a.team,
       status: a.status,
       anmeldungen: a.anmeldungen,
@@ -235,7 +260,7 @@ export async function createAktionenExcel(aktionen: AktionExport[]): Promise<Buf
 
 export function createAktionenTxt(aktionen: AktionExport[]): string {
   return aktionen
-    .map((a) => formatSignalInfo(a.datumMitTag, a.startzeit, a.endzeit, a.titel, a.adresse, a.ansprechpersonName))
+    .map((a) => formatSignalInfo(a.datumMitTag, a.startzeit, a.endzeit, a.titel, a.adresse, a.ansprechpersonName, a.kategorie))
     .join("\n");
 }
 
@@ -321,6 +346,7 @@ export async function createVorlageExcel(): Promise<Buffer> {
     { header: "Endzeit", key: "endzeit", width: 10 },
     { header: "Adresse", key: "adresse", width: 40 },
     { header: "Wahlkreis", key: "wahlkreis", width: 10 },
+    { header: "Kategorie", key: "kategorie", width: 12 },
     { header: "Ansprechperson Name", key: "ansprechpersonName", width: 20 },
     { header: "Ansprechperson E-Mail", key: "ansprechpersonEmail", width: 25 },
     { header: "Ansprechperson Telefon", key: "ansprechpersonTelefon", width: 20 },
@@ -338,6 +364,7 @@ export async function createVorlageExcel(): Promise<Buffer> {
     endzeit: new Date(Date.UTC(1899, 11, 30, 13, 0)),
     adresse: "Alexanderplatz 1, 10178 Berlin",
     wahlkreis: 1,
+    kategorie: "Straße",
     ansprechpersonName: "Max Mustermann",
     ansprechpersonEmail: "max@example.com",
     ansprechpersonTelefon: "030 1234567",

@@ -5,8 +5,10 @@ import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Dialog from "@/components/ui/Dialog";
+import Select from "@/components/ui/Select";
 import { format, isToday, isTomorrow, isThisWeek } from "date-fns";
 import { de } from "date-fns/locale";
+import { KATEGORIEN, kategorieLabel } from "@/lib/kategorien";
 
 interface Aktion {
   id: string;
@@ -16,6 +18,7 @@ interface Aktion {
   endzeit: string;
   adresse: string;
   status: string;
+  kategorie: string;
   wahlkreis: { nummer: number; name: string };
   team: { name: string } | null;
   _count: { anmeldungen: number };
@@ -31,6 +34,14 @@ export default function DashboardPage() {
   const [dateFilter, setDateFilter] = useState<"alle" | "heute" | "morgen" | "woche">("alle");
   const [activeOnly, setActiveOnly] = useState(false);
   const [hidePast, setHidePast] = useState(true);
+  const [kategorieFilter, setKategorieFilter] = useState<string[]>([]);
+
+  // Mehrfachauswahl fuer die Bulk-Umkategorisierung
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkKategorie, setBulkKategorie] = useState("");
+  const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [bulkSaving, setBulkSaving] = useState(false);
+  const [bulkError, setBulkError] = useState("");
 
   useEffect(() => {
     fetch("/api/aktionen")
@@ -68,6 +79,9 @@ export default function DashboardPage() {
       if (new Date(a.datum) < cutoff) return false;
     }
 
+    // Kategorie Filter
+    if (kategorieFilter.length > 0 && !kategorieFilter.includes(a.kategorie)) return false;
+
     // Datums Filter
     const date = new Date(a.datum);
     if (dateFilter === "heute" && !isToday(date)) return false;
@@ -82,14 +96,65 @@ export default function DashboardPage() {
   const exportParams = new URLSearchParams();
   if (dateFilter !== "alle") exportParams.set("dateFilter", dateFilter);
   if (activeOnly) exportParams.set("activeOnly", "true");
+  if (kategorieFilter.length > 0) exportParams.set("kategorie", kategorieFilter.join(","));
   const exportQuery = exportParams.toString() ? `&${exportParams.toString()}` : "";
+
+  function toggleKategorieFilter(value: string) {
+    setKategorieFilter((prev) =>
+      prev.includes(value) ? prev.filter((k) => k !== value) : [...prev, value]
+    );
+  }
+
+  function toggleSelection(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const allVisibleSelected =
+    filteredAktionen.length > 0 && filteredAktionen.every((a) => selectedIds.has(a.id));
+
+  function toggleSelectAll() {
+    setSelectedIds(allVisibleSelected ? new Set() : new Set(filteredAktionen.map((a) => a.id)));
+  }
+
+  async function confirmBulkKategorie() {
+    if (!bulkKategorie || selectedIds.size === 0) return;
+    setBulkSaving(true);
+    setBulkError("");
+    const ids = Array.from(selectedIds);
+
+    const res = await fetch("/api/aktionen/bulk-kategorie", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids, kategorie: bulkKategorie }),
+    });
+
+    setBulkSaving(false);
+    setBulkConfirm(false);
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setBulkError(data.error || "Die Kategorie konnte nicht geändert werden.");
+      return;
+    }
+
+    setAktionen((prev) =>
+      prev.map((a) => (ids.includes(a.id) ? { ...a, kategorie: bulkKategorie } : a))
+    );
+    setSelectedIds(new Set());
+    setBulkKategorie("");
+  }
 
   if (loading) {
     return <div className="text-gray-500 p-8">Lade Aktionen...</div>;
   }
 
   return (
-    <div>
+    <div className={selectedIds.size > 0 ? "pb-40 sm:pb-28" : ""}>
       <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="font-headline text-2xl font-bold text-tanne uppercase">
           Meine Aktionen
@@ -144,6 +209,26 @@ export default function DashboardPage() {
             Diese Woche
           </Button>
         </div>
+        <div className="flex flex-wrap items-center gap-2 border-l-2 border-gray-300 pl-6">
+          <span className="text-sm font-bold uppercase">Art:</span>
+          <Button
+            variant={kategorieFilter.length === 0 ? "primary" : "outline"}
+            size="sm"
+            onClick={() => setKategorieFilter([])}
+          >
+            Alle
+          </Button>
+          {KATEGORIEN.map((kat) => (
+            <Button
+              key={kat.value}
+              variant={kategorieFilter.includes(kat.value) ? "primary" : "outline"}
+              size="sm"
+              onClick={() => toggleKategorieFilter(kat.value)}
+            >
+              {kat.label}
+            </Button>
+          ))}
+        </div>
         <div className="flex flex-wrap items-center gap-4 border-l-2 border-gray-300 pl-6">
           <label className="flex items-center gap-2 text-sm font-bold uppercase cursor-pointer">
             <input
@@ -177,16 +262,38 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="space-y-3">
+          <label className="flex items-center gap-2 text-sm font-bold uppercase cursor-pointer">
+            <input
+              type="checkbox"
+              checked={allVisibleSelected}
+              onChange={toggleSelectAll}
+              className="w-4 h-4 accent-tanne cursor-pointer"
+            />
+            Alle auswählen
+          </label>
           {filteredAktionen.map((aktion) => (
             <div
               key={aktion.id}
-              className="bg-white border-2 border-black shadow-[4px_4px_0_#000] p-4"
+              className={`bg-white border-2 shadow-[4px_4px_0_#000] p-4 ${
+                selectedIds.has(aktion.id) ? "border-tanne" : "border-black"
+              }`}
             >
               <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                <div className="flex flex-1 gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(aktion.id)}
+                    onChange={() => toggleSelection(aktion.id)}
+                    aria-label={`${aktion.titel} auswählen`}
+                    className="w-4 h-4 mt-1 accent-tanne cursor-pointer shrink-0"
+                  />
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center flex-wrap gap-2 mb-1">
                     <h3 className="font-headline font-bold text-tanne uppercase tracking-wide">{aktion.titel}</h3>
                     <StatusBadge status={aktion.status} />
+                    {aktion.kategorie && (
+                      <Badge variant="info">{kategorieLabel(aktion.kategorie)}</Badge>
+                    )}
                   </div>
                   <div className="text-sm text-black space-y-0.5">
                     <p>
@@ -205,6 +312,7 @@ export default function DashboardPage() {
                       {aktion.maxTeilnehmer ? ` / ${aktion.maxTeilnehmer} Plätze` : ""}
                     </p>
                   </div>
+                </div>
                 </div>
 
                 <div className="flex flex-col gap-2 shrink-0 sm:flex-row sm:flex-wrap items-start">
@@ -236,6 +344,60 @@ export default function DashboardPage() {
           ))}
         </div>
       )}
+      {/* Aktionsleiste fuer die Mehrfachauswahl */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-black p-4 shadow-[0_-4px_0_#000]">
+          <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-end gap-3">
+            <p className="text-sm font-bold uppercase sm:mb-2">
+              {selectedIds.size} Aktion{selectedIds.size !== 1 ? "en" : ""} ausgewählt
+            </p>
+            <div className="sm:w-64">
+              <Select
+                label="Art der Aktion ändern in"
+                value={bulkKategorie}
+                onChange={(e) => setBulkKategorie(e.target.value)}
+                options={KATEGORIEN}
+                placeholder="Bitte wählen"
+              />
+            </div>
+            <div className="flex gap-2 sm:mb-0">
+              <Button
+                onClick={() => setBulkConfirm(true)}
+                disabled={!bulkKategorie || bulkSaving}
+              >
+                Kategorie ändern
+              </Button>
+              <Button variant="secondary" onClick={() => setSelectedIds(new Set())}>
+                Auswahl aufheben
+              </Button>
+            </div>
+          </div>
+          {bulkError && (
+            <p className="max-w-5xl mx-auto mt-2 text-sm font-bold text-signal">{bulkError}</p>
+          )}
+        </div>
+      )}
+
+      <Dialog
+        open={bulkConfirm}
+        onClose={() => setBulkConfirm(false)}
+        title="Kategorie ändern"
+      >
+        <p className="mb-6 text-gray-700">
+          Die Art von {selectedIds.size} Aktion{selectedIds.size !== 1 ? "en" : ""} wird auf
+          &bdquo;{kategorieLabel(bulkKategorie)}&ldquo; geändert. Es werden keine E-Mails
+          verschickt.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button variant="secondary" onClick={() => setBulkConfirm(false)}>
+            Abbrechen
+          </Button>
+          <Button onClick={confirmBulkKategorie} disabled={bulkSaving}>
+            {bulkSaving ? "Wird geändert..." : "Ändern"}
+          </Button>
+        </div>
+      </Dialog>
+
       <Dialog
         open={cancelId !== null}
         onClose={() => setCancelId(null)}

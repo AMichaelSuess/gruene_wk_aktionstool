@@ -18,6 +18,12 @@ enum AktionStatus {
   GEAENDERT
 }
 
+enum AktionKategorie {
+  HAUSTUER
+  STRASSE
+  SONSTIGES
+}
+
 enum EmailTyp {
   BESTAETIGUNG
   AENDERUNG
@@ -94,6 +100,7 @@ model Aktion {
   ansprechpersonTelefon String
   maxTeilnehmer         Int?
   status                AktionStatus @default(AKTIV)
+  kategorie             AktionKategorie @default(SONSTIGES)
   createdById           String
   createdBy             User         @relation(fields: [createdById], references: [id])
   teamId                String?

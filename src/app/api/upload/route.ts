@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { parseExcelFile, convertDatumToISO } from "@/lib/excel";
-import { excelRowSchema } from "@/lib/validators";
+import { excelRowSchema, type ExcelRowInput } from "@/lib/validators";
 import { geocodeAddress } from "@/lib/geocoding";
 
 export async function POST(req: NextRequest) {
@@ -113,6 +113,9 @@ export async function POST(req: NextRequest) {
             latitude,
             longitude,
             wahlkreisId,
+            // Zeile wurde bereits gegen excelRowSchema validiert, daher ist der
+            // Wert garantiert ein gueltiger AktionKategorie-Enumwert.
+            kategorie: row.kategorie as ExcelRowInput["kategorie"],
             ansprechpersonName: row.ansprechpersonName,
             ansprechpersonEmail: row.ansprechpersonEmail,
             ansprechpersonTelefon: row.ansprechpersonTelefon,

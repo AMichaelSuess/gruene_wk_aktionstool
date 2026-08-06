@@ -71,6 +71,7 @@ const VALID_AKTION = {
   ansprechpersonName: "Lara Test",
   ansprechpersonEmail: "lara@test.de",
   ansprechpersonTelefon: "030123456",
+  kategorie: "SONSTIGES",
   status: "AKTIV",
   maxTeilnehmer: null,
   _count: { anmeldungen: 0 },

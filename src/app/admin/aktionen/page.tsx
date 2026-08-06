@@ -5,6 +5,7 @@ import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { kategorieLabel } from "@/lib/kategorien";
 
 interface Aktion {
   id: string;
@@ -14,6 +15,7 @@ interface Aktion {
   endzeit: string;
   adresse: string;
   status: string;
+  kategorie: string;
   wahlkreis: { nummer: number; name: string };
   team: { name: string };
   _count: { anmeldungen: number };
@@ -85,6 +87,7 @@ export default function AdminAktionenPage() {
               <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Datum</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Wahlkreis</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Team</th>
+              <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Art</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Status</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Anmeldungen</th>
               <th className="text-right px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Details</th>
@@ -105,6 +108,11 @@ export default function AdminAktionenPage() {
                   WK {aktion.wahlkreis.nummer}
                 </td>
                 <td className="px-4 py-3 text-gray-700">{aktion.team.name}</td>
+                <td className="px-4 py-3">
+                  {aktion.kategorie && (
+                    <Badge variant="info">{kategorieLabel(aktion.kategorie)}</Badge>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <StatusBadge status={aktion.status} />
                 </td>

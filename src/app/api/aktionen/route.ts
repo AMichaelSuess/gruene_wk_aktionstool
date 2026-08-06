@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { ZodError } from "zod";
 import { aktionSchema } from "@/lib/validators";
+import { KATEGORIE_VALUES } from "@/lib/kategorien";
 import { geocodeAddress } from "@/lib/geocoding";
 
 // Rate limiting for public GET endpoint (SEC-05)
@@ -38,6 +39,7 @@ export async function GET(req: NextRequest) {
   const datum = searchParams.get("datum");
   const datumBis = searchParams.get("datumBis");
   const tageszeit = searchParams.get("tageszeit");
+  const kategorie = searchParams.get("kategorie");
   const teamId = searchParams.get("teamId");
   const isPublic = searchParams.get("public") === "true";
 
@@ -66,6 +68,16 @@ export async function GET(req: NextRequest) {
     where.wahlkreis = { nummer: { in: wahlkreisNummern } };
   }
 
+  if (kategorie) {
+    const kategorien = kategorie
+      .split(",")
+      .map((k) => k.trim())
+      .filter((k) => (KATEGORIE_VALUES as readonly string[]).includes(k));
+    if (kategorien.length > 0) {
+      where.kategorie = { in: kategorien };
+    }
+  }
+
   if (datum) {
     where.datum = { ...(where.datum || {}), gte: new Date(datum) };
     if (datumBis) {
@@ -80,7 +92,7 @@ export async function GET(req: NextRequest) {
       _count: { select: { anmeldungen: true } },
       team: true,
     },
-    orderBy: { datum: "asc" },
+    orderBy: [{ datum: "asc" }, { startzeit: "asc" }],
   });
 
   // Filter by tageszeit client-side (based on startzeit); supports multiple values (comma-separated)
@@ -174,6 +186,7 @@ export async function POST(req: NextRequest) {
         latitude,
         longitude,
         wahlkreisId: validated.wahlkreisId,
+        kategorie: validated.kategorie,
         ansprechpersonName: validated.ansprechpersonName,
         ansprechpersonEmail: validated.ansprechpersonEmail,
         ansprechpersonTelefon: validated.ansprechpersonTelefon,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createAktionenExcel, createAktionenTxt } from "@/lib/excel";
+import { KATEGORIE_VALUES, kategorieLabel } from "@/lib/kategorien";
 import { format, startOfDay, endOfDay, addDays, startOfWeek, endOfWeek } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -16,6 +17,7 @@ export async function GET(req: NextRequest) {
   const teamId = searchParams.get("teamId");
   const dateFilter = searchParams.get("dateFilter");
   const activeOnly = searchParams.get("activeOnly") === "true";
+  const kategorie = searchParams.get("kategorie");
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {};
@@ -52,6 +54,17 @@ export async function GET(req: NextRequest) {
     where.status = { in: ["AKTIV", "GEAENDERT"] };
   }
 
+  // Kategorie-Filter auf Prisma anwenden
+  if (kategorie) {
+    const kategorien = kategorie
+      .split(",")
+      .map((k) => k.trim())
+      .filter((k) => (KATEGORIE_VALUES as readonly string[]).includes(k));
+    if (kategorien.length > 0) {
+      where.kategorie = { in: kategorien };
+    }
+  }
+
   const aktionen = await prisma.aktion.findMany({
     where,
     include: {
@@ -59,7 +72,7 @@ export async function GET(req: NextRequest) {
       team: true,
       _count: { select: { anmeldungen: true } },
     },
-    orderBy: { datum: "asc" },
+    orderBy: [{ datum: "asc" }, { startzeit: "asc" }],
   });
 
   const exportData = aktionen.map((a) => ({
@@ -70,6 +83,7 @@ export async function GET(req: NextRequest) {
     endzeit: a.endzeit,
     adresse: a.adresse,
     wahlkreis: `WK ${a.wahlkreis.nummer} – ${a.wahlkreis.name}`,
+    kategorie: kategorieLabel(a.kategorie),
     team: a.team?.name ?? "",
     status: a.status,
     anmeldungen: a._count.anmeldungen,

@@ -8,6 +8,7 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import ExcelUpload from "@/components/ExcelUpload";
+import { KATEGORIEN } from "@/lib/kategorien";
 
 interface Wahlkreis {
   id: string;
@@ -36,6 +37,7 @@ export default function NewAktionPage() {
     endzeit: "",
     adresse: "",
     wahlkreisId: "",
+    kategorie: "",
     ansprechpersonName: "",
     ansprechpersonEmail: "",
     ansprechpersonTelefon: "",
@@ -184,6 +186,15 @@ export default function NewAktionPage() {
                 label: `${wk.nummer}: ${wk.name}`,
               }))}
               placeholder="Bitte wählen"
+            />
+
+            <Select
+              label="Art der Aktion"
+              value={form.kategorie}
+              onChange={(e) => updateForm("kategorie", e.target.value)}
+              options={KATEGORIEN}
+              placeholder="Bitte wählen"
+              required
             />
 
             {needsTeamSelect && userTeams.length > 0 && (

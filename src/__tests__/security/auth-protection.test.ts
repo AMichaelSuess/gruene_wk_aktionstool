@@ -106,6 +106,19 @@ describe("Authentifizierungsschutz: Aktionen-Verwaltung", () => {
     const res = await DELETE(req as any, { params: Promise.resolve({ id: "test-id" }) });
     expect(res.status).toBe(401);
   });
+
+  it("PATCH /api/aktionen/bulk-kategorie → 401 ohne Auth", async () => {
+    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const req = createJsonRequest(
+      "/api/aktionen/bulk-kategorie",
+      { ids: ["test-id"], kategorie: "HAUSTUER" },
+      "PATCH"
+    );
+    const res = await PATCH(req as any);
+    expect(res.status).toBe(401);
+    const body = await res.json();
+    expect(body.error).toBe("Nicht autorisiert");
+  });
 });
 
 describe("Authentifizierungsschutz: Admin-Endpunkte", () => {

@@ -19,6 +19,7 @@ const mockPrisma = {
     findMany: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+    updateMany: vi.fn(),
     delete: vi.fn(),
     count: vi.fn(),
   },
@@ -302,5 +303,81 @@ describe("PII-Schutz: Oeffentlicher Aktionszugriff", () => {
 
     expect(data.ansprechpersonEmail).toBe("max@test.de");
     expect(data.ansprechpersonTelefon).toBe("0171234");
+  });
+});
+
+describe("Team-Isolation: Bulk-Umkategorisierung", () => {
+  it("EXPERT-Bulk-Update setzt teamId-Filter im where", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+    mockPrisma.aktion.updateMany.mockResolvedValue({ count: 1 });
+
+    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const req = createJsonRequest(
+      "/api/aktionen/bulk-kategorie",
+      { ids: ["aktion-1", "fremde-aktion"], kategorie: "HAUSTUER" },
+      "PATCH"
+    );
+    const res = await PATCH(req as any);
+
+    expect(res.status).toBe(200);
+
+    const where = mockPrisma.aktion.updateMany.mock.calls[0][0].where;
+    // Ohne diesen Filter koennte ein EXPERT fremde Aktionen umkategorisieren
+    expect(where.teamId).toEqual({ in: ["team-a"] });
+    expect(where.id).toEqual({ in: ["aktion-1", "fremde-aktion"] });
+  });
+
+  it("Fremde Aktions-IDs bleiben unveraendert (count 0)", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+    // Prisma matcht keine Zeile, weil die IDs zu Team B gehoeren
+    mockPrisma.aktion.updateMany.mockResolvedValue({ count: 0 });
+
+    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const req = createJsonRequest(
+      "/api/aktionen/bulk-kategorie",
+      { ids: ["team-b-aktion"], kategorie: "STRASSE" },
+      "PATCH"
+    );
+    const res = await PATCH(req as any);
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.count).toBe(0);
+  });
+
+  it("ADMIN-Bulk-Update ohne teamId-Filter", async () => {
+    await mockAuth(ADMIN_SESSION);
+    mockPrisma.aktion.updateMany.mockResolvedValue({ count: 2 });
+
+    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const req = createJsonRequest(
+      "/api/aktionen/bulk-kategorie",
+      { ids: ["a1", "a2"], kategorie: "SONSTIGES" },
+      "PATCH"
+    );
+    const res = await PATCH(req as any);
+
+    expect(res.status).toBe(200);
+    const where = mockPrisma.aktion.updateMany.mock.calls[0][0].where;
+    expect(where.teamId).toBeUndefined();
+  });
+
+  it("Bulk-Update verschickt keine E-Mails und aendert den Status nicht", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+    mockPrisma.aktion.updateMany.mockResolvedValue({ count: 1 });
+    const { sendEmail } = await import("@/lib/email");
+
+    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const req = createJsonRequest(
+      "/api/aktionen/bulk-kategorie",
+      { ids: ["aktion-1"], kategorie: "HAUSTUER" },
+      "PATCH"
+    );
+    await PATCH(req as any);
+
+    expect(sendEmail).not.toHaveBeenCalled();
+    const data = mockPrisma.aktion.updateMany.mock.calls[0][0].data;
+    expect(data).toEqual({ kategorie: "HAUSTUER" });
+    expect(data.status).toBeUndefined();
   });
 });

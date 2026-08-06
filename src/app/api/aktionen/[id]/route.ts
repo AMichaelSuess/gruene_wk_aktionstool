@@ -138,6 +138,10 @@ export async function PUT(
         latitude,
         longitude,
         wahlkreisId: validated.wahlkreisId,
+        // Bewusst nicht in `changes`: eine Kategorie-Korrektur ist eine reine
+        // Verwaltungsangabe und darf weder Aenderungs-Mails ausloesen noch den
+        // Status auf GEAENDERT setzen.
+        kategorie: validated.kategorie,
         ansprechpersonName: validated.ansprechpersonName,
         ansprechpersonEmail: validated.ansprechpersonEmail,
         ansprechpersonTelefon: validated.ansprechpersonTelefon,

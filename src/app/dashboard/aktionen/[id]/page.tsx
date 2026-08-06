@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
+import { KATEGORIEN } from "@/lib/kategorien";
 
 interface Wahlkreis {
   id: string;
@@ -37,6 +38,7 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
     endzeit: "",
     adresse: "",
     wahlkreisId: "",
+    kategorie: "",
     teamId: "",
     ansprechpersonName: "",
     ansprechpersonEmail: "",
@@ -60,6 +62,7 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
         endzeit: aktion.endzeit,
         adresse: aktion.adresse,
         wahlkreisId: aktion.wahlkreisId,
+        kategorie: aktion.kategorie ?? "",
         teamId: aktion.teamId,
         ansprechpersonName: aktion.ansprechpersonName,
         ansprechpersonEmail: aktion.ansprechpersonEmail,
@@ -161,6 +164,15 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
               value: wk.id,
               label: `${wk.nummer}: ${wk.name}`,
             }))}
+          />
+
+          <Select
+            label="Art der Aktion"
+            value={form.kategorie}
+            onChange={(e) => updateForm("kategorie", e.target.value)}
+            options={KATEGORIEN}
+            placeholder="Bitte wählen"
+            required
           />
 
           {isAdmin && teams.length > 0 && (

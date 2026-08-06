@@ -3,6 +3,7 @@
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import Badge from "@/components/ui/Badge";
+import { kategorieLabel } from "@/lib/kategorien";
 
 interface AktionCardProps {
   aktion: {
@@ -13,6 +14,7 @@ interface AktionCardProps {
     endzeit: string;
     adresse: string;
     wahlkreis: { nummer: number; name: string };
+    kategorie: string;
     ansprechpersonName: string;
     maxTeilnehmer: number | null;
     status: string;
@@ -93,10 +95,13 @@ export default function AktionCard({ aktion, selected, onToggle }: AktionCardPro
               👋 {aktion.ansprechpersonName}
             </span>
           </div>
-          <div className="pt-2 border-t border-gray-200">
+          <div className="pt-2 border-t border-gray-200 flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wide bg-black text-white px-2 py-0.5 inline-block">
               WK {aktion.wahlkreis.nummer}: {aktion.wahlkreis.name}
             </span>
+            {aktion.kategorie && (
+              <Badge variant="info">{kategorieLabel(aktion.kategorie)}</Badge>
+            )}
           </div>
           <div className="flex items-center justify-between mt-1">
             <span className="text-sm text-gray-600 font-medium">

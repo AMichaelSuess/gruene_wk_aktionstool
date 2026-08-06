@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Select from "@/components/ui/Select";
+import { kategorieLabel } from "@/lib/kategorien";
 
 interface Team {
   id: string;
@@ -177,6 +178,7 @@ export default function ExcelUpload({ userTeams = [], needsTeamSelect = false }:
                   <th className="text-left py-2 px-2">Datum</th>
                   <th className="text-left py-2 px-2">Adresse</th>
                   <th className="text-left py-2 px-2">WK</th>
+                  <th className="text-left py-2 px-2">Kategorie</th>
                   <th className="text-left py-2 px-2">Fehler</th>
                 </tr>
               </thead>
@@ -196,6 +198,9 @@ export default function ExcelUpload({ userTeams = [], needsTeamSelect = false }:
                     <td className="py-2 px-2">{String(r.row.datum || "")}</td>
                     <td className="py-2 px-2">{String(r.row.adresse || "")}</td>
                     <td className="py-2 px-2">{String(r.row.wahlkreis || "")}</td>
+                    <td className="py-2 px-2">
+                      {kategorieLabel(String(r.row.kategorie || ""))}
+                    </td>
                     <td className="py-2 px-2 text-red-600">
                       {r.errors.join(", ")}
                     </td>
