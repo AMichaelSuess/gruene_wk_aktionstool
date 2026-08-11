@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import FilterBar, { type FilterState } from "@/components/FilterBar";
@@ -56,6 +56,7 @@ function AktionenPageInner() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"liste" | "karte">("liste");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [aktionTitles, setAktionTitles] = useState<Map<string, string>>(new Map());
   const [filters, setFilters] = useState<FilterState>({
     datum: searchParams.get("datum") ?? "",
     datumBis: searchParams.get("datumBis") ?? "",
@@ -81,8 +82,13 @@ function AktionenPageInner() {
     params.set("public", "true");
     fetch(`/api/aktionen?${params}`)
       .then((r) => r.json())
-      .then((data) => {
+      .then((data: Aktion[]) => {
         setAktionen(data);
+        setAktionTitles((prev) => {
+          const next = new Map(prev);
+          for (const a of data) next.set(a.id, a.titel);
+          return next;
+        });
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -99,11 +105,6 @@ function AktionenPageInner() {
       return next;
     });
   }, []);
-
-  const aktionTitles = useMemo(
-    () => new Map(aktionen.map((a) => [a.id, a.titel])),
-    [aktionen]
-  );
 
   return (
     <div className={selectedIds.size > 0 ? "pb-24" : ""}>

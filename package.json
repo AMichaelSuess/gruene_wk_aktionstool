@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:normalize-emails": "npx tsx prisma/normalize-anmeldung-emails.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

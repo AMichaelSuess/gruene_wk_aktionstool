@@ -50,7 +50,9 @@ export async function GET(req: NextRequest) {
   }
 
   const emailParam = req.nextUrl.searchParams.get("email");
-  const parsed = z.string().email().safeParse(emailParam);
+  // Trim + Kleinschreibung: E-Mail-Vergleich muss unabhängig von Groß-/Kleinschreibung
+  // funktionieren, da Anmeldungen z. B. auch "Max@Domain.de" gespeichert haben können.
+  const parsed = z.string().trim().toLowerCase().email().safeParse(emailParam);
   if (!parsed.success) {
     return NextResponse.json({ error: "Ungültige E-Mail-Adresse" }, { status: 400 });
   }
@@ -65,7 +67,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const anmeldungen = await prisma.anmeldung.findMany({
-      where: { email },
+      // Zusätzliche Absicherung als case-insensitive Vergleich (mode: "insensitive"),
+      // falls in der DB noch nicht normalisierte Alt-Datensätze liegen.
+      where: { email: { equals: email, mode: "insensitive" } },
       include: { aktion: true },
       orderBy: { aktion: { datum: "asc" } },
     });

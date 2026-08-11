@@ -2,14 +2,20 @@ import { z } from "zod";
 import { getWahlkreisCount } from "@/lib/district-config";
 import { KATEGORIE_VALUES } from "@/lib/kategorien";
 
+// E-Mail-Adressen werden immer getrimmt und kleingeschrieben gespeichert/verglichen,
+// damit z. B. "Max@Domain.de" und "max@domain.de" als dieselbe Adresse behandelt werden
+// (siehe: fehlende Anmeldungen in der "Meine Aktionen"-Übersichtsmail durch Groß-/Kleinschreibung).
+const emailSchema = (message = "Bitte gib eine gültige E-Mail-Adresse ein") =>
+  z.string().trim().toLowerCase().email(message);
+
 export const loginSchema = z.object({
-  email: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein"),
+  email: emailSchema(),
   password: z.string().min(1, "Bitte gib dein Passwort ein"),
 });
 
 export const userSchema = z.object({
   name: z.string().min(2, "Name muss mindestens 2 Zeichen lang sein"),
-  email: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein"),
+  email: emailSchema(),
   password: z.string().min(8, "Passwort muss mindestens 8 Zeichen lang sein"),
   role: z.enum(["ADMIN", "EXPERT"]),
   teamIds: z.array(z.string()).optional().default([]),
@@ -18,7 +24,7 @@ export const userSchema = z.object({
 export const userUpdateSchema = z.object({
   id: z.string().min(1, "ID fehlt"),
   name: z.string().min(2, "Name muss mindestens 2 Zeichen lang sein").optional(),
-  email: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein").optional(),
+  email: emailSchema().optional(),
   password: z.string().min(8, "Passwort muss mindestens 8 Zeichen lang sein").optional(),
   role: z.enum(["ADMIN", "EXPERT"]).optional(),
   active: z.boolean().optional(),
@@ -43,7 +49,7 @@ export const aktionSchema = z.object({
   wahlkreisId: z.string().min(1, "Bitte wähle einen Wahlkreis"),
   kategorie: z.enum(KATEGORIE_VALUES, { error: "Bitte wähle eine Art der Aktion" }),
   ansprechpersonName: z.string().min(2, "Name der Ansprechperson erforderlich"),
-  ansprechpersonEmail: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein"),
+  ansprechpersonEmail: emailSchema(),
   ansprechpersonTelefon: z.string().min(5, "Telefonnummer erforderlich"),
   maxTeilnehmer: z.number().int().positive().optional().nullable(),
 }).refine(
@@ -63,7 +69,7 @@ export const anmeldungSchema = z.object({
   aktionIds: z.array(z.string()).min(1, "Bitte wähle mindestens eine Aktion"),
   vorname: z.string().min(2, "Vorname muss mindestens 2 Zeichen lang sein"),
   nachname: z.string().min(2, "Nachname muss mindestens 2 Zeichen lang sein"),
-  email: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein"),
+  email: emailSchema(),
   telefon: z
     .string()
     .refine(
@@ -98,7 +104,7 @@ export const excelRowSchema = z.object({
   wahlkreis: z.number().int().min(1).max(getWahlkreisCount(), `Wahlkreis muss zwischen 1 und ${getWahlkreisCount()} liegen`),
   kategorie: z.enum(KATEGORIE_VALUES, { error: "Kategorie fehlt oder ungültig (erlaubt: Haustür, Straße, Sonstiges)" }),
   ansprechpersonName: z.string().min(1, "Ansprechperson Name fehlt"),
-  ansprechpersonEmail: z.string().email("Ungültige E-Mail der Ansprechperson"),
+  ansprechpersonEmail: emailSchema("Ungültige E-Mail der Ansprechperson"),
   ansprechpersonTelefon: z.string().min(1, "Telefon der Ansprechperson fehlt"),
   maxTeilnehmer: z.number().int().positive().optional().nullable(),
 }).refine(
