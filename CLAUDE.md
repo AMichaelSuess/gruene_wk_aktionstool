@@ -10,26 +10,24 @@ Campaign action coordination platform ("Aktionskoordination") for BÜNDNIS 90/DI
 
 ## Development Commands
 
-Primary development environment is DDEV (Docker-based):
+This fork runs natively (no DDEV): Node.js 24 via nvm (`.nvmrc`) and a shared local PostgreSQL 17 container on `localhost:5432` (database `gruene_aktionen`).
 
 ```bash
-ddev start                                    # Start all services
-ddev exec npm run dev                         # Start Next.js dev server
-ddev exec npm run build                       # Production build
-ddev exec npm run lint                        # ESLint
-ddev exec npm test                            # Run all tests (vitest)
-ddev exec npx prisma migrate dev --name <n>  # Create migration
-ddev exec npx prisma migrate reset            # Reset DB + reseed
-ddev exec npx prisma studio                   # DB browser
-ddev psql                                     # PostgreSQL CLI
+npm run dev -- -p 3200                        # Start Next.js dev server (VS Code task "Dev: Next.js" auto-starts it)
+npm run build                                 # Production build
+npm run lint                                  # ESLint
+npm test                                      # Run all tests (vitest)
+npx prisma migrate dev --name <n>             # Create migration
+npx prisma migrate reset                      # Reset DB + reseed
+npx prisma studio --port 3201                 # DB browser
 ```
 
 Run a single test file:
 ```bash
-ddev exec npx vitest run src/__tests__/security/auth-protection.test.ts
+npx vitest run src/__tests__/security/auth-protection.test.ts
 ```
 
-After `ddev start`, the app runs at `https://gruene-aktionen.ddev.site:3001`.
+The app runs at `http://localhost:3200` (must match `NEXTAUTH_URL` in `.env`).
 
 Test credentials (after seeding):
 - Admin: `admin@gruene-mitte.de` / `admin1234`
@@ -98,7 +96,7 @@ Tests live in `src/__tests__/security/` and focus on auth protection, role autho
 ## Environment Variables
 
 See `.env.example`. Key variables:
-- `DATABASE_URL` — PostgreSQL connection (DDEV: `postgresql://db:db@db:5432/db`)
+- `DATABASE_URL` — PostgreSQL connection (local: `postgresql://postgres:<pw>@localhost:5432/gruene_aktionen`)
 - `NEXTAUTH_SECRET` — JWT signing key (min 32 chars)
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD` — SMTP credentials (leave empty to skip email in local dev)
 - `EMAIL_FROM`, `EMAIL_FROM_NAME` — sender identity
@@ -338,22 +336,12 @@ Eine Web-App zur Koordinierung und Anmeldung von Aktiven bei Wahlkampf-Aktionen 
 ## Cross-Cutting Concerns
 <!-- GSD:architecture-end -->
 
-<!-- GSD:workflow-start source:GSD defaults -->
-## GSD Workflow Enforcement
+## Fork Notes
 
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+This repository is a fork of `maassfm/gruene_wk_aktionstool` (remote `upstream`, push disabled). Where the generated sections above mention DDEV, Node v25 or `https://gruene-aktionen.ddev.site:3001`, the native setup under "Development Commands" applies instead. Production is planned as a Docker container on Coolify (Dockerfile not yet written), not via systemd/Nginx as described in `docs/DEPLOYMENT.md`.
 
-Use these entry points:
-- `/gsd:quick` for small fixes, doc updates, and ad-hoc tasks
-- `/gsd:debug` for investigation and bug fixing
-- `/gsd:execute-phase` for planned phase work
-
-Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
-<!-- GSD:workflow-end -->
-
-<!-- GSD:profile-start -->
-## Developer Profile
-
-> Profile not yet configured. Run `/gsd:profile-user` to generate your developer profile.
-> This section is managed by `generate-claude-profile` -- do not edit manually.
-<!-- GSD:profile-end -->
+- **Commit messages:** Conventional Commits in English (`feat:`, `fix:`, `docs:`, `chore:`, `build:`, `test:`, `refactor:` …), imperative subject, body explains why.
+- **Workflow:** trunk-based on `main`, no PRs. Pull upstream changes with `git fetch upstream && git merge upstream/main` (merge, never rebase).
+- **Upstream candidates:** keep general fixes (bugs, tests, features useful to other Kreisverbände) in separate commits from fork-specific changes, so they can be cherry-picked onto a branch from `upstream/main` for a PR.
+- **Keep the diff small:** configure the Kreisverband via environment variables (`.env` locally, Coolify in production), never by changing code. Avoid repo-wide reformatting.
+- **Known failing tests:** 11 tests in `csp-header.test.ts` and `data-sanitization.test.ts` fail on upstream `main` already (tests out of date) — not caused by the local setup.
