@@ -1,0 +1,19 @@
+# Abhängigkeiten und Build-Ausgaben
+node_modules
+.next
+dist
+coverage
+*.tsbuildinfo
+npm-debug.log*
+
+# Umgebung und Secrets
+.env
+.env*.local
+
+# Entwicklung
+.git
+.ddev
+.vscode
+.claude
+docs
+TODO.md
