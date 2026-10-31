@@ -6,6 +6,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { MAP_CENTER, MAP_ZOOM } from "@/lib/map-config";
 
 // Fix default marker icons
 const DefaultIcon = L.icon({
@@ -60,8 +61,8 @@ export default function AktionMap({ aktionen, onSelect }: AktionMapProps) {
   return (
     <div className="h-[500px] md:h-[600px] rounded-xl overflow-hidden border border-gray-200">
       <MapContainer
-        center={[52.5235, 13.4115]}
-        zoom={13}
+        center={MAP_CENTER}
+        zoom={MAP_ZOOM}
         className="h-full w-full"
       >
         <TileLayer

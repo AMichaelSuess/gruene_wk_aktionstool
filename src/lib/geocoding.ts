@@ -1,3 +1,5 @@
+import { districtConfig } from "@/lib/district-config";
+
 interface GeocodingResult {
   latitude: number;
   longitude: number;
@@ -11,7 +13,7 @@ export async function geocodeAddress(
 ): Promise<GeocodingResult | null> {
   try {
     const params = new URLSearchParams({
-      q: `${address}, Berlin, Germany`,
+      q: `${address}, ${districtConfig.geocodingCity}, Germany`,
       format: "json",
       limit: "1",
       addressdetails: "1",

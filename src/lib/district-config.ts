@@ -48,6 +48,9 @@ export const districtConfig = {
   addressPostalCode: process.env.ADDRESS_POSTAL_CODE || "13353",
   addressCity: process.env.ADDRESS_CITY || "Berlin",
 
+  // Geocoding: Stadt, die an Adressen angehängt wird
+  geocodingCity: process.env.GEOCODING_CITY || process.env.ADDRESS_CITY || "Berlin",
+
   // Datenschutzbeauftragte*r
   dsbName: process.env.DSB_NAME || "SCO-CON:SULT",
   dsbStreet: process.env.DSB_STREET || "Hauptstraße 27",
