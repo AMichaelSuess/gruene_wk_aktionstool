@@ -1,0 +1,27 @@
+{
+  // Enforce LF line endings for new files (the repository stores LF)
+  "files.eol": "\n",
+
+  // Prevent auto-formatting on save to avoid unintended changes
+  // Run linting manually when you want to clean up a file
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+
+  // Trim trailing whitespace manually, not automatically
+  "files.trimTrailingWhitespace": false,
+
+  // Use workspace TypeScript version
+  "typescript.tsdk": "node_modules/typescript/lib",
+
+  // ESLint settings
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+
+  // Git settings
+  "git.detectSubmodules": false,
+  "git.autofetch": true
+}
