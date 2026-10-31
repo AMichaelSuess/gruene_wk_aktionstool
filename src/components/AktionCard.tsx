@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import Badge from "@/components/ui/Badge";
 import { kategorieLabel } from "@/lib/kategorien";
+import { WAHLKREIS_LABEL_SHORT } from "@/lib/wahlkreis-label";
 
 interface AktionCardProps {
   aktion: {
@@ -97,7 +98,7 @@ export default function AktionCard({ aktion, selected, onToggle }: AktionCardPro
           </div>
           <div className="pt-2 border-t border-gray-200 flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wide bg-black text-white px-2 py-0.5 inline-block">
-              WK {aktion.wahlkreis.nummer}: {aktion.wahlkreis.name}
+              {WAHLKREIS_LABEL_SHORT} {aktion.wahlkreis.nummer}: {aktion.wahlkreis.name}
             </span>
             {aktion.kategorie && (
               <Badge variant="info">{kategorieLabel(aktion.kategorie)}</Badge>

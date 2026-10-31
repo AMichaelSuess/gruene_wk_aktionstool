@@ -8,6 +8,7 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import { KATEGORIEN } from "@/lib/kategorien";
+import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
 
 interface Wahlkreis {
   id: string;
@@ -157,7 +158,7 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
           />
 
           <Select
-            label="Wahlkreis"
+            label={WAHLKREIS_LABEL}
             value={form.wahlkreisId}
             onChange={(e) => updateForm("wahlkreisId", e.target.value)}
             options={wahlkreise.map((wk) => ({

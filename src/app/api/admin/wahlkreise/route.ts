@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { wahlkreisUpdateSchema } from "@/lib/validators";
+import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
 
 export async function GET() {
   const session = await auth();
@@ -49,7 +50,7 @@ export async function PUT(req: NextRequest) {
       (error as { code: string }).code === "P2002"
     ) {
       return NextResponse.json(
-        { error: "Diese Wahlkreisnummer ist bereits vergeben." },
+        { error: `Diese Nummer ist bereits für einen anderen ${WAHLKREIS_LABEL} vergeben.` },
         { status: 409 }
       );
     }

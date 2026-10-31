@@ -271,6 +271,9 @@ Alle folgenden Variablen sind **optional** — ohne Angabe werden die Berlin-Mit
 | Variable         | Beschreibung                                                                 | Beispiel |
 |------------------|------------------------------------------------------------------------------|----------|
 | `WAHLKREISE_JSON` | JSON-Array mit `{nummer, name}` pro Wahlkreis. Wenn nicht gesetzt, werden die 7 Wahlkreise von Berlin-Mitte als Standard verwendet. Die Nummern müssen mit den Werten im Excel-Import übereinstimmen. | `'[{"nummer":1,"name":"Wahlkreis 1"},{"nummer":2,"name":"Wahlkreis 2"}]'` |
+| `NEXT_PUBLIC_WAHLKREIS_LABEL` | Bezeichnung der Gebietseinheit in Oberfläche, Fehlermeldungen und Excel-Dateien (Einzahl). Default: `Wahlkreis`. Wird beim Build eingebettet. Excel-Importe mit der Spalte „Wahlkreis“ funktionieren weiterhin. | `Stadtbezirk` |
+| `NEXT_PUBLIC_WAHLKREIS_LABEL_PLURAL` | Mehrzahl. Default: Einzahl + „e“ (bzw. `Wahlkreise`). | `Stadtbezirke` |
+| `NEXT_PUBLIC_WAHLKREIS_LABEL_SHORT` | Kurzform für Filterleiste, Aktionskarten und Karten-Popups. Default: `WK`, bei eigener Einzahl diese. | `Stadtbezirk` |
 
 ---
 

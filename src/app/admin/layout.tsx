@@ -5,12 +5,13 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useState, type ReactNode } from "react";
+import { WAHLKREIS_LABEL_PLURAL } from "@/lib/wahlkreis-label";
 
 const navItems = [
   { href: "/admin", label: "Übersicht", icon: "📊" },
   { href: "/admin/aktionen", label: "Alle Aktionen", icon: "📋" },
   { href: "/admin/teams", label: "Teams", icon: "👥" },
-  { href: "/admin/wahlkreise", label: "Wahlkreise", icon: "🗺️" },
+  { href: "/admin/wahlkreise", label: WAHLKREIS_LABEL_PLURAL, icon: "🗺️" },
   { href: "/admin/users", label: "Benutzer*innen", icon: "👤" },
 ];
 

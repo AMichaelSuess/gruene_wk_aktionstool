@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
+import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
 
 interface WahlkreisDetail {
   id: string;
@@ -68,18 +69,18 @@ export default function EditWahlkreisPage({ params }: { params: Promise<{ id: st
   }
 
   if (fetchLoading) {
-    return <div className="text-gray-500">Lade Wahlkreis...</div>;
+    return <div className="text-gray-500">Lade {WAHLKREIS_LABEL}...</div>;
   }
 
   return (
     <div className="max-w-xl">
       <h1 className="font-headline text-2xl font-bold text-tanne uppercase mb-6">
-        Wahlkreis bearbeiten
+        {WAHLKREIS_LABEL} bearbeiten
       </h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>Wahlkreis-Daten ändern</CardTitle>
+          <CardTitle>{WAHLKREIS_LABEL}-Daten ändern</CardTitle>
         </CardHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
+import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
 
 interface Wahlkreis {
   id: string;
@@ -65,7 +66,7 @@ export default function NewTeamPage() {
             required
           />
           <Select
-            label="Wahlkreis (optional)"
+            label={`${WAHLKREIS_LABEL} (optional)`}
             value={form.wahlkreisId}
             onChange={(e) => setForm({ ...form, wahlkreisId: e.target.value })}
             options={wahlkreise.map((wk) => ({

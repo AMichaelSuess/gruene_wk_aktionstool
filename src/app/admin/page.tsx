@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
 
 interface Stats {
   totalAktionen: number;
@@ -88,7 +89,7 @@ export default function AdminPage() {
       <div className="space-y-4">
         <Card>
           <CardHeader>
-            <CardTitle>Anmeldungen nach Wahlkreis</CardTitle>
+            <CardTitle>Anmeldungen nach {WAHLKREIS_LABEL}</CardTitle>
           </CardHeader>
           <div className="space-y-3">
             {anmeldungenByWahlkreis.map((item) => (

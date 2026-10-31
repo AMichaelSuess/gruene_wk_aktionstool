@@ -6,6 +6,7 @@ import Badge from "@/components/ui/Badge";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { kategorieLabel } from "@/lib/kategorien";
+import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
 
 interface Aktion {
   id: string;
@@ -85,7 +86,7 @@ export default function AdminAktionenPage() {
             <tr>
               <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Titel</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Datum</th>
-              <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Wahlkreis</th>
+              <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">{WAHLKREIS_LABEL}</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Team</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Art</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Status</th>

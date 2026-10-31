@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { MAP_CENTER, MAP_ZOOM } from "@/lib/map-config";
+import { WAHLKREIS_LABEL_SHORT } from "@/lib/wahlkreis-label";
 
 // Fix default marker icons
 const DefaultIcon = L.icon({
@@ -88,7 +89,7 @@ export default function AktionMap({ aktionen, onSelect }: AktionMapProps) {
                 </p>
                 <p className="text-sm text-gray-600">📍 {aktion.adresse}</p>
                 <p className="text-sm text-gray-600">
-                  WK {aktion.wahlkreis.nummer} · 👤 {aktion.ansprechpersonName}
+                  {WAHLKREIS_LABEL_SHORT} {aktion.wahlkreis.nummer} · 👤 {aktion.ansprechpersonName}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {aktion._count.anmeldungen} Anmeldung{aktion._count.anmeldungen !== 1 ? "en" : ""}

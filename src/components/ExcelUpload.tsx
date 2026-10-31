@@ -7,6 +7,7 @@ import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Select from "@/components/ui/Select";
 import { kategorieLabel } from "@/lib/kategorien";
+import { WAHLKREIS_LABEL_SHORT } from "@/lib/wahlkreis-label";
 
 interface Team {
   id: string;
@@ -177,7 +178,7 @@ export default function ExcelUpload({ userTeams = [], needsTeamSelect = false }:
                   <th className="text-left py-2 px-2">Titel</th>
                   <th className="text-left py-2 px-2">Datum</th>
                   <th className="text-left py-2 px-2">Adresse</th>
-                  <th className="text-left py-2 px-2">WK</th>
+                  <th className="text-left py-2 px-2">{WAHLKREIS_LABEL_SHORT}</th>
                   <th className="text-left py-2 px-2">Kategorie</th>
                   <th className="text-left py-2 px-2">Fehler</th>
                 </tr>

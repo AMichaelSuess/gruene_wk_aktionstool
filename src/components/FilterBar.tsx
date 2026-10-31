@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { KATEGORIEN } from "@/lib/kategorien";
+import { WAHLKREIS_LABEL_SHORT } from "@/lib/wahlkreis-label";
 
 interface FilterState {
   datum: string;
@@ -176,7 +177,7 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
 
             {/* Wahlkreise */}
             <div className="flex items-center gap-2 flex-wrap">
-            <label className="text-xs font-bold uppercase tracking-wide text-black shrink-0">WK:</label>
+            <label className="text-xs font-bold uppercase tracking-wide text-black shrink-0">{WAHLKREIS_LABEL_SHORT}:</label>
             <div className="flex gap-1 flex-wrap">
               {wahlkreise.map((wk) => (
                 <button

@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { parseKategorie } from "@/lib/kategorien";
+import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
 
 function kategorieEmoji(kategorie?: string): string {
   switch (kategorie) {
@@ -46,7 +47,9 @@ const COLUMN_MAP: Record<string, keyof ExcelRow> = {
   "Startzeit": "startzeit",
   "Endzeit": "endzeit",
   "Adresse": "adresse",
+  // Bisheriger Spaltenname bleibt gültig, damit ältere Vorlagen importierbar sind
   "Wahlkreis": "wahlkreis",
+  [WAHLKREIS_LABEL]: "wahlkreis",
   "Kategorie": "kategorie",
   "Ansprechperson Name": "ansprechpersonName",
   "Ansprechperson E-Mail": "ansprechpersonEmail",
@@ -231,7 +234,7 @@ export async function createAktionenExcel(aktionen: AktionExport[]): Promise<Buf
     { header: "Startzeit", key: "startzeit", width: 10 },
     { header: "Endzeit", key: "endzeit", width: 10 },
     { header: "Adresse", key: "adresse", width: 40 },
-    { header: "Wahlkreis", key: "wahlkreis", width: 10 },
+    { header: WAHLKREIS_LABEL, key: "wahlkreis", width: 10 },
     { header: "Kategorie", key: "kategorie", width: 12 },
     { header: "Team", key: "team", width: 20 },
     { header: "Status", key: "status", width: 12 },
@@ -294,10 +297,11 @@ export async function createAuswertungExcel(data: AuswertungData): Promise<Buffe
   ]);
 
   // Sheet 2: Anmeldungen nach Wahlkreis
-  const wkSheet = workbook.addWorksheet("Anmeldungen nach Wahlkreis");
+  // Excel erlaubt maximal 31 Zeichen pro Blattname
+  const wkSheet = workbook.addWorksheet(`Anmeldungen nach ${WAHLKREIS_LABEL}`.slice(0, 31));
   wkSheet.columns = [
     { header: "Nr.", key: "nummer", width: 6 },
-    { header: "Wahlkreis", key: "wahlkreis", width: 30 },
+    { header: WAHLKREIS_LABEL, key: "wahlkreis", width: 30 },
     { header: "Anmeldungen", key: "anmeldungen", width: 14 },
   ];
   for (const wk of data.anmeldungenByWahlkreis) {
@@ -345,7 +349,7 @@ export async function createVorlageExcel(): Promise<Buffer> {
     { header: "Startzeit", key: "startzeit", width: 10 },
     { header: "Endzeit", key: "endzeit", width: 10 },
     { header: "Adresse", key: "adresse", width: 40 },
-    { header: "Wahlkreis", key: "wahlkreis", width: 10 },
+    { header: WAHLKREIS_LABEL, key: "wahlkreis", width: 10 },
     { header: "Kategorie", key: "kategorie", width: 12 },
     { header: "Ansprechperson Name", key: "ansprechpersonName", width: 20 },
     { header: "Ansprechperson E-Mail", key: "ansprechpersonEmail", width: 25 },
