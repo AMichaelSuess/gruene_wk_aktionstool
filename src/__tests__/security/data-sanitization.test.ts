@@ -144,7 +144,8 @@ describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
         id: "aktion-1",
         titel: "Haustürwahlkampf",
         beschreibung: "Test",
-        datum: new Date("2026-06-01"),
+        // Zukünftiges Datum, da vergangene Aktionen öffentlich ausgeblendet werden
+        datum: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         startzeit: "10:00",
         endzeit: "12:00",
         adresse: "Musterstr. 1",
@@ -167,6 +168,7 @@ describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
     const data = await res.json();
 
     expect(res.status).toBe(200);
+    expect(data).toHaveLength(1);
 
     // Anmeldungsdaten (vorname, nachname, email, telefon) dürfen NICHT enthalten sein
     const responseText = JSON.stringify(data);

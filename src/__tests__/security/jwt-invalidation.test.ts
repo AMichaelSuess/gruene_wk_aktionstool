@@ -55,7 +55,6 @@ beforeEach(() => {
 async function getJwtCallback() {
   // next-auth mock neu aufsetzen, damit capturedCallbacks befüllt wird
   const nextAuthModule = await import("next-auth");
-  // @ts-expect-error: Mock-interne Hilfsfunktion
   const NextAuth = nextAuthModule.default;
 
   let capturedCallbacks: Record<string, Function> = {};

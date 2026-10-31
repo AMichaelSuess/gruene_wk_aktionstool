@@ -10,7 +10,7 @@ import nextConfig from "../../../next.config";
 describe("CSP Header Configuration", () => {
   it("should have a Content-Security-Policy header configured", async () => {
     const headersConfig = await nextConfig.headers!();
-    const catchAllRoute = headersConfig.find((h) => h.source === "/(.*)");
+    const catchAllRoute = headersConfig.find((h) => h.source === "/((?!embed).*)");
     expect(catchAllRoute).toBeDefined();
 
     const cspHeader = catchAllRoute!.headers.find(
@@ -22,7 +22,7 @@ describe("CSP Header Configuration", () => {
 
   it("should contain default-src 'self'", async () => {
     const headersConfig = await nextConfig.headers!();
-    const catchAllRoute = headersConfig.find((h) => h.source === "/(.*)")!;
+    const catchAllRoute = headersConfig.find((h) => h.source === "/((?!embed).*)")!;
     const csp = catchAllRoute.headers.find(
       (h) => h.key === "Content-Security-Policy"
     )!.value;
@@ -31,7 +31,7 @@ describe("CSP Header Configuration", () => {
 
   it("should contain script-src 'self'", async () => {
     const headersConfig = await nextConfig.headers!();
-    const catchAllRoute = headersConfig.find((h) => h.source === "/(.*)")!;
+    const catchAllRoute = headersConfig.find((h) => h.source === "/((?!embed).*)")!;
     const csp = catchAllRoute.headers.find(
       (h) => h.key === "Content-Security-Policy"
     )!.value;
@@ -40,7 +40,7 @@ describe("CSP Header Configuration", () => {
 
   it("should contain style-src 'self' 'unsafe-inline' for Leaflet compatibility", async () => {
     const headersConfig = await nextConfig.headers!();
-    const catchAllRoute = headersConfig.find((h) => h.source === "/(.*)")!;
+    const catchAllRoute = headersConfig.find((h) => h.source === "/((?!embed).*)")!;
     const csp = catchAllRoute.headers.find(
       (h) => h.key === "Content-Security-Policy"
     )!.value;
@@ -49,7 +49,7 @@ describe("CSP Header Configuration", () => {
 
   it("should contain img-src 'self' data: https: for Leaflet marker icons", async () => {
     const headersConfig = await nextConfig.headers!();
-    const catchAllRoute = headersConfig.find((h) => h.source === "/(.*)")!;
+    const catchAllRoute = headersConfig.find((h) => h.source === "/((?!embed).*)")!;
     const csp = catchAllRoute.headers.find(
       (h) => h.key === "Content-Security-Policy"
     )!.value;
@@ -58,7 +58,7 @@ describe("CSP Header Configuration", () => {
 
   it("should contain connect-src 'self' https://*.tile.openstreetmap.org for map tiles", async () => {
     const headersConfig = await nextConfig.headers!();
-    const catchAllRoute = headersConfig.find((h) => h.source === "/(.*)")!;
+    const catchAllRoute = headersConfig.find((h) => h.source === "/((?!embed).*)")!;
     const csp = catchAllRoute.headers.find(
       (h) => h.key === "Content-Security-Policy"
     )!.value;
@@ -69,7 +69,7 @@ describe("CSP Header Configuration", () => {
 
   it("should contain font-src 'self'", async () => {
     const headersConfig = await nextConfig.headers!();
-    const catchAllRoute = headersConfig.find((h) => h.source === "/(.*)")!;
+    const catchAllRoute = headersConfig.find((h) => h.source === "/((?!embed).*)")!;
     const csp = catchAllRoute.headers.find(
       (h) => h.key === "Content-Security-Policy"
     )!.value;
@@ -78,7 +78,7 @@ describe("CSP Header Configuration", () => {
 
   it("should contain frame-src 'none'", async () => {
     const headersConfig = await nextConfig.headers!();
-    const catchAllRoute = headersConfig.find((h) => h.source === "/(.*)")!;
+    const catchAllRoute = headersConfig.find((h) => h.source === "/((?!embed).*)")!;
     const csp = catchAllRoute.headers.find(
       (h) => h.key === "Content-Security-Policy"
     )!.value;
@@ -87,7 +87,7 @@ describe("CSP Header Configuration", () => {
 
   it("should NOT contain 'unsafe-eval' (XSS vector)", async () => {
     const headersConfig = await nextConfig.headers!();
-    const catchAllRoute = headersConfig.find((h) => h.source === "/(.*)")!;
+    const catchAllRoute = headersConfig.find((h) => h.source === "/((?!embed).*)")!;
     const csp = catchAllRoute.headers.find(
       (h) => h.key === "Content-Security-Policy"
     )!.value;
@@ -96,7 +96,7 @@ describe("CSP Header Configuration", () => {
 
   it("should NOT contain nonce (out of scope per D-04)", async () => {
     const headersConfig = await nextConfig.headers!();
-    const catchAllRoute = headersConfig.find((h) => h.source === "/(.*)")!;
+    const catchAllRoute = headersConfig.find((h) => h.source === "/((?!embed).*)")!;
     const csp = catchAllRoute.headers.find(
       (h) => h.key === "Content-Security-Policy"
     )!.value;
