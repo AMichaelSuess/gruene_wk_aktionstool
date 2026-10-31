@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "postinstall": "prisma generate",
-    "db:normalize-emails": "npx tsx prisma/normalize-anmeldung-emails.ts"
+    "db:normalize-emails": "npx tsx prisma/normalize-anmeldung-emails.ts",
+    "db:bootstrap": "npx tsx --env-file=.env prisma/bootstrap.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
