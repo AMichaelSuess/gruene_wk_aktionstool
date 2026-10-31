@@ -338,10 +338,11 @@ Eine Web-App zur Koordinierung und Anmeldung von Aktiven bei Wahlkampf-Aktionen 
 
 ## Fork Notes
 
-This repository is a fork of `maassfm/gruene_wk_aktionstool` (remote `upstream`, push disabled). Where the generated sections above mention DDEV, Node v25 or `https://gruene-aktionen.ddev.site:3001`, the native setup under "Development Commands" applies instead. Production is planned as a Docker container on Coolify (Dockerfile not yet written), not via systemd/Nginx as described in `docs/DEPLOYMENT.md`.
+This repository is a fork of `maassfm/gruene_wk_aktionstool` (remote `upstream`, push disabled). Where the generated sections above mention DDEV, Node v25 or `https://gruene-aktionen.ddev.site:3001`, the native setup under "Development Commands" applies instead. Production runs as a Docker container on Coolify (`Dockerfile`, deployed from the `production` branch), not via systemd/Nginx as described in `docs/DEPLOYMENT.md` — see `docs/deployment/coolify-deployment.md`. New production databases are set up with `prisma/bootstrap.ts`, never with the seed.
 
 - **Commit messages:** Conventional Commits in English (`feat:`, `fix:`, `docs:`, `chore:`, `build:`, `test:`, `refactor:` …), imperative subject, body explains why.
 - **Workflow:** trunk-based on `main`, no PRs. Pull upstream changes with `git fetch upstream && git merge upstream/main` (merge, never rebase).
 - **Upstream candidates:** keep general fixes (bugs, tests, features useful to other Kreisverbände) in separate commits from fork-specific changes, so they can be cherry-picked onto a branch from `upstream/main` for a PR.
 - **Keep the diff small:** configure the Kreisverband via environment variables (`.env` locally, Coolify in production), never by changing code. Avoid repo-wide reformatting.
-- **Known failing tests:** 11 tests in `csp-header.test.ts` and `data-sanitization.test.ts` fail on upstream `main` already (tests out of date) — not caused by the local setup.
+- **Tests gate the Docker build:** `npm test` runs inside the image build, so a failing test blocks every deployment.
+- **Build-time variables:** `NEXT_PUBLIC_*`, `ORG_FULL_NAME` and `ALLOWED_EMBED_DOMAIN` are baked in at build time and must be declared as `ARG` in the `Dockerfile`; a new variable of that kind needs an `ARG` there too.
