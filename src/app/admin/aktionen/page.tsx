@@ -17,7 +17,7 @@ interface Aktion {
   status: string;
   kategorie: string;
   wahlkreis: { nummer: number; name: string };
-  team: { name: string };
+  team: { name: string } | null;
   _count: { anmeldungen: number };
   maxTeilnehmer: number | null;
 }
@@ -107,7 +107,7 @@ export default function AdminAktionenPage() {
                 <td className="px-4 py-3 text-gray-700">
                   WK {aktion.wahlkreis.nummer}
                 </td>
-                <td className="px-4 py-3 text-gray-700">{aktion.team.name}</td>
+                <td className="px-4 py-3 text-gray-700">{aktion.team?.name ?? "–"}</td>
                 <td className="px-4 py-3">
                   {aktion.kategorie && (
                     <Badge variant="info">{kategorieLabel(aktion.kategorie)}</Badge>
