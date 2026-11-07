@@ -22,8 +22,13 @@ export async function GET(req: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {};
 
-  if (session.user.role === "EXPERT" && session.user.teamIds?.length > 0) {
-    where.teamId = { in: session.user.teamIds };
+  if (session.user.role === "EXPERT") {
+    // Team-Isolation: ohne Team nur selbst erstellte Aktionen
+    if (session.user.teamIds?.length > 0) {
+      where.teamId = { in: session.user.teamIds };
+    } else {
+      where.createdById = session.user.id;
+    }
   } else if (teamId) {
     where.teamId = teamId;
   }

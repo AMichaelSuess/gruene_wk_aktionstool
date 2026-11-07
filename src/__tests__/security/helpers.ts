@@ -45,6 +45,17 @@ export const EXPERT_TEAM_B: MockSession = {
   },
 };
 
+export const EXPERT_OHNE_TEAM: MockSession = {
+  user: {
+    id: "expert-ohne-team",
+    name: "Expert ohne Team",
+    email: "expert-ohne-team@test.de",
+    role: "EXPERT",
+    teamId: null,
+    teamIds: [],
+  },
+};
+
 // Hilfsfunktion: auth()-Mock setzen
 // Muss async sein, weil wir dynamic import verwenden (path alias)
 export async function mockAuth(session: MockSession | null) {

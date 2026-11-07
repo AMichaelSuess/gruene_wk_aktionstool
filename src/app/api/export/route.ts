@@ -24,8 +24,12 @@ export async function GET(req: NextRequest) {
     where.aktionId = aktionId;
   }
 
-  if (session.user.role === "EXPERT" && session.user.teamIds?.length > 0) {
-    where.aktion = { teamId: { in: session.user.teamIds } };
+  if (session.user.role === "EXPERT") {
+    // Team-Isolation: ohne Team nur Anmeldungen selbst erstellter Aktionen
+    where.aktion =
+      session.user.teamIds?.length > 0
+        ? { teamId: { in: session.user.teamIds } }
+        : { createdById: session.user.id };
   } else if (teamId) {
     where.aktion = { ...(where.aktion || {}), teamId };
   }

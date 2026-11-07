@@ -7,7 +7,7 @@
  * Team-Mitglieder gelangen.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mockAuth, createRequest, createJsonRequest, EXPERT_TEAM_A, ADMIN_SESSION } from "./helpers";
+import { mockAuth, createRequest, createJsonRequest, EXPERT_TEAM_A, EXPERT_OHNE_TEAM, ADMIN_SESSION } from "./helpers";
 
 vi.mock("@/lib/auth", () => ({
   auth: vi.fn(),
@@ -195,6 +195,36 @@ describe("Team-Isolation: Datenexport", () => {
     const callArgs = mockPrisma.anmeldung.findMany.mock.calls[0][0];
     expect(callArgs.where.aktion.teamId).toEqual({ in: ["team-a"] });
   });
+
+  it("EXPERT ohne Team exportiert nur Anmeldungen selbst erstellter Aktionen", async () => {
+    await mockAuth(EXPERT_OHNE_TEAM);
+
+    mockPrisma.anmeldung.findMany.mockResolvedValue([]);
+
+    const { GET } = await import("@/app/api/export/route");
+    const req = createRequest("/api/export?format=txt");
+    const res = await GET(req as any);
+
+    expect(res.status).toBe(200);
+
+    const callArgs = mockPrisma.anmeldung.findMany.mock.calls[0][0];
+    expect(callArgs.where.aktion).toEqual({ createdById: "expert-ohne-team" });
+  });
+
+  it("EXPERT ohne Team kann NICHT per teamId-Parameter fremde Anmeldungen exportieren", async () => {
+    await mockAuth(EXPERT_OHNE_TEAM);
+
+    mockPrisma.anmeldung.findMany.mockResolvedValue([]);
+
+    const { GET } = await import("@/app/api/export/route");
+    const req = createRequest("/api/export?format=txt&teamId=team-b");
+    const res = await GET(req as any);
+
+    expect(res.status).toBe(200);
+
+    const callArgs = mockPrisma.anmeldung.findMany.mock.calls[0][0];
+    expect(callArgs.where.aktion).toEqual({ createdById: "expert-ohne-team" });
+  });
 });
 
 describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
@@ -227,6 +257,22 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
     // Auch wenn teamId=team-b übergeben wird, muss der Filter team-a verwenden
     const callArgs = mockPrisma.aktion.findMany.mock.calls[0][0];
     expect(callArgs.where.teamId).toEqual({ in: ["team-a"] });
+  });
+
+  it("EXPERT ohne Team exportiert nur selbst erstellte Aktionen", async () => {
+    await mockAuth(EXPERT_OHNE_TEAM);
+
+    mockPrisma.aktion.findMany.mockResolvedValue([]);
+
+    const { GET } = await import("@/app/api/export-aktionen/route");
+    const req = createRequest("/api/export-aktionen?format=txt&teamId=team-b");
+    const res = await GET(req as any);
+
+    expect(res.status).toBe(200);
+
+    const callArgs = mockPrisma.aktion.findMany.mock.calls[0][0];
+    expect(callArgs.where).not.toHaveProperty("teamId");
+    expect(callArgs.where.createdById).toBe("expert-ohne-team");
   });
 
   it("ADMIN sieht alle Aktionen ohne Filter", async () => {
