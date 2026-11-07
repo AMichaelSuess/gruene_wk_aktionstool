@@ -110,7 +110,7 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="max-w-2xl">
-      <h1 className="font-headline text-2xl font-bold text-tanne uppercase mb-6">
+      <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-6">
         Aktion bearbeiten
       </h1>
 

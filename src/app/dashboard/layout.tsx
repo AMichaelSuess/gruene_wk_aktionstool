@@ -1,6 +1,7 @@
 "use client";
 
-import Image from "next/image";
+import BrandLogo, { wordmarkClass } from "@/components/BrandLogo";
+import { theme } from "@/lib/theme";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -19,8 +20,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const isAdmin = session?.user.role === "ADMIN";
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="bg-tanne text-white sticky top-0 z-50 border-b-[3px] border-black">
+    <div className="min-h-screen bg-canvas">
+      <header className="bg-chrome text-white sticky top-0 z-50 border-b-ui-thick border-line">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -31,8 +32,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               ☰
             </button>
             <Link href="/dashboard" className="flex items-center gap-2">
-              <Image src="/logo_white.png" alt="Sonnenblume" width={36} height={36} className="shrink-0" />
-              <span className="md:hidden font-headline font-bold text-lg uppercase tracking-wide">
+              <BrandLogo variant="onDark" size={36} />
+              <span className={`${theme.logo ? "md:hidden" : wordmarkClass} font-headline font-bold text-lg case-ui tracking-ui`}>
                 {process.env.NEXT_PUBLIC_ORG_SHORT_NAME || "B90/GRÜNE Berlin-Mitte"}
               </span>
             </Link>
@@ -46,7 +47,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <Link
               href="/dashboard"
               className={`text-sm transition-colors font-medium ${
-                pathname.startsWith("/dashboard") ? "text-sonne" : "text-white/70 hover:text-white"
+                pathname.startsWith("/dashboard") ? "text-accent" : "text-white/70 hover:text-white"
               }`}
             >
               Dashboard
@@ -55,7 +56,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <Link
                 href="/admin"
                 className={`text-sm transition-colors font-medium ${
-                  pathname.startsWith("/admin") ? "text-sonne" : "text-white/70 hover:text-white"
+                  pathname.startsWith("/admin") ? "text-accent" : "text-white/70 hover:text-white"
                 }`}
               >
                 Admin Panel
@@ -79,7 +80,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <aside
           className={`${
             menuOpen ? "block" : "hidden"
-          } md:block w-64 shrink-0 bg-white border-r-2 border-black min-h-[calc(100vh-56px)] p-4`}
+          } md:block w-64 shrink-0 bg-white border-r-ui border-line min-h-[calc(100vh-56px)] p-4`}
         >
           <nav className="space-y-1">
             {navItems.map((item) => (
@@ -87,10 +88,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 text-sm font-bold uppercase tracking-wide transition-colors border-2 mb-1 ${
+                className={`flex items-center gap-3 rounded-button px-3 py-2 text-sm font-bold case-ui tracking-ui transition-colors border-ui mb-1 ${
                   pathname === item.href
-                    ? "bg-tanne text-white border-black shadow-[2px_2px_0_#000]"
-                    : "text-black border-transparent hover:border-black hover:shadow-[2px_2px_0_#000]"
+                    ? "bg-primary text-white border-line shadow-ui-sm"
+                    : "text-ink border-transparent hover:border-line hover:shadow-ui-sm"
                 }`}
               >
                 <span>{item.icon}</span>
@@ -98,12 +99,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               </Link>
             ))}
             {/* Mobile-only links */}
-            <div className="md:hidden pt-2 border-t-2 border-black mt-2 space-y-1">
+            <div className="md:hidden pt-2 border-t-ui border-line mt-2 space-y-1">
               {isAdmin && (
                 <Link
                   href="/admin"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 text-sm font-bold uppercase tracking-wide border-2 border-transparent hover:border-black hover:shadow-[2px_2px_0_#000] transition-colors text-black"
+                  className="flex items-center gap-3 rounded-button px-3 py-2 text-sm font-bold case-ui tracking-ui border-ui border-transparent hover:border-line hover:shadow-ui-sm transition-colors text-ink"
                 >
                   <span>⚙️</span> Admin Panel
                 </Link>
@@ -111,13 +112,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <Link
                 href="/"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 text-sm font-bold uppercase tracking-wide border-2 border-transparent hover:border-black hover:shadow-[2px_2px_0_#000] transition-colors text-black"
+                className="flex items-center gap-3 rounded-button px-3 py-2 text-sm font-bold case-ui tracking-ui border-ui border-transparent hover:border-line hover:shadow-ui-sm transition-colors text-ink"
               >
                 <span>🌐</span> Zur Übersicht
               </Link>
               <button
                 onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }); }}
-                className="flex items-center gap-3 px-3 py-2 text-sm font-bold uppercase tracking-wide border-2 border-transparent hover:border-black hover:shadow-[2px_2px_0_#000] transition-colors text-black w-full text-left"
+                className="flex items-center gap-3 rounded-button px-3 py-2 text-sm font-bold case-ui tracking-ui border-ui border-transparent hover:border-line hover:shadow-ui-sm transition-colors text-ink w-full text-left"
               >
                 <span>🚪</span> Abmelden
               </button>

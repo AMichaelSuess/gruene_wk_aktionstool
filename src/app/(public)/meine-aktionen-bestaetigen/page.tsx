@@ -28,42 +28,42 @@ function BestaetigenContent() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-      <div className="bg-white border-2 border-black p-8 shadow-[6px_6px_0_#005538]">
+      <div className="bg-white rounded-card border-ui border-line p-8 shadow-ui-brand-lg">
         {!isValidEmail ? (
           <>
-            <p className="font-headline font-bold text-signal text-2xl uppercase mb-2">
+            <p className="font-headline font-bold text-danger text-2xl case-ui mb-2">
               Ungültige Anfrage
             </p>
-            <p className="text-black mt-2">
+            <p className="text-ink mt-2">
               Der Link ist ungültig. Bitte verwende den Link aus deiner
               Bestätigungs-E-Mail.
             </p>
           </>
         ) : status === "sent" ? (
           <>
-            <p className="font-headline font-bold text-tanne text-2xl uppercase mb-2">
+            <p className="font-headline font-bold text-primary text-2xl case-ui mb-2">
               E-Mail wird gesendet
             </p>
-            <p className="text-black mt-2">
+            <p className="text-ink mt-2">
               Deine Aktionsübersicht wurde an <strong>{email}</strong> gesendet.
             </p>
           </>
         ) : status === "error" ? (
           <>
-            <p className="font-headline font-bold text-signal text-2xl uppercase mb-2">
+            <p className="font-headline font-bold text-danger text-2xl case-ui mb-2">
               Fehler beim Senden
             </p>
-            <p className="text-black mt-2">
+            <p className="text-ink mt-2">
               Leider konnte die E-Mail nicht gesendet werden. Bitte versuche es
               später erneut.
             </p>
           </>
         ) : (
           <>
-            <p className="font-headline font-bold text-tanne text-2xl uppercase mb-2">
+            <p className="font-headline font-bold text-primary text-2xl case-ui mb-2">
               Übersicht anfordern
             </p>
-            <p className="text-black mt-2 mb-6">
+            <p className="text-ink mt-2 mb-6">
               Soll eine Übersicht aller deiner Anmeldungen an{" "}
               <strong>{email}</strong> gesendet werden?
             </p>
@@ -71,13 +71,13 @@ function BestaetigenContent() {
               <button
                 onClick={handleSend}
                 disabled={status === "sending"}
-                className="bg-tanne text-white font-bold px-6 py-3 border-2 border-black shadow-[4px_4px_0_black] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="rounded-button bg-primary text-white font-bold px-6 py-3 border-ui border-line shadow-ui hover:shadow-none hover:press transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {status === "sending" ? "Wird gesendet …" : "E-Mail senden"}
               </button>
               <a
                 href="/"
-                className="bg-white text-black font-bold px-6 py-3 border-2 border-black shadow-[4px_4px_0_black] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all inline-block"
+                className="rounded-button bg-white text-ink font-bold px-6 py-3 border-ui border-line shadow-ui hover:shadow-none hover:press transition-all inline-block"
               >
                 Abbrechen
               </a>
@@ -87,7 +87,7 @@ function BestaetigenContent() {
         {(status === "sent" || status === "error" || !isValidEmail) && (
           <a
             href="/"
-            className="mt-6 inline-block text-tanne hover:underline font-bold"
+            className="mt-6 inline-block text-primary hover:underline font-bold"
           >
             ← Zurück zur Aktionsübersicht
           </a>

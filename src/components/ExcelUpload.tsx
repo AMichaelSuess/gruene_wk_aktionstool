@@ -108,7 +108,7 @@ export default function ExcelUpload({ teamOptions = [], needsTeamSelect = false 
       <div className="mb-4">
         <a
           href="/api/vorlage"
-          className="text-tanne hover:underline text-sm font-medium"
+          className="text-primary hover:underline text-sm font-medium"
         >
           📥 Vorlage herunterladen
         </a>
@@ -133,8 +133,8 @@ export default function ExcelUpload({ teamOptions = [], needsTeamSelect = false 
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-          dragOver ? "border-klee bg-klee/5" : "border-gray-300"
+        className={`border-ui border-dashed rounded-xl p-8 text-center transition-colors ${
+          dragOver ? "border-success bg-success/5" : "border-gray-300"
         }`}
       >
         <p className="text-gray-500 mb-3">

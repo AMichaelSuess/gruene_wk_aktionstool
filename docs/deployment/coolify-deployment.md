@@ -236,6 +236,7 @@ Redeploy nötig** (Neubau des Images) – ein Restart reicht nicht.
 | `NEXT_PUBLIC_WAHLKREIS_LABEL` | `Stadtbezirk` | Bezeichnung der Gebietseinheit (Default „Wahlkreis“; hier „Stadtbezirk“) |
 | `NEXT_PUBLIC_WAHLKREIS_LABEL_PLURAL` | `Stadtbezirke` | |
 | `NEXT_PUBLIC_WAHLKREIS_LABEL_SHORT` | `Stadtbezirk` | |
+| `NEXT_PUBLIC_THEME` | `emerald` | Visuelles Theme: `brutalist` (Default) oder `emerald` (Design der OBM-Kampagne 2027) – Farben, Schrift, Formen, Logo/Wortmarke, Karten-Marker und E-Mails |
 | `ALLOWED_EMBED_DOMAIN` | `https://www.<kreisverband>.de` | Domain, die das Anmeldeformular per `<iframe>` einbinden darf; leer = keine Einbindung |
 
 Das Dockerfile reicht genau diese Variablen in den Build durch. Kommt eine neue
@@ -321,6 +322,7 @@ NEXT_PUBLIC_MAP_ZOOM=12
 NEXT_PUBLIC_WAHLKREIS_LABEL=Stadtbezirk
 NEXT_PUBLIC_WAHLKREIS_LABEL_PLURAL=Stadtbezirke
 NEXT_PUBLIC_WAHLKREIS_LABEL_SHORT=Stadtbezirk
+NEXT_PUBLIC_THEME=emerald
 # ALLOWED_EMBED_DOMAIN=https://gruene-leipzig.de   (nur falls Formulare eingebettet werden)
 
 # ── Kreisverbands-Konfiguration: Runtime ──

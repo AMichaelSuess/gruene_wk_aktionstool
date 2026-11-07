@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { MAP_CENTER, MAP_ZOOM } from "@/lib/map-config";
+import { theme } from "@/lib/theme";
 import { WAHLKREIS_LABEL_SHORT } from "@/lib/wahlkreis-label";
 
 // Fix default marker icons
@@ -19,7 +20,22 @@ const DefaultIcon = L.icon({
   popupAnchor: [1, -34],
   shadowSize: [41, 41],
 });
-L.Marker.prototype.options.icon = DefaultIcon;
+
+// Marker in den Theme-Farben, falls das Theme welche vorgibt
+function themedIcon(colors: NonNullable<typeof theme.mapMarker>) {
+  return L.divIcon({
+    className: "",
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="40" viewBox="0 0 28 40" aria-hidden="true">
+      <path d="M14 1C6.8 1 1 6.8 1 14c0 9.6 13 25 13 25s13-15.4 13-25C27 6.8 21.2 1 14 1z" fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
+      <circle cx="14" cy="14" r="5" fill="${colors.dot}"/>
+    </svg>`,
+    iconSize: [28, 40],
+    iconAnchor: [14, 40],
+    popupAnchor: [0, -36],
+  });
+}
+
+L.Marker.prototype.options.icon = theme.mapMarker ? themedIcon(theme.mapMarker) : DefaultIcon;
 
 interface AktionMapProps {
   aktionen: {
@@ -80,7 +96,7 @@ export default function AktionMap({ aktionen, onSelect }: AktionMapProps) {
           >
             <Popup>
               <div className="min-w-[200px]">
-                <h3 className="font-bold text-tanne mb-1">{aktion.titel}</h3>
+                <h3 className="font-bold text-primary mb-1">{aktion.titel}</h3>
                 <p className="text-sm text-gray-600">
                   📅 {format(new Date(aktion.datum), "d. MMMM yyyy", { locale: de })}
                 </p>
@@ -97,7 +113,7 @@ export default function AktionMap({ aktionen, onSelect }: AktionMapProps) {
                 </p>
                 <button
                   onClick={() => onSelect(aktion.id)}
-                  className="mt-2 text-sm bg-tanne text-white px-3 py-1 rounded font-bold hover:bg-tanne-light"
+                  className="mt-2 text-sm bg-primary text-white px-3 py-1 rounded-button font-bold hover:bg-primary-hover"
                 >
                   Anmelden
                 </button>

@@ -33,16 +33,16 @@ export default function AktionCard({ aktion, selected, onToggle }: AktionCardPro
 
   return (
     <div
-      className={`bg-white border-2 transition-all cursor-pointer ${
+      className={`bg-white rounded-card border-ui transition-all cursor-pointer ${
         selected
-          ? "border-tanne shadow-[4px_4px_0_#005538]"
-          : "border-black shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px]"
+          ? "border-primary shadow-ui-selected"
+          : "border-line shadow-ui hover:shadow-ui-sm hover:press-sm"
       } ${isFull ? "opacity-60 cursor-not-allowed" : ""}`}
       onClick={() => !isFull && onToggle(aktion.id)}
     >
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-3">
-          <h3 className="font-headline font-bold text-tanne text-xl leading-tight uppercase tracking-wide">
+          <h3 className="font-headline font-bold text-primary text-xl leading-tight case-ui tracking-ui">
             {aktion.titel}
           </h3>
           <div className="flex items-center gap-2 shrink-0">
@@ -54,10 +54,10 @@ export default function AktionCard({ aktion, selected, onToggle }: AktionCardPro
             )}
             {/* Square brutalist checkbox */}
             <div
-              className={`w-6 h-6 border-2 flex items-center justify-center shrink-0 transition-colors ${
+              className={`w-6 h-6 border-ui flex items-center justify-center shrink-0 transition-colors ${
                 selected
-                  ? "bg-tanne border-tanne"
-                  : "bg-white border-black"
+                  ? "bg-primary border-primary"
+                  : "bg-white border-line-strong"
               } ${isFull ? "opacity-50" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -82,7 +82,7 @@ export default function AktionCard({ aktion, selected, onToggle }: AktionCardPro
           </div>
         </div>
 
-        <div className="space-y-1 text-base text-black">
+        <div className="space-y-1 text-base text-ink">
           <p>
             📅{" "}
             <span className="font-bold">
@@ -97,7 +97,7 @@ export default function AktionCard({ aktion, selected, onToggle }: AktionCardPro
             </span>
           </div>
           <div className="pt-2 border-t border-gray-200 flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wide bg-black text-white px-2 py-0.5 inline-block">
+            <span className="text-xs font-bold case-ui tracking-ui rounded-badge bg-ink text-white px-2 py-0.5 inline-block">
               {WAHLKREIS_LABEL_SHORT} {aktion.wahlkreis.nummer}: {aktion.wahlkreis.name}
             </span>
             {aktion.kategorie && (

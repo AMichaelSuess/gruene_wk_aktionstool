@@ -15,21 +15,21 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       <div className="w-full">
         {label && (
           <label htmlFor={inputId} className="flex items-baseline gap-2 mb-1">
-            <span className="text-sm font-bold uppercase tracking-wide text-black whitespace-nowrap">{label}</span>
+            <span className="text-sm font-bold case-ui tracking-ui text-ink whitespace-nowrap">{label}</span>
             {hint && <span className="text-xs text-gray-500 font-normal normal-case tracking-normal whitespace-nowrap">{hint}</span>}
           </label>
         )}
         <input
           ref={ref}
           id={inputId}
-          className={`w-full px-3 py-2 border-2 bg-white transition-shadow focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black placeholder:text-gray-400 ${
+          className={`w-full px-3 py-2 rounded-control border-ui bg-white transition-shadow focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus placeholder:text-gray-400 ${
             error
-              ? "border-signal"
-              : "border-black"
+              ? "border-danger"
+              : "border-line-strong"
           } ${className}`}
           {...props}
         />
-        {error && <p className="mt-1 text-sm font-bold text-signal">{error}</p>}
+        {error && <p className="mt-1 text-sm font-bold text-danger">{error}</p>}
       </div>
     );
   }

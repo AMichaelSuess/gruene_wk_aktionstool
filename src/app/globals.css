@@ -1,15 +1,45 @@
 @import "tailwindcss";
 
+/*
+ * Theming
+ *
+ * Components only use semantic tokens (bg-primary, border-line, shadow-ui,
+ * rounded-card, case-ui, ...). Their values come from the --t-* variables
+ * below, which each theme defines. The active theme is selected at build
+ * time via NEXT_PUBLIC_THEME and set as data-theme on <html> (see
+ * src/lib/theme.ts). Email templates cannot use CSS variables; their colors
+ * live in the same theme module.
+ */
+
 @theme inline {
-  --color-tanne: #005538;
-  --color-tanne-light: #006644;
-  --color-klee: #008939;
-  --color-grashalm: #8ABD24;
-  --color-sonne: #FFF17A;
-  --color-sand: #F5F1E9;
-  --color-sand-dark: #E8E2D6;
-  --color-himmel: #0BA1DD;
-  --color-signal: #E6007E;
+  /* Brand */
+  --color-primary: var(--t-primary);             /* CTA, active states, headings */
+  --color-primary-hover: var(--t-primary-hover);
+  --color-chrome: var(--t-chrome);               /* header/footer background */
+  --color-accent: var(--t-accent);               /* highlight text on chrome */
+  --color-cta: var(--t-cta);                     /* main call to action */
+  --color-cta-ink: var(--t-cta-ink);
+  --color-cta-hover: var(--t-cta-hover);
+  --color-bar: var(--t-bar);                     /* sticky selection bar */
+  --color-bar-ink: var(--t-bar-ink);
+
+  /* Ink and lines */
+  --color-ink: var(--t-ink);                     /* body text, dark fills */
+  --color-line: var(--t-line);                   /* container borders */
+  --color-line-strong: var(--t-line-strong);     /* form control borders */
+  --color-focus: var(--t-focus);
+  --color-canvas: var(--t-canvas);               /* page background */
+  --color-muted: var(--t-muted);                 /* table headers, subtle fills */
+
+  /* Semantic accents */
+  --color-warning: var(--t-warning);
+  --color-danger: var(--t-danger);
+  --color-info: var(--t-info);
+  --color-success: var(--t-success);
+  --color-highlight: var(--t-highlight);
+  --color-highlight-ink: var(--t-highlight-ink);
+
+  /* Neutrals (shared by all themes) */
   --color-white: #FFFFFF;
   --color-gray-100: #F7F7F7;
   --color-gray-200: #E5E5E5;
@@ -27,12 +57,194 @@
   --color-green-50: #F0FDF4;
   --color-green-100: #DCFCE7;
   --color-green-600: #16A34A;
-  --color-background: #ffffff;
-  --color-foreground: #000000;
-  --font-sans: "DM Sans", Arial, Helvetica, sans-serif;
-  --font-headline: "GrueneType Neue", "Barlow Condensed", "Arial Narrow", sans-serif;
+  --color-background: var(--t-canvas);
+  --color-foreground: var(--t-ink);
+
+  /* Typography */
+  --font-sans: var(--t-font-sans);
+  --font-headline: var(--t-font-headline);
+  --tracking-ui: var(--t-tracking);
+
+  /* Shape */
+  --radius-card: var(--t-radius-card);
+  --radius-control: var(--t-radius-control);
+  --radius-button: var(--t-radius-button);
+  --radius-badge: var(--t-radius-badge);
+
+  /* Elevation */
+  --shadow-ui-sm: var(--t-shadow-sm);
+  --shadow-ui: var(--t-shadow);
+  --shadow-ui-lg: var(--t-shadow-lg);
+  --shadow-ui-xl: var(--t-shadow-xl);
+  --shadow-ui-brand-sm: var(--t-shadow-brand-sm);
+  --shadow-ui-brand: var(--t-shadow-brand);
+  --shadow-ui-brand-lg: var(--t-shadow-brand-lg);
+  --shadow-ui-up: var(--t-shadow-up);
+  --shadow-ui-warning: var(--t-shadow-warning);
+  --shadow-ui-selected: var(--t-shadow-selected); /* selected, clickable card */
 }
 
+/* ── Theme: brutalist (default) — Soft Brutalism × Grüne CI ───────── */
+:root {
+  --t-primary: #005538;
+  --t-primary-hover: #006644;
+  --t-chrome: #005538;
+  --t-accent: #FFF17A;
+  --t-cta: #005538;
+  --t-cta-ink: #FFFFFF;
+  --t-cta-hover: #006644;
+  --t-bar: #FFFFFF;
+  --t-bar-ink: #000000;
+
+  --t-ink: #000000;
+  --t-line: #000000;
+  --t-line-strong: #000000;
+  --t-focus: #000000;
+  --t-focus-offset: 0;
+  --t-canvas: #FFFFFF;
+  --t-muted: #F5F1E9;
+
+  --t-warning: #FFF17A;
+  --t-danger: #E6007E;
+  --t-info: #0BA1DD;
+  --t-success: #008939;
+  --t-highlight: #8ABD24;
+  --t-highlight-ink: #FFFFFF;
+
+  --t-font-sans: "DM Sans", Arial, Helvetica, sans-serif;
+  --t-font-headline: "GrueneType Neue", "Barlow Condensed", "Arial Narrow", sans-serif;
+  --t-headline-stretch: normal;
+  --t-case: uppercase;
+  --t-tracking: 0.025em;
+  --t-heading-tracking: 0.02em;
+
+  --t-border: 2px;
+  --t-border-thick: 3px;
+  --t-border-badge: 1px;
+  --t-radius-card: 0;
+  --t-radius-control: 0;
+  --t-radius-button: 0;
+  --t-radius-badge: 0;
+
+  --t-shadow-sm: 2px 2px 0 #000;
+  --t-shadow: 4px 4px 0 #000;
+  --t-shadow-lg: 6px 6px 0 #000;
+  --t-shadow-xl: 8px 8px 0 #000;
+  --t-shadow-brand-sm: 2px 2px 0 #005538;
+  --t-shadow-brand: 4px 4px 0 #005538;
+  --t-shadow-brand-lg: 6px 6px 0 #005538;
+  --t-shadow-up: 0 -4px 0 #000;
+  --t-shadow-warning: 3px 3px 0 #ca8a04;
+  --t-shadow-selected: 4px 4px 0 #005538;
+
+  /* Hover/active "press" offset for elements with hard shadows */
+  --t-press-sm: 2px;
+  --t-press: 4px;
+}
+
+/* ── Theme: emerald — Leipzig OBM-Kampagne 2027 ───────────────────── */
+:root[data-theme="emerald"] {
+  --t-primary: #014348;        /* Emerald */
+  --t-primary-hover: #015457;  /* Emerald, hellere Abstufung */
+  --t-chrome: #002E33;         /* Emerald, dunklere Abstufung: Website-Menü */
+  --t-accent: #D4DD74;         /* Gelbgrün */
+  --t-cta: #F1CDE0;            /* Rosa */
+  --t-cta-ink: #002E33;
+  --t-cta-hover: #E8B6D0;
+  --t-bar: #002E33;            /* dark bar so the pink CTA stands out */
+  --t-bar-ink: #FFFFFF;
+
+  --t-ink: #002E33;
+  --t-line: #C9D7D6;
+  --t-line-strong: #5C7A7C;    /* ≥ 3:1 against white for form controls */
+  --t-focus: #014348;
+  --t-focus-offset: 2px;
+  --t-canvas: #F5F8F7;
+  --t-muted: #E8F0EF;
+
+  --t-warning: #D4DD74;
+  --t-danger: #B4004E;
+  --t-info: #00677F;
+  --t-success: #015457;
+  --t-highlight: #D4DD74;
+  --t-highlight-ink: #002E33;
+
+  --t-font-sans: "Archivo", Arial, Helvetica, sans-serif;
+  --t-font-headline: "Archivo", "Arial Black", Arial, sans-serif;
+  --t-headline-stretch: 125%;
+  --t-case: none;
+  --t-tracking: 0;
+  --t-heading-tracking: 0;
+
+  --t-border: 1px;
+  --t-border-thick: 0;
+  --t-border-badge: 0;
+  --t-radius-card: 1rem;
+  --t-radius-control: 0.5rem;
+  --t-radius-button: 9999px;
+  --t-radius-badge: 9999px;
+
+  --t-shadow-sm: 0 1px 2px rgb(0 46 51 / 0.08), 0 1px 3px rgb(0 46 51 / 0.08);
+  --t-shadow: 0 1px 3px rgb(0 46 51 / 0.08), 0 4px 12px rgb(0 46 51 / 0.08);
+  --t-shadow-lg: 0 2px 6px rgb(0 46 51 / 0.08), 0 12px 28px rgb(0 46 51 / 0.10);
+  --t-shadow-xl: 0 4px 12px rgb(0 46 51 / 0.10), 0 24px 48px rgb(0 46 51 / 0.18);
+  --t-shadow-brand-sm: 0 1px 2px rgb(0 46 51 / 0.08), 0 1px 3px rgb(0 46 51 / 0.08);
+  --t-shadow-brand: 0 1px 3px rgb(0 46 51 / 0.08), 0 4px 12px rgb(0 46 51 / 0.08);
+  --t-shadow-brand-lg: 0 2px 6px rgb(0 46 51 / 0.08), 0 12px 28px rgb(0 46 51 / 0.10);
+  --t-shadow-up: 0 -4px 16px rgb(0 46 51 / 0.12);
+  --t-shadow-warning: 0 1px 3px rgb(0 46 51 / 0.08);
+  /* 1px border + 2px ring = clear 3px outline for selected cards */
+  --t-shadow-selected: 0 0 0 2px #014348, 0 4px 12px rgb(0 46 51 / 0.12);
+
+  --t-press-sm: 0;
+  --t-press: 0;
+}
+
+/* ── Theme utilities ──────────────────────────────────────────────── */
+@utility case-ui {
+  text-transform: var(--t-case);
+}
+@utility border-ui {
+  border-width: var(--t-border);
+}
+@utility border-t-ui {
+  border-top-width: var(--t-border);
+}
+@utility border-b-ui {
+  border-bottom-width: var(--t-border);
+}
+@utility border-l-ui {
+  border-left-width: var(--t-border);
+}
+@utility border-r-ui {
+  border-right-width: var(--t-border);
+}
+@utility border-t-ui-thick {
+  border-top-width: var(--t-border-thick);
+}
+@utility border-b-ui-thick {
+  border-bottom-width: var(--t-border-thick);
+}
+@utility border-badge {
+  border-width: var(--t-border-badge);
+}
+@utility divide-y-ui {
+  & > :not(:last-child) {
+    border-top-width: 0;
+    border-bottom-width: var(--t-border);
+  }
+}
+@utility press-sm {
+  translate: var(--t-press-sm) var(--t-press-sm);
+}
+@utility press {
+  translate: var(--t-press) var(--t-press);
+}
+@utility press-none {
+  translate: none;
+}
+
+/* ── Fonts ────────────────────────────────────────────────────────── */
 @font-face {
   font-family: "GrueneType Neue";
   font-style: normal;
@@ -58,9 +270,37 @@
   src: url("/fonts/DMSans-Bold.woff2") format("woff2");
 }
 
+/* Archivo (SIL OFL 1.1, see /fonts/Archivo-OFL.txt), variable in weight
+   and width — stand-in for the campaign typeface "Obviously". Browsers
+   only download it when a theme uses it. */
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("/fonts/Archivo-Variable-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("/fonts/Archivo-Variable-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────── */
 body {
-  background: #ffffff;
-  color: #000000;
+  background: var(--t-canvas);
+  color: var(--t-ink);
   font-family: var(--font-sans);
   line-height: 1.6;
   padding-bottom: env(safe-area-inset-bottom);
@@ -69,14 +309,23 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-headline);
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  text-transform: var(--t-case);
+  letter-spacing: var(--t-heading-tracking);
 }
 
-/* Focus style — Soft Brutalist: hard black outline, no color ring */
+:where(h1, h2, h3, h4, h5, h6, .font-headline) {
+  font-stretch: var(--t-headline-stretch);
+}
+
+/* Campaign design: H1 in the black cut, H2 bold */
+:root[data-theme="emerald"] h1 {
+  font-weight: 900;
+}
+
+/* Focus style — hard outline in the theme's focus color */
 *:focus-visible {
-  outline: 3px solid #000000;
-  outline-offset: 0;
+  outline: 3px solid var(--t-focus);
+  outline-offset: var(--t-focus-offset);
 }
 
 /* Leaflet fixes */
@@ -84,4 +333,8 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
   height: 100%;
   z-index: 0;
+}
+
+:root[data-theme="emerald"] .leaflet-popup-content-wrapper {
+  border-radius: var(--t-radius-control);
 }

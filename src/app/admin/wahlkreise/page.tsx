@@ -31,30 +31,30 @@ export default function WahlkreisePage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-headline text-2xl font-bold text-tanne uppercase">{WAHLKREIS_LABEL_PLURAL}</h1>
+        <h1 className="font-headline text-2xl font-bold text-primary case-ui">{WAHLKREIS_LABEL_PLURAL}</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {wahlkreise.map((wk) => (
           <div
             key={wk.id}
-            className="bg-white border-2 border-black p-4 shadow-[4px_4px_0_#000]"
+            className="bg-white rounded-card border-ui border-line p-4 shadow-ui"
           >
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="font-headline font-bold text-tanne text-lg uppercase tracking-wide">
+                <h3 className="font-headline font-bold text-primary text-lg case-ui tracking-ui">
                   {WAHLKREIS_LABEL} {wk.nummer}
                 </h3>
                 <p className="text-sm text-gray-700 mt-1">{wk.name}</p>
               </div>
               <Link
                 href={`/admin/wahlkreise/${wk.id}`}
-                className="text-sm text-tanne font-bold hover:underline"
+                className="text-sm text-primary font-bold hover:underline"
               >
                 Bearbeiten
               </Link>
             </div>
-            <div className="flex gap-4 mt-3 text-sm text-gray-700 border-t-2 border-black pt-3">
+            <div className="flex gap-4 mt-3 text-sm text-gray-700 border-t-ui border-line pt-3">
               <span>👥 {wk._count.teams} Teams</span>
               <span>📋 {wk._count.aktionen} Aktionen</span>
             </div>

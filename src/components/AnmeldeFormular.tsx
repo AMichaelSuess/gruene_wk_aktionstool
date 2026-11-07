@@ -177,8 +177,8 @@ export default function AnmeldeFormular({
         </div>
 
         {!contactError && (
-          <p className="text-sm font-bold text-himmel mt-1">
-            Bitte gib mindestens eine Telefonnummer <span className="uppercase font-black">ODER</span> einen Signal-Nutzernamen an.
+          <p className="text-sm font-bold text-info mt-1">
+            Bitte gib mindestens eine Telefonnummer <span className="case-ui font-black">ODER</span> einen Signal-Nutzernamen an.
           </p>
         )}
 
@@ -218,8 +218,8 @@ export default function AnmeldeFormular({
             />
             <label
               htmlFor="datenschutz-page"
-              className={`w-5 h-5 border-2 border-black flex items-center justify-center cursor-pointer transition-colors ${
-                form.datenschutz ? "bg-tanne" : "bg-white"
+              className={`w-5 h-5 border-ui border-line-strong flex items-center justify-center cursor-pointer transition-colors ${
+                form.datenschutz ? "bg-primary" : "bg-white"
               }`}
             >
               {form.datenschutz && (
@@ -236,18 +236,18 @@ export default function AnmeldeFormular({
               <Link
                 href="/datenschutz"
                 target="_blank"
-                className="text-tanne font-bold hover:underline"
+                className="text-primary font-bold hover:underline"
               >
                 Datenschutzerklärung
               </Link>
             </label>
             <p className="text-xs text-gray-400 mt-0.5">Pflichtfeld</p>
-            {datenschutzError && <p className="mt-1 text-sm font-bold text-signal">{datenschutzError}</p>}
+            {datenschutzError && <p className="mt-1 text-sm font-bold text-danger">{datenschutzError}</p>}
           </div>
         </div>
 
         {error && (
-          <div className="bg-white border-2 border-signal text-black p-3 text-sm font-bold">
+          <div className="bg-white rounded-control border-ui border-danger text-ink p-3 text-sm font-bold">
             {error}
           </div>
         )}

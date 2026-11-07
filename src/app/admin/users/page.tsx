@@ -48,7 +48,7 @@ export default function UsersPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-headline text-2xl font-bold text-tanne uppercase">
+        <h1 className="font-headline text-2xl font-bold text-primary case-ui">
           Benutzer*innen
         </h1>
         <Link href="/admin/users/neu">
@@ -56,21 +56,21 @@ export default function UsersPage() {
         </Link>
       </div>
 
-      <div className="border-2 border-black overflow-hidden shadow-[4px_4px_0_#000]">
+      <div className="rounded-card border-ui border-line overflow-hidden shadow-ui">
         <table className="w-full">
-          <thead className="bg-sand border-b-2 border-black">
+          <thead className="bg-muted border-b-ui border-line">
             <tr>
-              <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Name</th>
-              <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">E-Mail</th>
-              <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Rolle</th>
-              <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Teams</th>
-              <th className="text-left px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Status</th>
-              <th className="text-right px-4 py-3 text-sm font-bold text-black uppercase tracking-wide">Aktionen</th>
+              <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Name</th>
+              <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">E-Mail</th>
+              <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Rolle</th>
+              <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Teams</th>
+              <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Status</th>
+              <th className="text-right px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Aktionen</th>
             </tr>
           </thead>
-          <tbody className="divide-y-2 divide-black">
+          <tbody className="divide-y-ui divide-line">
             {users.map((user) => (
-              <tr key={user.id} className="hover:bg-sand/50 bg-white">
+              <tr key={user.id} className="hover:bg-muted/50 bg-white">
                 <td className="px-4 py-3 font-medium">{user.name}</td>
                 <td className="px-4 py-3 text-gray-700">{user.email}</td>
                 <td className="px-4 py-3">
@@ -89,7 +89,7 @@ export default function UsersPage() {
                 <td className="px-4 py-3 text-right flex gap-3 justify-end">
                   <Link
                     href={`/admin/users/${user.id}`}
-                    className="text-sm text-tanne font-bold hover:underline"
+                    className="text-sm text-primary font-bold hover:underline"
                   >
                     Bearbeiten
                   </Link>

@@ -47,7 +47,7 @@ export default function EmbedAktionPage() {
 
   if (!aktionTitle) {
     return (
-      <div className="p-4 text-center text-red-600 font-bold uppercase text-sm">
+      <div className="p-4 text-center text-red-600 font-bold case-ui text-sm">
         Aktion nicht gefunden
       </div>
     );
@@ -55,8 +55,8 @@ export default function EmbedAktionPage() {
 
   if (success) {
     return (
-      <div className="p-6 bg-tanne text-white border-2 border-black shadow-[4px_4px_0_#000]">
-        <h2 className="font-headline text-xl font-bold uppercase mb-2">
+      <div className="p-6 rounded-card bg-primary text-white border-ui border-line shadow-ui">
+        <h2 className="font-headline text-xl font-bold case-ui mb-2">
           Anmeldung erfolgreich!
         </h2>
         <p>Vielen Dank für deine Anmeldung. Du erhältst in Kürze eine Bestätigungs-E-Mail.</p>
@@ -66,8 +66,8 @@ export default function EmbedAktionPage() {
 
   if (bereitsAngemeldet) {
     return (
-      <div className="p-6 bg-white border-2 border-black shadow-[4px_4px_0_#000]">
-        <h2 className="font-headline text-xl font-bold uppercase mb-2">
+      <div className="p-6 rounded-card bg-white border-ui border-line shadow-ui">
+        <h2 className="font-headline text-xl font-bold case-ui mb-2">
           Bereits angemeldet
         </h2>
         <p>Du bist für diese Aktion bereits registriert.</p>
@@ -79,10 +79,10 @@ export default function EmbedAktionPage() {
 
   return (
     <div className="p-4">
-      <h2 className="font-headline text-xl md:text-2xl font-bold uppercase text-tanne mb-4">
+      <h2 className="font-headline text-xl md:text-2xl font-bold case-ui text-primary mb-4">
         Anmeldung
         <br />
-        <span className="text-black text-lg font-normal">{aktionTitle}</span>
+        <span className="text-ink text-lg font-normal">{aktionTitle}</span>
       </h2>
 
       <AnmeldeFormular

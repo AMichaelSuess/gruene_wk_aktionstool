@@ -54,7 +54,7 @@ export default function AdminPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="font-headline text-2xl font-bold text-tanne uppercase mb-3">
+        <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-3">
           Gesamtübersicht
         </h1>
         <div className="flex flex-wrap gap-2">
@@ -94,13 +94,13 @@ export default function AdminPage() {
           <div className="space-y-3">
             {anmeldungenByWahlkreis.map((item) => (
               <div key={item.nummer} className="flex items-center gap-3">
-                <span className="text-sm font-bold text-tanne w-6">
+                <span className="text-sm font-bold text-primary w-6">
                   {item.nummer}
                 </span>
                 <span className="text-sm text-gray-600 w-40">{item.wahlkreis}</span>
                 <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                   <div
-                    className="bg-klee h-full rounded-full flex items-center justify-end px-2"
+                    className="bg-success h-full rounded-full flex items-center justify-end px-2"
                     style={{
                       width: `${Math.max(
                         (item.count / maxAnmeldungenWK) * 100,
@@ -128,7 +128,7 @@ export default function AdminPage() {
                 </span>
                 <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                   <div
-                    className="bg-grashalm h-full rounded-full flex items-center justify-end px-2"
+                    className="bg-highlight h-full rounded-full flex items-center justify-end px-2"
                     style={{
                       width: `${Math.max(
                         (item.count / maxStaendeTeam) * 100,
@@ -136,7 +136,7 @@ export default function AdminPage() {
                       )}%`,
                     }}
                   >
-                    <span className="text-xs text-white font-bold">{item.count}</span>
+                    <span className="text-xs text-highlight-ink font-bold">{item.count}</span>
                   </div>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export default function AdminPage() {
                 </span>
                 <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                   <div
-                    className="bg-himmel h-full rounded-full flex items-center justify-end px-2"
+                    className="bg-info h-full rounded-full flex items-center justify-end px-2"
                     style={{
                       width: `${Math.max(
                         (item.count / maxAnmeldungenTeam) * 100,
@@ -185,12 +185,12 @@ export default function AdminPage() {
                   key={`${item.year}-${item.kw}`}
                   className="flex items-center gap-3"
                 >
-                  <span className="text-sm font-bold text-tanne w-16 shrink-0">
+                  <span className="text-sm font-bold text-primary w-16 shrink-0">
                     KW {String(item.kw).padStart(2, "0")}
                   </span>
                   <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                     <div
-                      className="bg-tanne h-full rounded-full flex items-center justify-end px-2"
+                      className="bg-primary h-full rounded-full flex items-center justify-end px-2"
                       style={{
                         width: `${Math.max(
                           (item.staende / maxStaendeKW) * 100,
@@ -222,12 +222,12 @@ export default function AdminPage() {
                   key={`${item.year}-${item.kw}`}
                   className="flex items-center gap-3"
                 >
-                  <span className="text-sm font-bold text-tanne w-16 shrink-0">
+                  <span className="text-sm font-bold text-primary w-16 shrink-0">
                     KW {String(item.kw).padStart(2, "0")}
                   </span>
                   <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                     <div
-                      className="bg-klee h-full rounded-full flex items-center justify-end px-2"
+                      className="bg-success h-full rounded-full flex items-center justify-end px-2"
                       style={{
                         width: `${Math.max(
                           (item.anmeldungen / maxAnmeldungenKW) * 100,
@@ -256,7 +256,7 @@ function StatCard({ label, value, icon }: { label: string; value: number; icon: 
       <div className="flex items-center gap-3">
         <span className="text-3xl">{icon}</span>
         <div>
-          <p className="text-2xl font-bold text-tanne">{value}</p>
+          <p className="text-2xl font-bold text-primary">{value}</p>
           <p className="text-sm text-gray-500">{label}</p>
         </div>
       </div>

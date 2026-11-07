@@ -59,12 +59,12 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
     (filters.kategorien.length > 0 ? 1 : 0);
 
   return (
-    <div className="bg-white border-b-2 border-black sticky top-[52px] z-40">
+    <div className="bg-white border-b-ui border-line sticky top-[52px] z-40">
       <div className="max-w-7xl mx-auto px-4">
         {/* Toggle button: visible on mobile and tablet (< lg) */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="lg:hidden w-full py-3 flex items-center justify-between text-sm font-bold uppercase tracking-wide text-black focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black"
+          className="lg:hidden w-full py-3 flex items-center justify-between text-sm font-bold case-ui tracking-ui text-ink focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
         >
           <span>
             Filter {activeFilterCount > 0 ? `(${activeFilterCount})` : ""}
@@ -82,25 +82,25 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 lg:flex-nowrap">
             {/* Datum */}
             <div className="flex items-center gap-2">
-              <label className="text-xs font-bold uppercase tracking-wide text-black shrink-0">Datum:</label>
+              <label className="text-xs font-bold case-ui tracking-ui text-ink shrink-0">Datum:</label>
               <input
                 type="date"
                 value={filters.datum}
                 onChange={(e) => onFilterChange({ ...filters, datum: e.target.value })}
-                className="text-sm border-2 border-black bg-white px-2 py-1 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black"
+                className="text-sm rounded-control border-ui border-line-strong bg-white px-2 py-1 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
               />
-              <span className="text-black font-bold">–</span>
+              <span className="text-ink font-bold">–</span>
               <input
                 type="date"
                 value={filters.datumBis}
                 onChange={(e) => onFilterChange({ ...filters, datumBis: e.target.value })}
-                className="text-sm border-2 border-black bg-white px-2 py-1 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black"
+                className="text-sm rounded-control border-ui border-line-strong bg-white px-2 py-1 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
               />
             </div>
 
             {/* Tageszeit */}
             <div className="flex items-center gap-2 flex-wrap">
-              <label className="text-xs font-bold uppercase tracking-wide text-black shrink-0">Tageszeit:</label>
+              <label className="text-xs font-bold case-ui tracking-ui text-ink shrink-0">Tageszeit:</label>
               <div className="flex gap-1 flex-wrap">
                 {TAGESZEITEN.map((tz) => (
                   <button
@@ -110,11 +110,11 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
                         ? onFilterChange({ ...filters, tageszeit: [] })
                         : toggleTageszeit(tz.value)
                     }
-                    className={`text-xs px-2 py-1 font-bold uppercase tracking-wide border-2 transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black ${
+                    className={`rounded-button text-xs px-2 py-1 font-bold case-ui tracking-ui border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
                       (tz.value === "" && filters.tageszeit.length === 0) ||
                       (tz.value !== "" && filters.tageszeit.includes(tz.value))
-                        ? "bg-tanne text-white border-black"
-                        : "bg-white text-black border-black hover:bg-black hover:text-white"
+                        ? "bg-primary text-white border-line"
+                        : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
                     }`}
                   >
                     {tz.label}
@@ -136,7 +136,7 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
                     kategorien: [],
                   })
                 }
-                className="text-xs font-bold uppercase tracking-wide text-black underline lg:ml-auto hover:text-tanne focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black hidden lg:block"
+                className="text-xs font-bold case-ui tracking-ui text-ink underline lg:ml-auto hover:text-primary focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus hidden lg:block"
               >
                 Filter zurücksetzen
               </button>
@@ -147,14 +147,14 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
           <div className="flex items-center gap-x-6 gap-y-3 mt-3 flex-wrap">
             {/* Art der Aktion */}
             <div className="flex items-center gap-2 flex-wrap">
-              <label className="text-xs font-bold uppercase tracking-wide text-black shrink-0">Art:</label>
+              <label className="text-xs font-bold case-ui tracking-ui text-ink shrink-0">Art:</label>
               <div className="flex gap-1 flex-wrap">
                 <button
                   onClick={() => onFilterChange({ ...filters, kategorien: [] })}
-                  className={`text-xs px-2 py-1 font-bold uppercase tracking-wide border-2 transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black ${
+                  className={`rounded-button text-xs px-2 py-1 font-bold case-ui tracking-ui border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
                     filters.kategorien.length === 0
-                      ? "bg-tanne text-white border-black"
-                      : "bg-white text-black border-black hover:bg-black hover:text-white"
+                      ? "bg-primary text-white border-line"
+                      : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
                   }`}
                 >
                   Alle
@@ -163,10 +163,10 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
                   <button
                     key={kat.value}
                     onClick={() => toggleKategorie(kat.value)}
-                    className={`text-xs px-2 py-1 font-bold uppercase tracking-wide border-2 transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black ${
+                    className={`rounded-button text-xs px-2 py-1 font-bold case-ui tracking-ui border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
                       filters.kategorien.includes(kat.value)
-                        ? "bg-tanne text-white border-black"
-                        : "bg-white text-black border-black hover:bg-black hover:text-white"
+                        ? "bg-primary text-white border-line"
+                        : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
                     }`}
                   >
                     {kat.label}
@@ -177,17 +177,17 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
 
             {/* Wahlkreise */}
             <div className="flex items-center gap-2 flex-wrap">
-            <label className="text-xs font-bold uppercase tracking-wide text-black shrink-0">{WAHLKREIS_LABEL_SHORT}:</label>
+            <label className="text-xs font-bold case-ui tracking-ui text-ink shrink-0">{WAHLKREIS_LABEL_SHORT}:</label>
             <div className="flex gap-1 flex-wrap">
               {wahlkreise.map((wk) => (
                 <button
                   key={wk.nummer}
                   onClick={() => toggleWahlkreis(wk.nummer)}
                   title={wk.name}
-                  className={`w-7 h-7 text-xs font-bold border-2 transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black ${
+                  className={`rounded-button w-7 h-7 text-xs font-bold border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
                     filters.wahlkreise.includes(wk.nummer)
-                      ? "bg-tanne text-white border-black"
-                      : "bg-white text-black border-black hover:bg-black hover:text-white"
+                      ? "bg-primary text-white border-line"
+                      : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
                   }`}
                 >
                   {wk.nummer}
@@ -208,7 +208,7 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
                     kategorien: [],
                   })
                 }
-                className="text-xs font-bold uppercase tracking-wide text-black underline ml-auto hover:text-tanne focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black lg:hidden"
+                className="text-xs font-bold case-ui tracking-ui text-ink underline ml-auto hover:text-primary focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus lg:hidden"
               >
                 Filter zurücksetzen
               </button>

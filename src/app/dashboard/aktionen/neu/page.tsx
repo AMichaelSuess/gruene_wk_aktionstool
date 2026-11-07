@@ -111,7 +111,7 @@ export default function NewAktionPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="font-headline text-2xl font-bold text-tanne uppercase mb-6">
+      <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-6">
         Neue Aktion
       </h1>
 
@@ -119,20 +119,20 @@ export default function NewAktionPage() {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setTab("manual")}
-          className={`px-4 py-2 font-bold text-sm uppercase tracking-wide border-2 border-black transition-all ${
+          className={`rounded-button px-4 py-2 font-bold text-sm case-ui tracking-ui border-ui border-line transition-all ${
             tab === "manual"
-              ? "bg-tanne text-white shadow-[2px_2px_0_#000]"
-              : "bg-white text-black shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px]"
+              ? "bg-primary text-white shadow-ui-sm"
+              : "bg-white text-ink shadow-ui hover:shadow-ui-sm hover:press-sm"
           }`}
         >
           Manuell anlegen
         </button>
         <button
           onClick={() => setTab("excel")}
-          className={`px-4 py-2 font-bold text-sm uppercase tracking-wide border-2 border-black transition-all ${
+          className={`rounded-button px-4 py-2 font-bold text-sm case-ui tracking-ui border-ui border-line transition-all ${
             tab === "excel"
-              ? "bg-tanne text-white shadow-[2px_2px_0_#000]"
-              : "bg-white text-black shadow-[4px_4px_0_#000] hover:shadow-[2px_2px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px]"
+              ? "bg-primary text-white shadow-ui-sm"
+              : "bg-white text-ink shadow-ui hover:shadow-ui-sm hover:press-sm"
           }`}
         >
           Excel-Import
@@ -217,8 +217,8 @@ export default function NewAktionPage() {
               />
             )}
 
-            <div className="border-t-2 border-black pt-4 mt-4">
-              <h3 className="font-headline font-bold uppercase tracking-wide text-black mb-3">Ansprechperson</h3>
+            <div className="border-t-ui border-line pt-4 mt-4">
+              <h3 className="font-headline font-bold case-ui tracking-ui text-ink mb-3">Ansprechperson</h3>
               <div className="space-y-4">
                 <Input
                   label="Name"
@@ -255,7 +255,7 @@ export default function NewAktionPage() {
             />
 
             {error && (
-              <div className="border-2 border-black bg-red-50 text-red-600 p-3 text-sm shadow-[2px_2px_0_#000]">
+              <div className="rounded-control border-ui border-line bg-red-50 text-red-600 p-3 text-sm shadow-ui-sm">
                 {error}
               </div>
             )}

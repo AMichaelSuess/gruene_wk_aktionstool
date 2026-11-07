@@ -21,6 +21,8 @@ ARG NEXT_PUBLIC_MAP_ZOOM
 ARG NEXT_PUBLIC_WAHLKREIS_LABEL
 ARG NEXT_PUBLIC_WAHLKREIS_LABEL_PLURAL
 ARG NEXT_PUBLIC_WAHLKREIS_LABEL_SHORT
+# Visuelles Theme: "brutalist" (Default) oder "emerald"
+ARG NEXT_PUBLIC_THEME
 # Meta-Beschreibung im Root-Layout, landet in den statisch gerenderten Seiten
 ARG ORG_FULL_NAME
 # Wird von next.config.ts in die Header-Regeln (CSP frame-ancestors) übernommen

@@ -156,7 +156,7 @@ export default function DashboardPage() {
   return (
     <div className={selectedIds.size > 0 ? "pb-40 sm:pb-28" : ""}>
       <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-headline text-2xl font-bold text-tanne uppercase">
+        <h1 className="font-headline text-2xl font-bold text-primary case-ui">
           Meine Aktionen
         </h1>
         <div className="flex flex-wrap items-center gap-2">
@@ -177,9 +177,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-6 mb-8 bg-white border-2 border-black p-4 shadow-[4px_4px_0_#000]">
+      <div className="flex flex-wrap items-center gap-6 mb-8 bg-white rounded-card border-ui border-line p-4 shadow-ui">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-bold uppercase">Zeitraum:</span>
+          <span className="text-sm font-bold case-ui">Zeitraum:</span>
           <Button
             variant={dateFilter === "alle" ? "primary" : "outline"}
             size="sm"
@@ -209,8 +209,8 @@ export default function DashboardPage() {
             Diese Woche
           </Button>
         </div>
-        <div className="flex flex-wrap items-center gap-2 border-l-2 border-gray-300 pl-6">
-          <span className="text-sm font-bold uppercase">Art:</span>
+        <div className="flex flex-wrap items-center gap-2 border-l-ui border-gray-300 pl-6">
+          <span className="text-sm font-bold case-ui">Art:</span>
           <Button
             variant={kategorieFilter.length === 0 ? "primary" : "outline"}
             size="sm"
@@ -229,22 +229,22 @@ export default function DashboardPage() {
             </Button>
           ))}
         </div>
-        <div className="flex flex-wrap items-center gap-4 border-l-2 border-gray-300 pl-6">
-          <label className="flex items-center gap-2 text-sm font-bold uppercase cursor-pointer">
+        <div className="flex flex-wrap items-center gap-4 border-l-ui border-gray-300 pl-6">
+          <label className="flex items-center gap-2 text-sm font-bold case-ui cursor-pointer">
             <input
               type="checkbox"
               checked={activeOnly}
               onChange={(e) => setActiveOnly(e.target.checked)}
-              className="w-4 h-4 accent-tanne cursor-pointer"
+              className="w-4 h-4 accent-primary cursor-pointer"
             />
             Nur Aktive (Aktiv & Geändert)
           </label>
-          <label className="flex items-center gap-2 text-sm font-bold uppercase cursor-pointer">
+          <label className="flex items-center gap-2 text-sm font-bold case-ui cursor-pointer">
             <input
               type="checkbox"
               checked={hidePast}
               onChange={(e) => setHidePast(e.target.checked)}
-              className="w-4 h-4 accent-tanne cursor-pointer"
+              className="w-4 h-4 accent-primary cursor-pointer"
             />
             Vergangene ausblenden (älter als 1 Tag)
           </label>
@@ -252,30 +252,30 @@ export default function DashboardPage() {
       </div>
 
       {filteredAktionen.length === 0 ? (
-        <div className="bg-white border-2 border-black shadow-[4px_4px_0_#000] p-8 text-center text-gray-500">
+        <div className="bg-white rounded-card border-ui border-line shadow-ui p-8 text-center text-gray-500">
           <p>Keine Aktionen für diese Filter gefunden.</p>
           {aktionen.length === 0 && (
-            <Link href="/dashboard/aktionen/neu" className="text-tanne font-bold hover:underline mt-2 inline-block">
+            <Link href="/dashboard/aktionen/neu" className="text-primary font-bold hover:underline mt-2 inline-block">
               Erste Aktion anlegen
             </Link>
           )}
         </div>
       ) : (
         <div className="space-y-3">
-          <label className="flex items-center gap-2 text-sm font-bold uppercase cursor-pointer">
+          <label className="flex items-center gap-2 text-sm font-bold case-ui cursor-pointer">
             <input
               type="checkbox"
               checked={allVisibleSelected}
               onChange={toggleSelectAll}
-              className="w-4 h-4 accent-tanne cursor-pointer"
+              className="w-4 h-4 accent-primary cursor-pointer"
             />
             Alle auswählen
           </label>
           {filteredAktionen.map((aktion) => (
             <div
               key={aktion.id}
-              className={`bg-white border-2 shadow-[4px_4px_0_#000] p-4 ${
-                selectedIds.has(aktion.id) ? "border-tanne" : "border-black"
+              className={`bg-white rounded-card border-ui shadow-ui p-4 ${
+                selectedIds.has(aktion.id) ? "border-primary" : "border-line"
               }`}
             >
               <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
@@ -285,24 +285,24 @@ export default function DashboardPage() {
                     checked={selectedIds.has(aktion.id)}
                     onChange={() => toggleSelection(aktion.id)}
                     aria-label={`${aktion.titel} auswählen`}
-                    className="w-4 h-4 mt-1 accent-tanne cursor-pointer shrink-0"
+                    className="w-4 h-4 mt-1 accent-primary cursor-pointer shrink-0"
                   />
                 <div className="flex-1">
                   <div className="flex items-center flex-wrap gap-2 mb-1">
-                    <h3 className="font-headline font-bold text-tanne uppercase tracking-wide">{aktion.titel}</h3>
+                    <h3 className="font-headline font-bold text-primary case-ui tracking-ui">{aktion.titel}</h3>
                     <StatusBadge status={aktion.status} />
                     {aktion.kategorie && (
                       <Badge variant="info">{kategorieLabel(aktion.kategorie)}</Badge>
                     )}
                   </div>
-                  <div className="text-sm text-black space-y-0.5">
+                  <div className="text-sm text-ink space-y-0.5">
                     <p>
                       📅 {format(new Date(aktion.datum), "EEEE, d. MMMM yyyy", { locale: de })} · {aktion.startzeit} – {aktion.endzeit}
                     </p>
                     <p>📍 {aktion.adresse}</p>
                     {aktion.team && (
                       <p>
-                        <span className="text-xs font-bold uppercase tracking-wide bg-black text-white px-2 py-0.5 inline-block mt-1">
+                        <span className="text-xs font-bold case-ui tracking-ui rounded-badge bg-ink text-white px-2 py-0.5 inline-block mt-1">
                           {aktion.team.name}
                         </span>
                       </p>
@@ -346,9 +346,9 @@ export default function DashboardPage() {
       )}
       {/* Aktionsleiste fuer die Mehrfachauswahl */}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-black p-4 shadow-[0_-4px_0_#000]">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-ui border-line p-4 shadow-ui-up">
           <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-end gap-3">
-            <p className="text-sm font-bold uppercase sm:mb-2">
+            <p className="text-sm font-bold case-ui sm:mb-2">
               {selectedIds.size} Aktion{selectedIds.size !== 1 ? "en" : ""} ausgewählt
             </p>
             <div className="sm:w-64">
@@ -373,7 +373,7 @@ export default function DashboardPage() {
             </div>
           </div>
           {bulkError && (
-            <p className="max-w-5xl mx-auto mt-2 text-sm font-bold text-signal">{bulkError}</p>
+            <p className="max-w-5xl mx-auto mt-2 text-sm font-bold text-danger">{bulkError}</p>
           )}
         </div>
       )}

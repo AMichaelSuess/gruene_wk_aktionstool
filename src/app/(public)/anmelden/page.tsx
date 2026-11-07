@@ -68,33 +68,33 @@ function AnmeldenPageContent() {
   if (success) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        <div className="bg-white border-2 border-black p-8 shadow-[6px_6px_0_#005538]">
-          <p className="font-headline font-bold text-tanne text-2xl uppercase mb-2">
+        <div className="bg-white rounded-card border-ui border-line p-8 shadow-ui-brand-lg">
+          <p className="font-headline font-bold text-primary text-2xl case-ui mb-2">
             Anmeldung erfolgreich!
           </p>
-          <p className="text-black mt-2">
+          <p className="text-ink mt-2">
             Du erhältst in Kürze eine Bestätigungs-E-Mail.
           </p>
           {bereitsAngemeldet.length > 0 && (
-            <div className="mt-4 bg-white border-2 border-yellow-500 p-4 text-left shadow-[3px_3px_0_#ca8a04]">
-              <p className="font-bold text-sm text-black mb-2">
+            <div className="mt-4 bg-white rounded-card border-ui border-yellow-500 p-4 text-left shadow-ui-warning">
+              <p className="font-bold text-sm text-ink mb-2">
                 Hinweis: Für folgende Aktionen warst Du bereits angemeldet:
               </p>
               <ul className="list-disc list-inside space-y-1">
                 {bereitsAngemeldet.map((id) => (
-                  <li key={id} className="text-sm text-black">
+                  <li key={id} className="text-sm text-ink">
                     {aktionTitles.get(id) || id}
                   </li>
                 ))}
               </ul>
-              <p className="font-bold text-sm text-black mb-2">
+              <p className="font-bold text-sm text-ink mb-2">
                 Du erhältst für diese Aktionen keine Bestätigungs-E-Mail.
               </p>
             </div>
           )}
           <Link
             href="/"
-            className="mt-6 inline-block text-tanne hover:underline font-bold"
+            className="mt-6 inline-block text-primary hover:underline font-bold"
           >
             ← Zurück zur Aktionsübersicht
           </Link>
@@ -108,18 +108,18 @@ function AnmeldenPageContent() {
       {/* Back link */}
       <Link
         href="/"
-        className="inline-flex items-center gap-1 text-sm text-tanne hover:underline font-medium mb-6"
+        className="inline-flex items-center gap-1 text-sm text-primary hover:underline font-medium mb-6"
       >
         ← Zurück zur Aktionsübersicht
       </Link>
 
-      <h1 className="font-headline text-2xl md:text-3xl font-bold text-tanne uppercase mb-6">
+      <h1 className="font-headline text-2xl md:text-3xl font-bold text-primary case-ui mb-6">
         Anmeldung
       </h1>
 
       {/* Selected actions summary */}
-      <div className="border-2 border-black p-4 mb-6 shadow-[4px_4px_0_#000]">
-        <p className="text-sm font-bold uppercase tracking-wide text-black mb-3">
+      <div className="rounded-card border-ui border-line p-4 mb-6 shadow-ui">
+        <p className="text-sm font-bold case-ui tracking-ui text-ink mb-3">
           {selectedIds.length === 1
             ? "Du hast 1 Aktion ausgewählt:"
             : `Du hast ${selectedIds.length} Aktionen ausgewählt:`}
@@ -131,13 +131,13 @@ function AnmeldenPageContent() {
             {selectedIds.map((id) => (
               <span
                 key={id}
-                className="inline-flex items-center gap-1 text-xs bg-tanne text-white px-2.5 py-1 border border-black font-bold uppercase tracking-wide"
+                className="inline-flex items-center gap-1 rounded-badge text-xs bg-primary text-white px-2.5 py-1 border-badge border-line font-bold case-ui tracking-ui"
               >
                 {aktionTitles.get(id) || id}
                 <button
                   type="button"
                   onClick={() => removeAktion(id)}
-                  className="ml-0.5 text-white/70 hover:text-white transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black"
+                  className="ml-0.5 text-white/70 hover:text-white transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
                   aria-label={`${aktionTitles.get(id) || id} entfernen`}
                 >
                   ×

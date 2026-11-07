@@ -8,13 +8,13 @@ export default async function AbmeldungPage({
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-      <div className="bg-white border-2 border-black p-8 shadow-[6px_6px_0_#005538]">
+      <div className="bg-white rounded-card border-ui border-line p-8 shadow-ui-brand-lg">
         {isError ? (
           <>
-            <p className="font-headline font-bold text-signal text-2xl uppercase mb-2">
+            <p className="font-headline font-bold text-danger text-2xl case-ui mb-2">
               Abmeldung nicht möglich
             </p>
-            <p className="text-black mt-2">
+            <p className="text-ink mt-2">
               Der Abmelde-Link ist ungültig oder wurde bereits verwendet.
               Falls du dich von einer Aktion abmelden möchtest, wende dich
               bitte direkt an die Ansprechperson.
@@ -22,10 +22,10 @@ export default async function AbmeldungPage({
           </>
         ) : (
           <>
-            <p className="font-headline font-bold text-tanne text-2xl uppercase mb-2">
+            <p className="font-headline font-bold text-primary text-2xl case-ui mb-2">
               Erfolgreich abgemeldet
             </p>
-            <p className="text-black mt-2">
+            <p className="text-ink mt-2">
               Du wurdest erfolgreich von der Aktion abgemeldet.
               Vielen Dank für dein Interesse!
             </p>
@@ -33,7 +33,7 @@ export default async function AbmeldungPage({
         )}
         <a
           href="/"
-          className="mt-6 inline-block text-tanne hover:underline font-bold"
+          className="mt-6 inline-block text-primary hover:underline font-bold"
         >
           ← Zurück zur Aktionsübersicht
         </a>

@@ -61,7 +61,7 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
-          <h1 className="font-headline text-2xl font-bold text-tanne uppercase">
+          <h1 className="font-headline text-2xl font-bold text-primary case-ui">
             Anmeldungen
           </h1>
           {aktion && (

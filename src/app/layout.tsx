@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { districtConfig } from "@/lib/district-config";
+import { theme } from "@/lib/theme";
 import Providers from "./providers";
 import "./globals.css";
 
@@ -24,9 +25,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de">
+    <html lang="de" data-theme={theme.name}>
       <head />
-      <body className="font-sans antialiased bg-white text-black">
+      <body className="font-sans antialiased bg-canvas text-ink">
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -74,7 +74,7 @@ export default function EditWahlkreisPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="max-w-xl">
-      <h1 className="font-headline text-2xl font-bold text-tanne uppercase mb-6">
+      <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-6">
         {WAHLKREIS_LABEL} bearbeiten
       </h1>
 
@@ -100,7 +100,7 @@ export default function EditWahlkreisPage({ params }: { params: Promise<{ id: st
             minLength={2}
           />
 
-          <div className="text-sm text-gray-600 border-t-2 border-black pt-3">
+          <div className="text-sm text-gray-600 border-t-ui border-line pt-3">
             <span className="mr-4">👥 {counts.teams} Teams</span>
             <span>📋 {counts.aktionen} Aktionen</span>
           </div>

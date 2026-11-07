@@ -43,7 +43,7 @@ export default function TeamsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-headline text-2xl font-bold text-tanne uppercase">Teams</h1>
+        <h1 className="font-headline text-2xl font-bold text-primary case-ui">Teams</h1>
         <Link href="/admin/teams/neu">
           <Button>Neues Team</Button>
         </Link>
@@ -53,11 +53,11 @@ export default function TeamsPage() {
         {teams.map((team) => (
           <div
             key={team.id}
-            className="bg-white border-2 border-black p-4 shadow-[4px_4px_0_#000]"
+            className="bg-white rounded-card border-ui border-line p-4 shadow-ui"
           >
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="font-headline font-bold text-tanne text-lg uppercase tracking-wide">{team.name}</h3>
+                <h3 className="font-headline font-bold text-primary text-lg case-ui tracking-ui">{team.name}</h3>
                 <p className="text-sm text-gray-600 mt-1">
                   {team.wahlkreis
                     ? `${WAHLKREIS_LABEL} ${team.wahlkreis.nummer}: ${team.wahlkreis.name}`
@@ -67,19 +67,19 @@ export default function TeamsPage() {
               <div className="flex gap-3">
                 <Link
                   href={`/admin/teams/${team.id}`}
-                  className="text-sm text-tanne font-bold hover:underline"
+                  className="text-sm text-primary font-bold hover:underline"
                 >
                   Bearbeiten
                 </Link>
                 <button
                   onClick={() => handleDelete(team.id)}
-                  className="text-sm text-signal font-bold hover:underline"
+                  className="text-sm text-danger font-bold hover:underline"
                 >
                   Löschen
                 </button>
               </div>
             </div>
-            <div className="flex gap-4 mt-3 text-sm text-gray-700 border-t-2 border-black pt-3">
+            <div className="flex gap-4 mt-3 text-sm text-gray-700 border-t-ui border-line pt-3">
               <span>👤 {team._count.members} Mitglieder</span>
               <span>📋 {team._count.aktionen} Aktionen</span>
             </div>

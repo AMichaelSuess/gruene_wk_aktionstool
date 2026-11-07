@@ -10,7 +10,7 @@ import SelectionBar from "@/components/SelectionBar";
 const AktionMap = dynamic(() => import("@/components/AktionMap"), {
   ssr: false,
   loading: () => (
-    <div className="h-[500px] md:h-[600px] bg-gray-100 border-2 border-black flex items-center justify-center text-black font-bold uppercase tracking-wide">
+    <div className="h-[500px] md:h-[600px] bg-gray-100 rounded-card border-ui border-line flex items-center justify-center text-ink font-bold case-ui tracking-ui">
       Karte wird geladen...
     </div>
   ),
@@ -113,26 +113,26 @@ function AktionenPageInner() {
       <div className="max-w-7xl mx-auto px-4 py-4">
         {/* View toggle */}
         <div className="flex items-center justify-between mb-4">
-          <h1 className="font-headline text-xl md:text-3xl font-bold text-tanne uppercase">
+          <h1 className="font-headline text-xl md:text-3xl font-bold text-primary case-ui">
             Aktionen
           </h1>
-          <div className="flex overflow-hidden border-2 border-black">
+          <div className="flex overflow-hidden rounded-button border-ui border-line">
             <button
               onClick={() => setView("liste")}
-              className={`px-4 py-2 text-sm font-bold uppercase tracking-wide min-h-[44px] transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black ${
+              className={`px-4 py-2 text-sm font-bold case-ui tracking-ui min-h-[44px] transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
                 view === "liste"
-                  ? "bg-tanne text-white"
-                  : "bg-white text-black hover:bg-black hover:text-white"
+                  ? "bg-primary text-white"
+                  : "bg-white text-ink hover:bg-ink hover:text-white"
               }`}
             >
               Liste
             </button>
             <button
               onClick={() => setView("karte")}
-              className={`px-4 py-2 text-sm font-bold uppercase tracking-wide min-h-[44px] transition-colors border-l-2 border-black focus:outline-none focus-visible:outline-[3px] focus-visible:outline-black ${
+              className={`px-4 py-2 text-sm font-bold case-ui tracking-ui min-h-[44px] transition-colors border-l-ui border-line focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
                 view === "karte"
-                  ? "bg-tanne text-white"
-                  : "bg-white text-black hover:bg-black hover:text-white"
+                  ? "bg-primary text-white"
+                  : "bg-white text-ink hover:bg-ink hover:text-white"
               }`}
             >
               Karte
@@ -141,12 +141,12 @@ function AktionenPageInner() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center h-64 text-black font-bold uppercase tracking-wide">
+          <div className="flex items-center justify-center h-64 text-ink font-bold case-ui tracking-ui">
             Lade Aktionen...
           </div>
         ) : aktionen.length === 0 ? (
-          <div className="bg-white border-2 border-black p-8 text-center shadow-[4px_4px_0_#000]">
-            <p className="font-headline font-bold text-lg uppercase tracking-wide">
+          <div className="bg-white rounded-card border-ui border-line p-8 text-center shadow-ui">
+            <p className="font-headline font-bold text-lg case-ui tracking-ui">
               Aktuell keine Aktionen geplant.
             </p>
             <p className="text-gray-600 text-base mt-2">

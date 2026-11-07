@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { districtConfig } from "@/lib/district-config";
+import { theme } from "@/lib/theme";
 
 interface AktionInfo {
   titel: string;
@@ -15,8 +16,14 @@ interface AktionInfo {
 
 const baseUrl = process.env.NEXTAUTH_URL ?? "https://aktionen.gruene-mitte.de";
 
+// Farben und Formen kommen aus dem aktiven Theme (src/lib/theme.ts)
+const t = theme.email;
+/** Laufweite nur bei Versalien – ohne Uppercase sieht Sperrung falsch aus */
+const ls = (em: string) => (t.textTransform === "uppercase" ? em : "0");
+const ctaStyle = `display:inline-block;background-color:${t.primary};color:${t.primaryText};font-weight:700;text-transform:${t.textTransform};letter-spacing:${ls("0.08em")};font-size:14px;padding:12px 24px;text-decoration:none;border:${t.cardBorder};border-radius:${t.buttonRadius};box-shadow:${t.buttonShadow};margin-top:8px;`;
+
 function baseLayout(content: string, accentBar?: string): string {
-  const accent = accentBar ?? "#005538";
+  const accent = accentBar ?? t.primary;
   return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -24,54 +31,54 @@ function baseLayout(content: string, accentBar?: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #FFFFFF; color: #000000; }
-    .container { max-width: 600px; width: 100%; background: #FFFFFF; border: 3px solid #000000; }
-    .header { background-color: #005538; padding: 24px 32px; border-bottom: 3px solid #000000; }
-    .header h1 { color: #FFFFFF; font-size: 20px; margin: 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.2; }
-    .header .subtitle { color: #FFF17A; font-size: 16px; letter-spacing: 0.2em; text-transform: uppercase; margin: 0 0 4px 0; font-weight: 700; }
+    body { margin: 0; padding: 0; font-family: ${t.fontFamily}; background-color: ${t.canvas}; color: ${t.ink}; }
+    .container { max-width: 600px; width: 100%; background: ${t.canvas}; border: ${t.containerBorder}; border-radius: ${t.radius}; overflow: hidden; }
+    .header { background-color: ${t.headerBg}; padding: 24px 32px; border-bottom: ${t.headerBorder}; }
+    .header h1 { color: ${t.headerText}; font-size: 20px; margin: 0; font-weight: 700; text-transform: ${t.textTransform}; letter-spacing: ${ls("0.08em")}; line-height: 1.2; }
+    .header .subtitle { color: ${t.headerSubtitle}; font-size: 16px; letter-spacing: ${ls("0.2em")}; text-transform: ${t.textTransform}; margin: 0 0 4px 0; font-weight: 700; }
     .content { padding: 32px; text-align: left; }
     .content p { font-size: 16px; line-height: 1.6; margin: 0 0 12px 0; text-align: left; }
-    .content h2 { font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 20px 0; border-bottom: 3px solid #000000; padding-bottom: 8px; }
-    .content h3 { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin: 24px 0 8px 0; }
+    .content h2 { font-size: 20px; font-weight: 700; text-transform: ${t.textTransform}; letter-spacing: ${ls("0.04em")}; margin: 0 0 20px 0; border-bottom: ${t.dividerBorder}; padding-bottom: 8px; }
+    .content h3 { font-size: 16px; font-weight: 700; text-transform: ${t.textTransform}; letter-spacing: ${ls("0.04em")}; margin: 24px 0 8px 0; }
     .content ul { margin: 0 0 16px 0; padding-left: 20px; }
     .content li { font-size: 15px; line-height: 1.6; margin-bottom: 4px; }
-    .content a { color: #005538; font-weight: 700; text-decoration: underline; }
-    .aktion-card { background: #FFFFFF; border: 2px solid #000000; padding: 20px; margin-bottom: 16px; box-shadow: 4px 4px 0 #000000; }
-    .aktion-card-title { font-size: 17px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 12px 0; color: #000000; border-bottom: 2px solid #000000; padding-bottom: 8px; }
-    .aktion-card p { margin: 5px 0; font-size: 15px; color: #000000; line-height: 1.5; text-align: left; }
-    .aktion-card a { color: #005538; font-weight: 700; }
+    .content a { color: ${t.primary}; font-weight: 700; text-decoration: underline; }
+    .aktion-card { background: ${t.canvas}; border: ${t.cardBorder}; border-radius: ${t.radius}; padding: 20px; margin-bottom: 16px; box-shadow: ${t.cardShadow}; }
+    .aktion-card-title { font-size: 17px; font-weight: 700; text-transform: ${t.textTransform}; letter-spacing: ${ls("0.04em")}; margin: 0 0 12px 0; color: ${t.ink}; border-bottom: ${t.cardBorder}; padding-bottom: 8px; }
+    .aktion-card p { margin: 5px 0; font-size: 15px; color: ${t.ink}; line-height: 1.5; text-align: left; }
+    .aktion-card a { color: ${t.primary}; font-weight: 700; }
     .aktion-card .cancel-link { display: inline-block; margin-top: 12px; font-size: 15px; color: #e63946; text-decoration: underline; font-weight: 700; }
-    .change-row { border: 2px solid #000000; padding: 12px 16px; margin-bottom: 8px; background: #FFFFFF; }
-    .change-row strong { font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; display: block; margin-bottom: 4px; }
-    .change-old { background: #262626; color: #FFFFFF; padding: 2px 6px; font-size: 14px; font-weight: 700; border: 1px solid #000000;display: inline-block; }
+    .change-row { border: ${t.cardBorder}; border-radius: ${t.radius}; padding: 12px 16px; margin-bottom: 8px; background: ${t.canvas}; }
+    .change-row strong { font-weight: 700; text-transform: ${t.textTransform}; font-size: 12px; letter-spacing: ${ls("0.08em")}; display: block; margin-bottom: 4px; }
+    .change-old { background: #262626; color: #FFFFFF; padding: 2px 6px; font-size: 14px; font-weight: 700; border: ${t.badgeBorder};display: inline-block; }
     .change-arrow { font-size: 18px; font-weight: 700; margin: 0 6px; }
-    .change-new { background: #FFF17A; color: #000000; padding: 2px 6px; font-size: 14px; font-weight: 700; border: 1px solid #000000; display: inline-block; }
-    .cta-button { display: inline-block; background-color: #005538; color: #FFFFFF; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 14px; padding: 12px 24px; text-decoration: none; border: 2px solid #000000; box-shadow: 3px 3px 0 #000000; margin-top: 8px; }
+    .change-new { background: ${t.warning}; color: ${t.warningText}; padding: 2px 6px; font-size: 14px; font-weight: 700; border: ${t.badgeBorder}; display: inline-block; }
+    .cta-button { ${ctaStyle} }
     .greeting { font-size: 24px; font-weight: 700; margin: 0 0 16px 0; text-align: left; }
-    .section-divider { border: none; border-top: 3px solid #000000; margin: 24px 0; }
-    .badge-geaendert { background: #FFF17A; color: #000000; border: 1px solid #000000; padding: 2px 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: inline-block; }
-    .badge-absage { background: #E6007E; color: #FFFFFF; border: 1px solid #000000; padding: 2px 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: inline-block; }
-    .count-badge { background: #005538; color: #FFFFFF; border: 1px solid #000000; padding: 2px 8px; font-size: 12px; font-weight: 700; display: inline-block; }
-    .footer { background-color: #000000; padding: 20px 32px; font-size: 12px; color: #FFFFFF; }
+    .section-divider { border: none; border-top: ${t.dividerBorder}; margin: 24px 0; }
+    .badge-geaendert { background: ${t.warning}; color: ${t.warningText}; border: ${t.badgeBorder}; border-radius: ${t.buttonRadius}; padding: 2px 6px; font-size: 12px; font-weight: 700; text-transform: ${t.textTransform}; letter-spacing: ${ls("0.06em")}; display: inline-block; }
+    .badge-absage { background: ${t.danger}; color: ${t.dangerText}; border: ${t.badgeBorder}; border-radius: ${t.buttonRadius}; padding: 2px 6px; font-size: 12px; font-weight: 700; text-transform: ${t.textTransform}; letter-spacing: ${ls("0.06em")}; display: inline-block; }
+    .count-badge { background: ${t.primary}; color: ${t.primaryText}; border: ${t.badgeBorder}; border-radius: ${t.buttonRadius}; padding: 2px 8px; font-size: 12px; font-weight: 700; display: inline-block; }
+    .footer { background-color: ${t.footerBg}; padding: 20px 32px; font-size: 12px; color: ${t.footerText}; }
     .footer p { margin: 4px 0; line-height: 1.5; }
-    .footer a { color: #FFF17A; text-decoration: none; font-weight: 700; }
+    .footer a { color: ${t.footerLink}; text-decoration: none; font-weight: 700; }
     .footer-links { margin-top: 8px; }
     .footer-separator { color: #555555; margin: 0 8px; }
   </style>
 </head>
 <body>
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-  <tr><td align="center" style="padding: 24px 16px; background-color: #ffffff;">
+  <tr><td align="center" style="padding: 24px 16px; background-color: ${t.canvas};">
   <div class="container">
       <div class="header">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
-            <td width="64" valign="middle" style="padding-right: 16px;">
-              <img src="${baseUrl}/logo_white.png" alt="Sonnenblume" width="48" height="48" style="display:block; border:0;" />
-            </td>
+            ${theme.logo ? `<td width="64" valign="middle" style="padding-right: 16px;">
+              <img src="${baseUrl}${theme.logo.onDark}" alt="Sonnenblume" width="48" height="48" style="display:block; border:0;" />
+            </td>` : ""}
             <td valign="middle">
-              <p class="subtitle" style="color: #FFF17A; font-size: 16px; letter-spacing: 0.2em; text-transform: uppercase; margin: 0 0 4px 0; font-weight: 700;">${districtConfig.orgSubtitle}</p>
-              <h1 style="color: #FFFFFF; font-size: 20px; margin: 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.2;">${districtConfig.orgShortName}</h1>
+              <p class="subtitle" style="color: ${t.headerSubtitle}; font-size: 16px; letter-spacing: ${ls("0.2em")}; text-transform: ${t.textTransform}; margin: 0 0 4px 0; font-weight: 700;">${districtConfig.orgSubtitle}</p>
+              <h1 style="color: ${t.headerText}; font-size: 20px; margin: 0; font-weight: 700; text-transform: ${t.textTransform}; letter-spacing: ${ls("0.08em")}; line-height: 1.2;">${districtConfig.orgShortName}</h1>
             </td>
           </tr>
         </table>
@@ -168,7 +175,7 @@ export function aenderungsEmail(
     <p>Bei Fragen wende Dich bitte an die Ansprechperson der Aktion.</p>
   `;
 
-  return { subject, html: baseLayout(content, "#FFF17A") };
+  return { subject, html: baseLayout(content, t.warning) };
 }
 
 export function absageEmail(aktion: AktionInfo): { subject: string; html: string } {
@@ -184,7 +191,7 @@ export function absageEmail(aktion: AktionInfo): { subject: string; html: string
     <p>Wir bedauern die Unannehmlichkeiten. Schau gerne auf <a href="${baseUrl}">unserer Seite</a> nach weiteren Aktionen, bei denen Du mitmachen kannst!</p>
   `;
 
-  return { subject, html: baseLayout(content, "#E6007E") };
+  return { subject, html: baseLayout(content, t.danger) };
 }
 
 interface AktionInfoWithToken extends AktionInfo {
@@ -357,7 +364,7 @@ export function tagesUebersichtEmail(
     ${neueAnmeldungenHtml && abmeldungenHtml ? '<hr class="section-divider" />' : ""}
     ${abmeldungenHtml}
     <hr class="section-divider" />
-    <p><a href="${baseUrl}/dashboard" class="cta-button" style="display:inline-block;background-color:#005538;color:#FFFFFF;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;font-size:14px;padding:12px 24px;text-decoration:none;border:2px solid #000000;box-shadow:3px 3px 0 #000000;margin-top:8px;">Zum Dashboard →</a></p>
+    <p><a href="${baseUrl}/dashboard" class="cta-button" style="${ctaStyle}">Zum Dashboard →</a></p>
   `;
 
   return { subject, html: baseLayout(content) };

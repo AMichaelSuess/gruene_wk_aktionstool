@@ -66,7 +66,7 @@ export default function NewUserPage() {
 
   return (
     <div className="max-w-xl">
-      <h1 className="font-headline text-2xl font-bold text-tanne uppercase mb-6">
+      <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-6">
         Neue*r Benutzer*in
       </h1>
 

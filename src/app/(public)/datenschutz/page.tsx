@@ -3,14 +3,14 @@ import { districtConfig } from "@/lib/district-config";
 export default function DatenschutzPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="font-headline text-3xl font-bold text-tanne uppercase mb-2">
+      <h1 className="font-headline text-3xl font-bold text-primary case-ui mb-2">
         Datenschutzerklärung
       </h1>
 
-      <div className="bg-white border-2 border-black p-6 md:p-8 space-y-6 shadow-[4px_4px_0_#000] leading-relaxed">
+      <div className="bg-white rounded-card border-ui border-line p-6 md:p-8 space-y-6 shadow-ui leading-relaxed">
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Verantwortliche Stelle
           </h2>
           <p>
@@ -22,7 +22,7 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Datenschutzbeauftragte*r
           </h2>
           <p className="mb-2">
@@ -36,7 +36,7 @@ export default function DatenschutzPage() {
               <>
                 <br />
                 E-Mail:{" "}
-                <a href={`mailto:${districtConfig.dsbEmail}`} className="text-tanne underline">
+                <a href={`mailto:${districtConfig.dsbEmail}`} className="text-primary underline">
                   {districtConfig.dsbEmail}
                 </a>
               </>
@@ -55,7 +55,7 @@ export default function DatenschutzPage() {
                   href={districtConfig.dsbContactUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-tanne underline"
+                  className="text-primary underline"
                 >
                   Kontaktformular
                 </a>
@@ -65,7 +65,7 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Erhobene Daten und Zweck der Verarbeitung
           </h2>
           <p className="mb-2">
@@ -87,7 +87,7 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Rechtsgrundlage
           </h2>
           <p className="mb-3">
@@ -97,7 +97,7 @@ export default function DatenschutzPage() {
           <p>
             Du kannst deine Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen – formlos
             per E-Mail an{" "}
-            <a href={`mailto:${districtConfig.contactEmail}`} className="text-tanne underline">
+            <a href={`mailto:${districtConfig.contactEmail}`} className="text-primary underline">
               {districtConfig.contactEmail}
             </a>{" "}
             oder über den Abmeldelink in deiner Bestätigungs-E-Mail. Der Widerruf berührt nicht die
@@ -106,7 +106,7 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Empfänger und Auftragsverarbeiter
           </h2>
           <p className="mb-3">
@@ -122,7 +122,7 @@ export default function DatenschutzPage() {
             Serverstandort: {districtConfig.hostingLocation}<br />
             <a
               href={districtConfig.hostingPrivacyUrl}
-              className="text-tanne underline"
+              className="text-primary underline"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -134,7 +134,7 @@ export default function DatenschutzPage() {
             {districtConfig.emailProvider}<br />
             <a
               href={districtConfig.emailProviderPrivacyUrl}
-              className="text-tanne underline"
+              className="text-primary underline"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -144,7 +144,7 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Übermittlung in Drittländer
           </h2>
           <p>
@@ -154,7 +154,7 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Speicherdauer und Löschung
           </h2>
           <p className="mb-3">
@@ -171,7 +171,7 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Automatisierte Entscheidungsfindung
           </h2>
           <p>
@@ -181,7 +181,7 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Cookies
           </h2>
           <p>
@@ -193,7 +193,7 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Deine Rechte
           </h2>
           <p className="mb-2">
@@ -211,14 +211,14 @@ export default function DatenschutzPage() {
           </ul>
           <p>
             Zur Ausübung deiner Rechte wende dich an:{" "}
-            <a href={`mailto:${districtConfig.contactEmail}`} className="text-tanne underline">
+            <a href={`mailto:${districtConfig.contactEmail}`} className="text-primary underline">
               {districtConfig.contactEmail}
             </a>
           </p>
         </section>
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Zuständige Aufsichtsbehörde
           </h2>
           <p className="mb-2">
@@ -230,13 +230,13 @@ export default function DatenschutzPage() {
             {districtConfig.aufsichtPostalCode} {districtConfig.aufsichtCity}<br />
             Telefon: {districtConfig.aufsichtPhone}<br />
             E-Mail:{" "}
-            <a href={`mailto:${districtConfig.aufsichtEmail}`} className="text-tanne underline">
+            <a href={`mailto:${districtConfig.aufsichtEmail}`} className="text-primary underline">
               {districtConfig.aufsichtEmail}
             </a>
             <br />
             <a
               href={districtConfig.aufsichtUrl}
-              className="text-tanne underline"
+              className="text-primary underline"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -246,18 +246,18 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
-          <h2 className="font-headline text-xl font-bold text-tanne uppercase mb-3">
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Kontakt bei Datenschutzfragen
           </h2>
           <p>
             Bei Fragen zum Datenschutz wende dich an:{" "}
-            <a href={`mailto:${districtConfig.contactEmail}`} className="text-tanne underline">
+            <a href={`mailto:${districtConfig.contactEmail}`} className="text-primary underline">
               {districtConfig.contactEmail}
             </a>
           </p>
         </section>
 
-        <p className="text-sm text-gray-500 border-t-2 border-black pt-4">
+        <p className="text-sm text-gray-500 border-t-ui border-line pt-4">
           {districtConfig.orgLegalName} · Stand: {districtConfig.datenschutzStand}
         </p>
       </div>

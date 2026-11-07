@@ -25,11 +25,11 @@ export default function NavAuthSection({ session }: Props) {
         <span className="text-white/70 text-xs">
           {session.user.name} &middot; {isAdmin ? "Admin" : "Expert*in"}
         </span>
-        <Link href="/dashboard" className="hover:text-sonne transition-colors font-medium text-sm">
+        <Link href="/dashboard" className="hover:text-accent transition-colors font-medium text-sm">
           Dashboard
         </Link>
         {isAdmin && (
-          <Link href="/admin" className="hover:text-sonne transition-colors font-medium text-sm">
+          <Link href="/admin" className="hover:text-accent transition-colors font-medium text-sm">
             Admin Panel
           </Link>
         )}
@@ -62,10 +62,10 @@ export default function NavAuthSection({ session }: Props) {
             onClick={() => setMenuOpen(false)}
           />
           {/* Sidebar */}
-          <aside className="md:hidden fixed top-0 left-0 h-full w-64 bg-white border-r-2 border-black z-50 p-4 flex flex-col">
+          <aside className="md:hidden fixed top-0 left-0 h-full w-64 bg-white border-r-ui border-line z-50 p-4 flex flex-col">
             {/* Header row inside sidebar */}
-            <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-black">
-              <span className="text-xs font-bold uppercase tracking-wide text-black/60">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b-ui border-line">
+              <span className="text-xs font-bold case-ui tracking-ui text-ink/60">
                 {session.user.name} &middot; {isAdmin ? "Admin" : "Expert*in"}
               </span>
               <button
@@ -80,7 +80,7 @@ export default function NavAuthSection({ session }: Props) {
               <Link
                 href="/dashboard"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 text-sm font-bold uppercase tracking-wide border-2 border-transparent hover:border-black hover:shadow-[2px_2px_0_#000] transition-colors text-black mb-1"
+                className="flex items-center gap-3 rounded-button px-3 py-2 text-sm font-bold case-ui tracking-ui border-ui border-transparent hover:border-line hover:shadow-ui-sm transition-colors text-ink mb-1"
               >
                 <span>📋</span> Dashboard
               </Link>
@@ -88,7 +88,7 @@ export default function NavAuthSection({ session }: Props) {
                 <Link
                   href="/admin"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 text-sm font-bold uppercase tracking-wide border-2 border-transparent hover:border-black hover:shadow-[2px_2px_0_#000] transition-colors text-black mb-1"
+                  className="flex items-center gap-3 rounded-button px-3 py-2 text-sm font-bold case-ui tracking-ui border-ui border-transparent hover:border-line hover:shadow-ui-sm transition-colors text-ink mb-1"
                 >
                   <span>⚙️</span> Admin Panel
                 </Link>
@@ -96,13 +96,13 @@ export default function NavAuthSection({ session }: Props) {
               <Link
                 href="/"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 text-sm font-bold uppercase tracking-wide border-2 border-transparent hover:border-black hover:shadow-[2px_2px_0_#000] transition-colors text-black mb-1"
+                className="flex items-center gap-3 rounded-button px-3 py-2 text-sm font-bold case-ui tracking-ui border-ui border-transparent hover:border-line hover:shadow-ui-sm transition-colors text-ink mb-1"
               >
                 <span>🌐</span> Zur Übersicht
               </Link>
               <button
                 onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }); }}
-                className="flex items-center gap-3 px-3 py-2 text-sm font-bold uppercase tracking-wide border-2 border-transparent hover:border-black hover:shadow-[2px_2px_0_#000] transition-colors text-black w-full text-left mb-1"
+                className="flex items-center gap-3 rounded-button px-3 py-2 text-sm font-bold case-ui tracking-ui border-ui border-transparent hover:border-line hover:shadow-ui-sm transition-colors text-ink w-full text-left mb-1"
               >
                 <span>🚪</span> Abmelden
               </button>
