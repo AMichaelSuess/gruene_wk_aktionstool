@@ -50,7 +50,25 @@ export default async function PublicLayout({ children }: { children: ReactNode }
             </div>
           </div>
           <p className="text-xs text-white/50 text-center">
-            Entwickelt vom Kreisvorstand BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte mit Unterstützung von künstlicher Intelligenz
+            Weiterentwickelt von Michael Süß für {districtConfig.orgFullName} (
+            <a
+              href="https://github.com/AMichaelSuess/gruene_wk_aktionstool"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-white transition-colors"
+            >
+              GitHub
+            </a>
+            ) auf Basis des Aktionstools von BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte (
+            <a
+              href="https://github.com/maassfm/gruene_wk_aktionstool"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-white transition-colors"
+            >
+              GitHub
+            </a>
+            )
           </p>
         </div>
       </footer>
