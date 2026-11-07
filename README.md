@@ -274,6 +274,7 @@ Alle folgenden Variablen sind **optional** — ohne Angabe werden die Berlin-Mit
 | `NEXT_PUBLIC_WAHLKREIS_LABEL` | Bezeichnung der Gebietseinheit in Oberfläche, Fehlermeldungen und Excel-Dateien (Einzahl). Default: `Wahlkreis`. Wird beim Build eingebettet. Excel-Importe mit der Spalte „Wahlkreis“ funktionieren weiterhin. | `Stadtbezirk` |
 | `NEXT_PUBLIC_WAHLKREIS_LABEL_PLURAL` | Mehrzahl. Default: Einzahl + „e“ (bzw. `Wahlkreise`). | `Stadtbezirke` |
 | `NEXT_PUBLIC_WAHLKREIS_LABEL_SHORT` | Kurzform für Filterleiste, Aktionskarten und Karten-Popups. Default: `WK`, bei eigener Einzahl diese. | `Stadtbezirk` |
+| `NEXT_PUBLIC_THEME` | Visuelles Theme: `brutalist` (Default) oder `emerald` (Design der Leipziger OBM-Kampagne 2027). Wird beim Build eingebettet. Siehe `docs/design/theming.md`. | `emerald` |
 
 ---
 
@@ -325,7 +326,10 @@ Ohne diese Variable ist Einbettung nur von `'self'` erlaubt (d.h. nur von der Ap
 ├── docs/
 │   ├── DEPLOYMENT.md            # Deployment-Anleitung
 │   ├── anleitung-wahlkampfexperten.md  # Benutzerhandbuch
-│   └── design.md                # Design-Dokumentation
+│   └── design/                  # Design-Dokumentation
+│       ├── theming.md           # Theme-System, Tokens, Komponenten-Muster
+│       ├── theme-brutalist.md   # Default-Theme (Soft Brutalism)
+│       └── theme-emerald.md     # Theme der Leipziger OBM-Kampagne 2027
 ├── prisma/
 │   ├── migrations/              # Datenbank-Migrationen
 │   ├── schema.prisma            # Datenmodell

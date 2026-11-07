@@ -80,6 +80,11 @@ Core entities in `prisma/schema.prisma`:
 - `src/lib/excel.ts` — ExcelJS import parser and export generation (Excel + Signal-text)
 - `src/lib/geocoding.ts` — address-to-coordinates via Nominatim
 - `src/lib/validators.ts` — Zod schemas for all models
+- `src/lib/theme.ts` — active visual theme (from `NEXT_PUBLIC_THEME`): logo, chevrons, map marker, email palette
+
+### Theming
+
+The UI is themed. `NEXT_PUBLIC_THEME` (build time) selects `brutalist` (default, Soft Brutalism in Grüne CI) or `emerald` (Leipzig OBM campaign 2027). The root layout sets `<html data-theme>`; `src/app/globals.css` defines every visual value as a `--t-*` variable per theme and maps them to Tailwind tokens. Email templates read literal colors from `theme.email`. Full reference: `docs/design/theming.md`; per-theme docs: `docs/design/theme-brutalist.md`, `docs/design/theme-emerald.md`.
 
 ### Authorization Pattern
 
@@ -101,6 +106,7 @@ See `.env.example`. Key variables:
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD` — SMTP credentials (leave empty to skip email in local dev)
 - `EMAIL_FROM`, `EMAIL_FROM_NAME` — sender identity
 - `CRON_SECRET` — bearer token for cron endpoints
+- `NEXT_PUBLIC_THEME` — visual theme, `brutalist` (default) or `emerald`; baked in at build time
 
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
@@ -240,6 +246,21 @@ Eine Web-App zur Koordinierung und Anmeldung von Aktiven bei Wahlkampf-Aktionen 
 - Render guard: `if (loading) return <div>Lade...</div>`
 - Client-side `useEffect` + `fetch` — no React Query or SWR
 - Multiple parallel fetches: `Promise.all([fetch(...), fetch(...)])`
+## Styling & Theming
+All UI must work in every theme. See `docs/design/theming.md` for the token table and component class patterns.
+- **Never hard-code theme-specific styling:** no hex colors, `border-black`, `border-2`, `uppercase`/`tracking-wide`, `rounded-<size>` or arbitrary `shadow-[…]` in components.
+- **Use semantic tokens by role:**
+  - Colors: `primary`, `primary-hover`, `chrome` (header/footer), `accent` (highlight on chrome), `cta`/`cta-ink`, `bar`/`bar-ink`, `ink`, `line` (containers), `line-strong` (form controls, clickable chips), `focus`, `canvas`, `muted`, `warning`, `danger`, `info`, `success`, `highlight`/`highlight-ink`
+  - Borders: `border-ui`, `border-{t,b,l,r}-ui`, `border-{t,b}-ui-thick`, `border-badge`, `divide-y-ui`
+  - Radius: `rounded-card` (cards, panels, dialogs, tables), `rounded-control` (inputs, selects), `rounded-button` (buttons, nav items, chips), `rounded-badge`
+  - Elevation: `shadow-ui-sm|ui|ui-lg|ui-xl`, `shadow-ui-brand*`, `shadow-ui-selected`, `shadow-ui-up`; hover pattern `shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press`
+  - Labels/buttons/badges: `case-ui tracking-ui`; headings: `font-headline`
+- **Every bordered surface needs a radius token.** It is `0` in brutalist, so a missing one is only visible in other themes.
+- **Reuse `src/components/ui/`** (Button, Card, Input, Select, Badge, Dialog), `BrandLogo` (renders nothing when the theme uses a wordmark; pair the org name with `wordmarkClass`) and `ChevronBand`.
+- **Contrast:** light accents (`accent`, `warning`, `highlight`, `cta` in emerald) are fills or text on dark surfaces, never text on white.
+- **New visual values** go into every theme block in `globals.css` (a missing `--t-*` silently falls back to brutalist); email colors go into `theme.email` in `src/lib/theme.ts`.
+- **Verify UI changes in both themes**, e.g. `NEXT_PUBLIC_THEME=emerald npm run build && NEXT_PUBLIC_THEME=emerald npx next start -p 3210`.
+- **Fonts are self-hosted** in `public/fonts/` (DSGVO: no font CDNs).
 ## API Route Patterns
 ## Validation
 - One schema per entity: `loginSchema`, `userSchema`, `teamSchema`, `aktionSchema`, `anmeldungSchema`, `excelRowSchema`
