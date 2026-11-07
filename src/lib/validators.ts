@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { getWahlkreisCount } from "@/lib/district-config";
-import { KATEGORIE_VALUES } from "@/lib/kategorien";
+import { KATEGORIE_VALUES, KATEGORIEN } from "@/lib/kategorien";
 import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
 
 // E-Mail-Adressen werden immer getrimmt und kleingeschrieben gespeichert/verglichen,
@@ -103,7 +103,7 @@ export const excelRowSchema = z.object({
   endzeit: z.string().regex(/^\d{2}:\d{2}$/, "Endzeit im Format HH:MM"),
   adresse: z.string().min(1, "Adresse fehlt"),
   wahlkreis: z.number().int().min(1).max(getWahlkreisCount(), `${WAHLKREIS_LABEL} muss zwischen 1 und ${getWahlkreisCount()} liegen`),
-  kategorie: z.enum(KATEGORIE_VALUES, { error: "Kategorie fehlt oder ungültig (erlaubt: Haustür, Straße, Sonstiges)" }),
+  kategorie: z.enum(KATEGORIE_VALUES, { error: `Kategorie fehlt oder ungültig (erlaubt: ${KATEGORIEN.map((k) => k.label).join(", ")})` }),
   ansprechpersonName: z.string().min(1, "Ansprechperson Name fehlt"),
   ansprechpersonEmail: emailSchema("Ungültige E-Mail der Ansprechperson"),
   ansprechpersonTelefon: z.string().min(1, "Telefon der Ansprechperson fehlt"),

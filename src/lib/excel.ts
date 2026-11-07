@@ -6,11 +6,15 @@ function kategorieEmoji(kategorie?: string): string {
   switch (kategorie) {
     case "Haustür":
       return "🚪";
-    case "Sonstiges":
-      return "▶️";
-    case "Straße":
-    default:
+    case "Flyern":
+      return "📄";
+    case "Infostand":
       return "📢";
+    case "Plakatieren":
+      return "🪧";
+    case "Sonstiges":
+    default:
+      return "▶️";
   }
 }
 
@@ -114,7 +118,7 @@ export async function parseExcelFile(buffer: ArrayBuffer): Promise<ExcelRow[]> {
       } else if (key === "wahlkreis") {
         partial.wahlkreis = parseInt(String(value ?? ""), 10);
       } else if (key === "kategorie") {
-        // Deutsche Labels ("Haustür", "Straße") in Enum-Werte übersetzen.
+        // Deutsche Labels ("Haustür", "Infostand") in Enum-Werte übersetzen.
         // Bei unbekannten Werten den Rohwert durchreichen, damit Zod eine
         // verständliche Fehlermeldung für die Vorschau erzeugt.
         partial.kategorie = parseKategorie(value) ?? String(value ?? "").trim();
@@ -368,7 +372,7 @@ export async function createVorlageExcel(): Promise<Buffer> {
     endzeit: new Date(Date.UTC(1899, 11, 30, 13, 0)),
     adresse: "Alexanderplatz 1, 10178 Berlin",
     wahlkreis: 1,
-    kategorie: "Straße",
+    kategorie: "Infostand",
     ansprechpersonName: "Max Mustermann",
     ansprechpersonEmail: "max@example.com",
     ansprechpersonTelefon: "030 1234567",

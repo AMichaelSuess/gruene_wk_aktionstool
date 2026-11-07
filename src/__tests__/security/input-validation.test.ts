@@ -319,7 +319,7 @@ describe("Input-Validierung: PATCH /api/aktionen/bulk-kategorie", () => {
 
     const req = createJsonRequest(
       "/api/aktionen/bulk-kategorie",
-      { ids: ["aktion-1"], kategorie: "STRASSE" },
+      { ids: ["aktion-1"], kategorie: "INFOSTAND" },
       "PATCH"
     );
     const res = await PATCH(req as any);

@@ -10,11 +10,13 @@ export interface KategorieConfig {
 
 export const KATEGORIEN: KategorieConfig[] = [
   { value: "HAUSTUER", label: "Haustür" },
-  { value: "STRASSE", label: "Straße" },
+  { value: "FLYERN", label: "Flyern" },
+  { value: "INFOSTAND", label: "Infostand" },
+  { value: "PLAKATIEREN", label: "Plakatieren" },
   { value: "SONSTIGES", label: "Sonstiges" },
 ];
 
-export const KATEGORIE_VALUES = ["HAUSTUER", "STRASSE", "SONSTIGES"] as const;
+export const KATEGORIE_VALUES = ["HAUSTUER", "FLYERN", "INFOSTAND", "PLAKATIEREN", "SONSTIGES"] as const;
 
 export function kategorieLabel(value: string | null | undefined): string {
   if (!value) return "";
@@ -24,8 +26,8 @@ export function kategorieLabel(value: string | null | undefined): string {
 
 /**
  * Tolerante Eingabe-Erkennung für Excel-Import und URL-Parameter.
- * Akzeptiert Enum-Werte ("HAUSTUER"), deutsche Labels ("Haustür", "Straße")
- * sowie umlautfreie Schreibweisen ("Haustuer", "Strasse") — jeweils case-insensitiv.
+ * Akzeptiert Enum-Werte ("HAUSTUER"), deutsche Labels ("Haustür", "Infostand")
+ * sowie umlautfreie Schreibweisen ("Haustuer") — jeweils case-insensitiv.
  * Gibt bei unbekannten Werten `null` zurück.
  */
 export function parseKategorie(value: unknown): string | null {
@@ -46,10 +48,20 @@ export function parseKategorie(value: unknown): string | null {
     case "haustuere":
     case "haustuerwahlkampf":
       return "HAUSTUER";
+    case "flyern":
+    case "flyer":
+    case "flyer verteilen":
+      return "FLYERN";
+    case "infostand":
+    case "infostaende":
+    // Frühere Kategorie "Straße" — heißt jetzt "Infostand".
     case "strasse":
     case "strassenwahlkampf":
-    case "infostand":
-      return "STRASSE";
+      return "INFOSTAND";
+    case "plakatieren":
+    case "plakate":
+    case "plakatierung":
+      return "PLAKATIEREN";
     case "sonstiges":
     case "sonstige":
       return "SONSTIGES";

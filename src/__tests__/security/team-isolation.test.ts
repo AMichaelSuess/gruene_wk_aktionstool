@@ -335,7 +335,7 @@ describe("Team-Isolation: Bulk-Umkategorisierung", () => {
     const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
     const req = createJsonRequest(
       "/api/aktionen/bulk-kategorie",
-      { ids: ["team-b-aktion"], kategorie: "STRASSE" },
+      { ids: ["team-b-aktion"], kategorie: "INFOSTAND" },
       "PATCH"
     );
     const res = await PATCH(req as any);

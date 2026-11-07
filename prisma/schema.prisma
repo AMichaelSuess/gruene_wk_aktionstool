@@ -20,7 +20,9 @@ enum AktionStatus {
 
 enum AktionKategorie {
   HAUSTUER
-  STRASSE
+  FLYERN
+  INFOSTAND
+  PLAKATIEREN
   SONSTIGES
 }
 
