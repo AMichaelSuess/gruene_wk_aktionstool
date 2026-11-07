@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
+import { ADMIN_TEAMS_HINWEIS } from "@/lib/teams";
 
 interface Team {
   id: string;
@@ -79,7 +80,8 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
       email: form.email,
       role: form.role,
       active: form.active,
-      teamIds: form.teamIds,
+      // Admins stehen über den Teams und bekommen keine Team-Zuordnung
+      teamIds: form.role === "ADMIN" ? [] : form.teamIds,
     };
     if (form.newPassword) {
       payload.password = form.newPassword;
@@ -153,7 +155,9 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Teams
             </label>
-            {allTeams.length === 0 ? (
+            {form.role === "ADMIN" ? (
+              <p className="text-sm text-gray-600">{ADMIN_TEAMS_HINWEIS}</p>
+            ) : allTeams.length === 0 ? (
               <p className="text-sm text-gray-500">Keine Teams vorhanden</p>
             ) : (
               <div className="space-y-2">

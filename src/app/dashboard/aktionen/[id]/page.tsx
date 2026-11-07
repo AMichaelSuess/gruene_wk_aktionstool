@@ -9,6 +9,7 @@ import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import { KATEGORIEN } from "@/lib/kategorien";
 import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
+import { KEIN_TEAM_LABEL } from "@/lib/teams";
 
 interface Wahlkreis {
   id: string;
@@ -64,7 +65,7 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
         adresse: aktion.adresse,
         wahlkreisId: aktion.wahlkreisId,
         kategorie: aktion.kategorie ?? "",
-        teamId: aktion.teamId,
+        teamId: aktion.teamId ?? "",
         ansprechpersonName: aktion.ansprechpersonName,
         ansprechpersonEmail: aktion.ansprechpersonEmail,
         ansprechpersonTelefon: aktion.ansprechpersonTelefon,
@@ -181,7 +182,10 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
               label="Team"
               value={form.teamId}
               onChange={(e) => updateForm("teamId", e.target.value)}
-              options={teams.map((t) => ({ value: t.id, label: t.name }))}
+              options={[
+                { value: "", label: KEIN_TEAM_LABEL },
+                ...teams.map((t) => ({ value: t.id, label: t.name })),
+              ]}
             />
           )}
 

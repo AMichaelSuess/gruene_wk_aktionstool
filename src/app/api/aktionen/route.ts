@@ -168,8 +168,9 @@ export async function POST(req: NextRequest) {
     }
 
     let teamId: string | null = null;
-    if (session.user.role === "ADMIN" && body.teamId) {
-      teamId = body.teamId;
+    if (session.user.role === "ADMIN") {
+      // Admins stehen über den Teams: gewähltes Team oder bewusst keins
+      teamId = body.teamId || null;
     } else if (body.teamId && session.user.teamIds?.includes(body.teamId)) {
       teamId = body.teamId;
     } else if (session.user.teamIds?.length === 1) {

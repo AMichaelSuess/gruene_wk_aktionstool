@@ -81,10 +81,20 @@ export async function POST(req: NextRequest) {
       const wahlkreisMap = new Map(wahlkreise.map((wk) => [wk.nummer, wk.id]));
 
       const teamIds = session.user.teamIds ?? [];
-      const teamId: string | null =
-        session.user.role === "ADMIN" || teamIds.length > 1
-          ? (formData.get("teamId") as string) || teamIds[0] || null
-          : teamIds[0] || null;
+      const requestedTeamId = (formData.get("teamId") as string | null) || null;
+      let teamId: string | null;
+      if (session.user.role === "ADMIN") {
+        // Admins stehen über den Teams: gewähltes Team oder bewusst keins
+        teamId = requestedTeamId;
+      } else if (requestedTeamId) {
+        // Team-Isolation: EXPERT darf nur in eigene Teams importieren
+        if (!teamIds.includes(requestedTeamId)) {
+          return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
+        }
+        teamId = requestedTeamId;
+      } else {
+        teamId = teamIds[0] ?? null;
+      }
 
       const created = [];
 

@@ -8,11 +8,7 @@ import Badge from "@/components/ui/Badge";
 import Select from "@/components/ui/Select";
 import { kategorieLabel } from "@/lib/kategorien";
 import { WAHLKREIS_LABEL_SHORT } from "@/lib/wahlkreis-label";
-
-interface Team {
-  id: string;
-  name: string;
-}
+import { KEIN_TEAM_VALUE } from "@/lib/teams";
 
 interface ValidationResult {
   index: number;
@@ -22,11 +18,11 @@ interface ValidationResult {
 }
 
 interface ExcelUploadProps {
-  userTeams?: Team[];
+  teamOptions?: { value: string; label: string }[];
   needsTeamSelect?: boolean;
 }
 
-export default function ExcelUpload({ userTeams = [], needsTeamSelect = false }: ExcelUploadProps) {
+export default function ExcelUpload({ teamOptions = [], needsTeamSelect = false }: ExcelUploadProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [results, setResults] = useState<ValidationResult[]>([]);
@@ -68,7 +64,7 @@ export default function ExcelUpload({ userTeams = [], needsTeamSelect = false }:
   }
 
   async function handleImport() {
-    if (needsTeamSelect && userTeams.length > 0 && !selectedTeamId) {
+    if (needsTeamSelect && teamOptions.length > 0 && !selectedTeamId) {
       alert("Bitte wähle ein Team aus.");
       return;
     }
@@ -84,7 +80,7 @@ export default function ExcelUpload({ userTeams = [], needsTeamSelect = false }:
 
     formData.append("file", file);
     formData.append("import", "true");
-    if (selectedTeamId) {
+    if (selectedTeamId && selectedTeamId !== KEIN_TEAM_VALUE) {
       formData.append("teamId", selectedTeamId);
     }
 
@@ -118,13 +114,13 @@ export default function ExcelUpload({ userTeams = [], needsTeamSelect = false }:
         </a>
       </div>
 
-      {needsTeamSelect && userTeams.length > 0 && (
+      {needsTeamSelect && teamOptions.length > 0 && (
         <div className="mb-4">
           <Select
             label="Team"
             value={selectedTeamId}
             onChange={(e) => setSelectedTeamId(e.target.value)}
-            options={userTeams.map((t) => ({ value: t.id, label: t.name }))}
+            options={teamOptions}
             placeholder="Bitte Team wählen"
           />
         </div>

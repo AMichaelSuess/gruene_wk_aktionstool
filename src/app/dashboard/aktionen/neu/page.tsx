@@ -10,6 +10,7 @@ import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import ExcelUpload from "@/components/ExcelUpload";
 import { KATEGORIEN } from "@/lib/kategorien";
 import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
+import { KEIN_TEAM_LABEL, KEIN_TEAM_VALUE } from "@/lib/teams";
 
 interface Wahlkreis {
   id: string;
@@ -26,7 +27,7 @@ export default function NewAktionPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>([]);
-  const [userTeams, setUserTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [tab, setTab] = useState<"manual" | "excel">("manual");
@@ -52,15 +53,22 @@ export default function NewAktionPage() {
       .then(setWahlkreise);
   }, []);
 
-  useEffect(() => {
-    if (!session) return;
-    const teamIds = session.user.teamIds ?? [];
-    if (teamIds.length <= 1) return; // No need to fetch if 0 or 1 team
+  const teamIds = session?.user.teamIds ?? [];
+  const isAdmin = session?.user.role === "ADMIN";
+  // Admins stehen über den Teams und wählen aus allen; Experts aus ihren eigenen
+  const needsTeamSelect = isAdmin || teamIds.length > 1;
 
-    fetch("/api/user/teams")
+  useEffect(() => {
+    if (!needsTeamSelect) return;
+    fetch(isAdmin ? "/api/admin/teams" : "/api/user/teams")
       .then((r) => r.json())
-      .then((teams: Team[]) => setUserTeams(teams));
-  }, [session]);
+      .then((data: Team[]) => setTeams(data));
+  }, [needsTeamSelect, isAdmin]);
+
+  const teamOptions = [
+    ...(isAdmin ? [{ value: KEIN_TEAM_VALUE, label: KEIN_TEAM_LABEL }] : []),
+    ...teams.map((t) => ({ value: t.id, label: t.name })),
+  ];
 
   function updateForm(field: string, value: string) {
     setForm({ ...form, [field]: value });
@@ -71,10 +79,14 @@ export default function NewAktionPage() {
     setLoading(true);
     setError("");
 
-    const teamIds = session?.user.teamIds ?? [];
-    const selectedTeamId =
-      form.teamId ||
-      (teamIds.length === 1 ? teamIds[0] : undefined);
+    let selectedTeamId: string | null | undefined;
+    if (form.teamId === KEIN_TEAM_VALUE) {
+      selectedTeamId = null;
+    } else if (form.teamId) {
+      selectedTeamId = form.teamId;
+    } else if (!isAdmin && teamIds.length === 1) {
+      selectedTeamId = teamIds[0];
+    }
 
     const body = {
       ...form,
@@ -96,10 +108,6 @@ export default function NewAktionPage() {
     }
     setLoading(false);
   }
-
-  const teamIds = session?.user.teamIds ?? [];
-  const isAdmin = session?.user.role === "ADMIN";
-  const needsTeamSelect = isAdmin || teamIds.length > 1;
 
   return (
     <div className="max-w-2xl">
@@ -198,13 +206,14 @@ export default function NewAktionPage() {
               required
             />
 
-            {needsTeamSelect && userTeams.length > 0 && (
+            {needsTeamSelect && teams.length > 0 && (
               <Select
                 label="Team"
                 value={form.teamId}
                 onChange={(e) => updateForm("teamId", e.target.value)}
-                options={userTeams.map((t) => ({ value: t.id, label: t.name }))}
+                options={teamOptions}
                 placeholder="Bitte Team wählen"
+                required
               />
             )}
 
@@ -262,7 +271,7 @@ export default function NewAktionPage() {
           </form>
         </Card>
       ) : (
-        <ExcelUpload userTeams={userTeams} needsTeamSelect={needsTeamSelect} />
+        <ExcelUpload teamOptions={teams.length > 0 ? teamOptions : []} needsTeamSelect={needsTeamSelect} />
       )}
     </div>
   );

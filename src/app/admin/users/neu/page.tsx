@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
+import { ADMIN_TEAMS_HINWEIS } from "@/lib/teams";
 
 interface Team {
   id: string;
@@ -49,7 +50,8 @@ export default function NewUserPage() {
     const res = await fetch("/api/admin/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      // Admins stehen über den Teams und bekommen keine Team-Zuordnung
+      body: JSON.stringify({ ...form, teamIds: form.role === "ADMIN" ? [] : form.teamIds }),
     });
 
     if (res.ok) {
@@ -109,7 +111,9 @@ export default function NewUserPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Teams
             </label>
-            {teams.length === 0 ? (
+            {form.role === "ADMIN" ? (
+              <p className="text-sm text-gray-600">{ADMIN_TEAMS_HINWEIS}</p>
+            ) : teams.length === 0 ? (
               <p className="text-sm text-gray-500">Keine Teams vorhanden</p>
             ) : (
               <div className="space-y-2">
