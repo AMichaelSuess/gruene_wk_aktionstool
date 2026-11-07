@@ -38,6 +38,7 @@ werden hier vorausgesetzt – sie sind Teil der Coolify-Instanz, nicht dieser Ap
 | **Entwicklung** | auf `main`; ein Push auf `main` löst **kein** Deployment aus |
 | **Build** | `Dockerfile` im Repository-Root (Node.js 24, Debian slim) |
 | **Datenbank** | PostgreSQL 17 als Coolify-Ressource, tägliches Backup nach S3 |
+| **Netzwerk** | eigene Destination `gruene-aktionstool-production` (Docker-Netzwerk `gruene-aktionstool-production-network`) |
 | **Migrationen** | laufen automatisch beim Containerstart (`prisma migrate deploy`) |
 | **Health-Check** | `GET /api/health` (prüft auch die Datenbankverbindung) |
 | **Cron-Jobs** | Coolify Scheduled Tasks, die die Cron-Endpunkte im Container aufrufen |
@@ -59,6 +60,25 @@ UTC-Mitternacht in der Datenbank, und mehrere Routen rechnen mit der lokalen Zei
 
 ## 2. Projekt und Datenbank anlegen
 
+### Eigenes Docker-Netzwerk (Destination)
+
+Ohne weitere Einstellung landen alle Ressourcen einer Coolify-Instanz im gemeinsamen Netzwerk
+`coolify` – Container anderer Projekte auf demselben Server könnten dann die Datenbank dieser App
+direkt erreichen. Eine eigene **Destination** trennt App und Datenbank davon ab. Den Reverse-Proxy
+verbindet Coolify automatisch mit dem neuen Netzwerk; Domains und SSL funktionieren unverändert.
+
+1. Coolify → **Servers** → Server auswählen → **Destinations** → **Add**
+2. Konfiguration:
+   - **Name:** `gruene-aktionstool-production`
+   - **Network:** `gruene-aktionstool-production-network`
+3. Speichern.
+
+> ⚠️ Datenbank **und** Anwendung müssen in **dieser** Destination angelegt werden. Coolify fragt
+> beim Anlegen einer Ressource danach, sobald ein Server mehrere Destinations hat. Liegen beide in
+> verschiedenen Netzwerken, erreicht die App die Datenbank nicht über die interne URL. Eine
+> nachträglich falsch zugeordnete Ressource lässt sich nur umziehen, nicht umhängen – daher von
+> Anfang an richtig auswählen.
+
 ### Projekt
 
 1. Coolify → **Projects** → **New Project**
@@ -67,7 +87,8 @@ UTC-Mitternacht in der Datenbank, und mehrere Routen rechnen mit der lokalen Zei
 
 ### PostgreSQL-Datenbank
 
-1. Im Projekt: **New Resource** → **Database** → **PostgreSQL 17**
+1. Im Projekt: **New Resource** → **Database** → **PostgreSQL 17**, als Destination
+   `gruene-aktionstool-production` wählen
 2. Konfiguration:
    - **Name:** `aktionskoordination-db`
    - **Database Name:** `gruene_aktionen`
@@ -75,9 +96,16 @@ UTC-Mitternacht in der Datenbank, und mehrere Routen rechnen mit der lokalen Zei
 3. **Scheduled Backups** aktivieren:
    - **Frequency:** `0 2 * * *` (täglich 02:00 UTC)
    - **S3:** den auf der Instanz bereits eingerichteten S3-Speicher auswählen
-4. **Port-Mapping** für den Zugriff per SSH-Tunnel (siehe [Abschnitt 12](#12-datenbankzugriff-und-backups)):
-   `127.0.0.1:<PORT>:5432` – einen auf dem Server noch freien Port wählen. Durch `127.0.0.1`
-   ist die Datenbank nur lokal auf dem Server erreichbar, nicht aus dem Internet.
+4. **Netzwerk-Einstellungen:**
+   - **SSL:** `Disabled` – App und Datenbank sprechen nur innerhalb des eigenen Docker-Netzwerks
+     auf demselben Server miteinander.
+   - **Access:** `Private` ⚠️ – `Public` würde die Datenbank über den Coolify-Proxy aus dem
+     Internet erreichbar machen. Public port und Proxy timeout spielen dann keine Rolle.
+   - **Port mappings:** `127.0.0.1:<PORT>:5432` für den Zugriff per SSH-Tunnel (siehe
+     [Abschnitt 12](#12-datenbankzugriff-und-backups)). Einen freien Port wählen
+     (`sudo ss -ltnp | grep -E ':54[0-9]{2}'` zeigt belegte). Das Präfix `127.0.0.1` ist
+     entscheidend: Ohne es öffnet Docker den Port auf allen Interfaces – an der Firewall (ufw)
+     vorbei.
 5. **Start** klicken.
 6. Die **interne Postgres-URL** (Abschnitt „Internal URL“, beginnt mit `postgres://`) notieren –
    sie wird zu `DATABASE_URL`.
@@ -105,8 +133,15 @@ openssl rand -base64 18
 
 ## 4. Anwendung anlegen
 
-1. Im Projekt: **New Resource** → **Application**
-2. **Source:** GitHub-Account → Repository `gruene_wk_aktionstool` (der eigene Fork)
+1. Im Projekt: **New Resource** → **Application**, als Destination
+   `gruene-aktionstool-production` wählen (dieselbe wie die Datenbank)
+2. **Typ:** **Git Repository (with GitHub App)** – nur damit richtet Coolify den Webhook für
+   automatische Deployments ein. (Nicht die Kachel „Dockerfile“: Die ist für ein in Coolify
+   eingefügtes Dockerfile ohne Git; das Dockerfile-Build-Pack wird in Schritt 3 gewählt.)
+   - **Source:** die GitHub App der Instanz → Repository `gruene_wk_aktionstool` (der eigene Fork)
+   - Taucht das Repository nicht auf, hat die GitHub App keinen Zugriff darauf. Auf GitHub unter
+     **Settings** → **Applications** → **Installed GitHub Apps** → Coolify-App → **Configure** →
+     **Repository access** das Repository hinzufügen.
 3. Konfiguration:
    - **Branch:** `production` ⚠️ nicht `main`
    - **Build Pack:** `Dockerfile`
@@ -114,6 +149,10 @@ openssl rand -base64 18
    - **Dockerfile Location:** `/Dockerfile`
    - **Ports Exposes:** `3000`
    - **Auto Deploy:** ✅ aktiviert (deployt bei jedem Push auf `production`)
+   - **Watch Paths:** leer lassen. Auf `production` wird nur bewusst per Release gepusht, und
+     jedes Release soll deployen. Eine Pfadliste müsste alle build-relevanten Dateien im Root
+     enthalten (`package-lock.json`, `next.config.ts`, …) – eine später hinzugekommene, aber
+     vergessene Datei würde dann still kein Deployment auslösen.
 4. **Domains:** `https://<DOMAIN>` (z. B. `https://aktionen.<kreisverband>.de`)
    - Der DNS-A-Record (und ggf. AAAA-Record) muss auf den Coolify-Server zeigen,
      sonst kann Let's Encrypt kein Zertifikat ausstellen.
@@ -220,6 +259,7 @@ Laufzeit gelesen; nach einer Änderung genügt ein **Restart**.
 | `ADDRESS_STREET`, `ADDRESS_POSTAL_CODE`, `ADDRESS_CITY` | Anschrift der Geschäftsstelle |
 | `GEOCODING_CITY` | Stadt, die beim Geocoding an Adressen angehängt wird (Default `ADDRESS_CITY`) |
 | `DSB_NAME`, `DSB_STREET`, `DSB_POSTAL_CODE`, `DSB_CITY`, `DSB_EMAIL`, `DSB_PHONE` | Datenschutzbeauftragte*r |
+| `DSB_CONTACT_URL` | Kontaktformular der*des Datenschutzbeauftragten (optional). Ist es gesetzt, dürfen `DSB_EMAIL` und `DSB_PHONE` fehlen – sie werden dann nicht angezeigt statt auf Berlin zurückzufallen. |
 | `AUFSICHT_NAME`, `AUFSICHT_STREET`, `AUFSICHT_POSTAL_CODE`, `AUFSICHT_CITY`, `AUFSICHT_PHONE`, `AUFSICHT_EMAIL`, `AUFSICHT_URL` | zuständige Datenschutz-Aufsichtsbehörde (je Bundesland verschieden) |
 | `HOSTING_PROVIDER`, `HOSTING_ADDRESS`, `HOSTING_LOCATION`, `HOSTING_PRIVACY_URL` | Auftragsverarbeiter Hosting – hier der Anbieter des Coolify-Servers, nicht der Default Hetzner |
 | `EMAIL_PROVIDER`, `EMAIL_PROVIDER_PRIVACY_URL` | Auftragsverarbeiter E-Mail |
@@ -262,12 +302,12 @@ SMTP_PASSWORD=<SMTP-Passwort>
 BOOTSTRAP_ADMIN_PASSWORD=<openssl rand -base64 18, nach der Grundeinrichtung löschen>
 
 # ── Pflichtwerte ──
-NEXTAUTH_URL=https://<DOMAIN>
+NEXTAUTH_URL=https://aktionen.gruene-leipzig.de
 AUTH_TRUST_HOST=true
 SMTP_HOST=<SMTP-Server>
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=<SMTP-Benutzer>
+SMTP_USER=aktionen@gruene-leipzig.de
 EMAIL_FROM=aktionen@gruene-leipzig.de
 EMAIL_FROM_NAME=BÜNDNIS 90/DIE GRÜNEN Leipzig
 BOOTSTRAP_ADMIN_EMAIL=<E-Mail des ersten Admins>
@@ -289,17 +329,16 @@ ORG_RESPONSIBLE=Kreisvorstand BÜNDNIS 90/DIE GRÜNEN Leipzig
 ORG_SUBTITLE=Wahlkampfteam
 ORG_TEAM_NAMES=Euer Wahlkampfteam
 CONTACT_EMAIL=info@gruene-leipzig.de
-WEBSITE_URL=www.gruene-leipzig.de
+WEBSITE_URL=gruene-leipzig.de
 IMPRESSUM_URL=https://gruene-leipzig.de/impressum/
 ADDRESS_STREET=Hohe Straße 58
 ADDRESS_POSTAL_CODE=04107
 ADDRESS_CITY=Leipzig
-DSB_NAME=<Name bzw. Organisation>
-DSB_STREET=<Straße>
-DSB_POSTAL_CODE=<PLZ>
-DSB_CITY=<Ort>
-DSB_EMAIL=<E-Mail>
-DSB_PHONE=<Telefon>
+DSB_NAME=Vetter Consulting
+DSB_STREET=Oschatzer Str. 46
+DSB_POSTAL_CODE=01127
+DSB_CITY=Dresden
+DSB_CONTACT_URL=https://gruene-sachsen.de/datenschutz/anfrage-zum-datenschutz/
 AUFSICHT_NAME=Sächsische Datenschutz- und Transparenzbeauftragte
 AUFSICHT_STREET=Maternistraße 17
 AUFSICHT_POSTAL_CODE=01067
@@ -566,6 +605,7 @@ entsprechend kurz halten und in der Datenschutzerklärung berücksichtigen.
 | Build bricht bei `npm test` ab | Ein Test schlägt fehl – lokal mit `npm test` nachvollziehen. Das bisherige Deployment läuft weiter. |
 | Container startet nicht, Log zeigt Prisma-Fehler | `DATABASE_URL` falsch oder Datenbank nicht gestartet; bei `migrate deploy`-Fehlern die Migration prüfen. |
 | Health-Check schlägt fehl, `/api/health` liefert 503 | App läuft, aber die Datenbank ist nicht erreichbar. Container-Log zeigt `Health-Check: Datenbank nicht erreichbar` mit Details. |
+| Login schlägt fehl, Log zeigt `[auth][error] MissingCSRF` | Die App wird unter einer anderen Adresse aufgerufen als in `NEXTAUTH_URL` – meist per `http://` (z. B. über die von Coolify generierte sslip.io-Domain oder bevor das Zertifikat ausgestellt ist), während `NEXTAUTH_URL` mit `https://` beginnt. Auth.js setzt das CSRF-Cookie dann als `__Host-`/`Secure`-Cookie, das der Browser über http verwirft. Lösung: nur unter der Domain aus `NEXTAUTH_URL` per https aufrufen; die generierte Domain in Coolify entfernen. |
 | Login leitet immer wieder auf `/login` um | `NEXTAUTH_URL` stimmt nicht mit der Domain überein oder `AUTH_TRUST_HOST` fehlt. |
 | Alle Benutzer*innen plötzlich abgemeldet | `NEXTAUTH_SECRET` wurde geändert. |
 | Links in E-Mails zeigen auf eine falsche Domain | `NEXTAUTH_URL` fehlt oder ist falsch. |
