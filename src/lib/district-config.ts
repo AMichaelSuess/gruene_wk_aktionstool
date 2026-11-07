@@ -56,8 +56,10 @@ export const districtConfig = {
   dsbStreet: process.env.DSB_STREET || "Hauptstraße 27",
   dsbPostalCode: process.env.DSB_POSTAL_CODE || "53604",
   dsbCity: process.env.DSB_CITY || "Bad Honnef",
-  dsbEmail: process.env.DSB_EMAIL || "datenschutz@gruene-berlin.de",
-  dsbPhone: process.env.DSB_PHONE || "02224/988290",
+  // Mit Kontaktformular sind E-Mail und Telefon optional – dann ohne Berlin-Fallback
+  dsbEmail: process.env.DSB_EMAIL || (process.env.DSB_CONTACT_URL ? "" : "datenschutz@gruene-berlin.de"),
+  dsbPhone: process.env.DSB_PHONE || (process.env.DSB_CONTACT_URL ? "" : "02224/988290"),
+  dsbContactUrl: process.env.DSB_CONTACT_URL || "",
 
   // Aufsichtsbehörde
   aufsichtName: process.env.AUFSICHT_NAME || "Berliner Beauftragte für Datenschutz und Informationsfreiheit",

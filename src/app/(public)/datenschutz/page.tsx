@@ -31,13 +31,36 @@ export default function DatenschutzPage() {
           <p>
             {districtConfig.dsbName}<br />
             {districtConfig.dsbStreet}<br />
-            {districtConfig.dsbPostalCode} {districtConfig.dsbCity}<br />
-            E-Mail:{" "}
-            <a href={`mailto:${districtConfig.dsbEmail}`} className="text-tanne underline">
-              {districtConfig.dsbEmail}
-            </a>
-            <br />
-            Tel.: {districtConfig.dsbPhone}
+            {districtConfig.dsbPostalCode} {districtConfig.dsbCity}
+            {districtConfig.dsbEmail && (
+              <>
+                <br />
+                E-Mail:{" "}
+                <a href={`mailto:${districtConfig.dsbEmail}`} className="text-tanne underline">
+                  {districtConfig.dsbEmail}
+                </a>
+              </>
+            )}
+            {districtConfig.dsbPhone && (
+              <>
+                <br />
+                Tel.: {districtConfig.dsbPhone}
+              </>
+            )}
+            {districtConfig.dsbContactUrl && (
+              <>
+                <br />
+                Kontakt:{" "}
+                <a
+                  href={districtConfig.dsbContactUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-tanne underline"
+                >
+                  Kontaktformular
+                </a>
+              </>
+            )}
           </p>
         </section>
 
