@@ -124,7 +124,7 @@ function formatAktionCard(aktion: AktionInfo, cancelLink?: string): string {
     <p>📅 ${datumStr}</p>
     <p>🕐 ${e(aktion.startzeit)} – ${e(aktion.endzeit)} Uhr</p>
     <p>📍 ${e(aktion.adresse)}</p>
-    <p>👋 Ansprechpartner*in: ${e(aktion.ansprechpersonName)} · <a href="mailto:${e(aktion.ansprechpersonEmail)}">${e(aktion.ansprechpersonEmail)}</a> · ${e(aktion.ansprechpersonTelefon)}</p>
+    <p>👋 Ansprechperson: ${e(aktion.ansprechpersonName)} · <a href="mailto:${e(aktion.ansprechpersonEmail)}">${e(aktion.ansprechpersonEmail)}</a> · ${e(aktion.ansprechpersonTelefon)}</p>
     ${cancelLink ? `<p><a href="${e(cancelLink)}" class="cancel-link">❌ Von dieser Aktion abmelden →</a></p>` : ""}
   </div>`;
 }
@@ -139,15 +139,15 @@ export function anmeldebestaetigungEmail(
 
   const content = `
     <p class="greeting">Hallo ${e(vorname)},</p>
-    <p>vielen Dank für Deine Anmeldung und Deine Unterstützung im Wahlkampf.</p>
-    <p>Wenn sich Deine Pläne ändern, kannst Du Dich jederzeit über den Link in der jeweiligen Aktion von der Teilnahme abmelden.</p>
-    <p>Wir freuen uns auf Dich! 💚</p>
+    <p>vielen Dank für deine Anmeldung und deine Unterstützung im Wahlkampf.</p>
+    <p>Wenn sich deine Pläne ändern, kannst du dich jederzeit über den Link in der jeweiligen Aktion von der Teilnahme abmelden.</p>
+    <p>Wir freuen uns auf dich! 💚</p>
     <p>Viele Grüße<br>
     <strong>${districtConfig.orgTeamNames}</strong><br>
     ${districtConfig.orgResponsible}</p>
     <hr class="section-divider" />
-    <p>Du kannst Dir jederzeit eine Übersicht aller Aktionen, für die Du angemeldet bist, per E-Mail zusenden lassen: <a href="${baseUrl}/meine-aktionen-bestaetigen?email=${encodeURIComponent(email)}">Meine Anmeldungen per E-Mail anfordern →</a></p>
-    <p>Du hast Dich für ${aktionen.length > 1 ? "folgende Aktionen" : "folgende Aktion"} angemeldet:</p>
+    <p>Du kannst dir jederzeit eine Übersicht aller Aktionen, für die du angemeldet bist, per E-Mail zusenden lassen: <a href="${baseUrl}/meine-aktionen-bestaetigen?email=${encodeURIComponent(email)}">Meine Anmeldungen per E-Mail anfordern →</a></p>
+    <p>Du hast dich für ${aktionen.length > 1 ? "folgende Aktionen" : "folgende Aktion"} angemeldet:</p>
     ${aktionen.map((a, i) => {
     const cancelLink = cancelTokens?.[i]
       ? cancelUrl(cancelTokens[i])
@@ -184,12 +184,12 @@ export function aenderungsEmail(
   const content = `
     <span class="badge-geaendert">Geändert</span>
     <h2 style="margin-top: 12px;">Änderung an deiner Aktion</h2>
-    <p>Eine Aktion, für die Du Dich angemeldet hast, wurde geändert:</p>
+    <p>Eine Aktion, für die du dich angemeldet hast, wurde geändert:</p>
     ${changesList}
     <hr class="section-divider" />
     <h3>Aktualisierte Details</h3>
     ${formatAktionCard(aktion, cancelLink)}
-    <p>Bei Fragen wende Dich bitte an die Ansprechperson der Aktion.</p>
+    <p>Bei Fragen wende dich bitte an die Ansprechperson der Aktion.</p>
   `;
 
   return { subject, html: baseLayout(content) };
@@ -205,7 +205,7 @@ export function absageEmail(aktion: AktionInfo): { subject: string; html: string
     <p>Leider wurde die folgende Aktion abgesagt:</p>
     ${formatAktionCard(aktion)}
     <hr class="section-divider" />
-    <p>Wir bedauern die Unannehmlichkeiten. Schau gerne auf <a href="${baseUrl}">unserer Seite</a> nach weiteren Aktionen, bei denen Du mitmachen kannst!</p>
+    <p>Wir bedauern die Unannehmlichkeiten. Schau gerne auf <a href="${baseUrl}">unserer Seite</a> nach weiteren Aktionen, bei denen du mitmachen kannst!</p>
   `;
 
   return { subject, html: baseLayout(content) };
@@ -234,10 +234,10 @@ export function meineAktionenEmail(
 
   const content = `
     <h2>Deine Anmeldungen</h2>
-    <p>Du hast eine Übersicht Deiner Anmeldungen angefordert.</p>
+    <p>Du hast eine Übersicht deiner Anmeldungen angefordert.</p>
     ${aktionenHtml}
     <hr class="section-divider" />
-    <p>Bei Fragen wende Dich gerne an uns.</p>
+    <p>Bei Fragen wende dich gerne an uns.</p>
   `;
 
   return { subject, html: baseLayout(content) };
@@ -251,7 +251,7 @@ export function erinnerungsEmail(
 
   const content = `
     <p class="greeting">Hallo ${e(vorname)},</p>
-    <p>morgen ist es soweit! Morgen ${aktionen.length > 1 ? "finden folgenden Aktionen" : "findet folgende Aktion"} statt:</p>
+    <p>morgen ist es so weit! Morgen ${aktionen.length > 1 ? "finden folgende Aktionen" : "findet folgende Aktion"} statt:</p>
     ${aktionen.map((a) => {
     const cancelLink = a.cancelToken
       ? cancelUrl(a.cancelToken)
@@ -259,7 +259,7 @@ export function erinnerungsEmail(
     return formatAktionCard(a, cancelLink);
   }).join("")}
     <hr class="section-divider" />
-    <p>Falls Du doch nicht kommen kannst, melde Dich bitte rechtzeitig über den Abmelde-Link in der jeweiligen Aktion ab und schreibe der Ansprechpartner*in eine kurze Nachricht.</p>
+    <p>Falls du doch nicht kommen kannst, melde dich bitte rechtzeitig über den Abmelde-Link in der jeweiligen Aktion ab und schreibe der Ansprechperson eine kurze Nachricht.</p>
     <p>Viele Grüße<br>
     <strong>${districtConfig.orgTeamNames}</strong><br>
     ${districtConfig.orgResponsible}</p>

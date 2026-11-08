@@ -26,7 +26,7 @@ export default function DatenschutzPage() {
             Datenschutzbeauftragte*r
           </h2>
           <p className="mb-2">
-            Den Datenschutzbeauftragten für {districtConfig.orgFullName} erreichst Du unter:
+            Den Datenschutzbeauftragten für {districtConfig.orgFullName} erreichst du unter:
           </p>
           <p>
             {districtConfig.dsbName}<br />

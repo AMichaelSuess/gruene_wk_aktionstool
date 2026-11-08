@@ -78,7 +78,7 @@ function AnmeldenPageContent() {
           {bereitsAngemeldet.length > 0 && (
             <div className="mt-4 bg-white rounded-card border-ui border-yellow-500 p-4 text-left shadow-ui-warning">
               <p className="font-bold text-sm text-ink mb-2">
-                Hinweis: Für folgende Aktionen warst Du bereits angemeldet:
+                Hinweis: Für folgende Aktionen warst du bereits angemeldet:
               </p>
               <ul className="list-disc list-inside space-y-1">
                 {bereitsAngemeldet.map((id) => (
