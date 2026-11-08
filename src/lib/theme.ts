@@ -33,6 +33,8 @@ export interface EmailTheme {
   warningText: string;
   danger: string;
   dangerText: string;
+  /** Dezente Fläche, z. B. hinter dem alten Wert in Änderungsmails */
+  muted: string;
   footerBg: string;
   footerText: string;
   footerLink: string;
@@ -99,6 +101,7 @@ const brutalist: ThemeConfig = {
     warningText: "#000000",
     danger: "#E6007E",
     dangerText: "#FFFFFF",
+    muted: "#F5F1E9",
     footerBg: "#000000",
     footerText: "#FFFFFF",
     footerLink: "#FFF17A",
@@ -143,6 +146,7 @@ const emerald: ThemeConfig = {
     warningText: "#002D2D",
     danger: "#B4004E",
     dangerText: "#FFFFFF",
+    muted: "#E8F0EF",
     footerBg: "#003C40",
     footerText: "#FFFFFF",
     footerLink: "#FFD2E8",

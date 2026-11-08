@@ -64,10 +64,10 @@ function baseLayout(content: string): string {
     .aktion-card-title { font-size: 17px; font-weight: 700; text-transform: ${t.textTransform}; letter-spacing: ${ls("0.04em")}; margin: 0 0 12px 0; color: ${t.ink}; border-bottom: ${t.cardBorder}; padding-bottom: 8px; }
     .aktion-card p { margin: 5px 0; font-size: 15px; color: ${t.ink}; line-height: 1.5; text-align: left; }
     .aktion-card a { color: ${t.primary}; font-weight: 700; }
-    .aktion-card .cancel-link { display: inline-block; margin-top: 12px; font-size: 15px; color: #e63946; text-decoration: underline; font-weight: 700; }
+    .aktion-card .cancel-link { display: inline-block; margin-top: 12px; font-size: 15px; color: ${t.danger}; text-decoration: underline; font-weight: 700; }
     .change-row { border: ${t.cardBorder}; border-radius: ${t.radius}; padding: 12px 16px; margin-bottom: 8px; background: ${t.canvas}; }
     .change-row strong { font-weight: 700; text-transform: ${t.textTransform}; font-size: 12px; letter-spacing: ${ls("0.08em")}; display: block; margin-bottom: 4px; }
-    .change-old { background: #262626; color: #FFFFFF; padding: 2px 6px; font-size: 14px; font-weight: 700; border: ${t.badgeBorder};display: inline-block; }
+    .change-old { background: ${t.muted}; color: ${t.ink}; padding: 2px 6px; font-size: 14px; text-decoration: line-through; border: ${t.badgeBorder}; display: inline-block; }
     .change-arrow { font-size: 18px; font-weight: 700; margin: 0 6px; }
     .change-new { background: ${t.warning}; color: ${t.warningText}; padding: 2px 6px; font-size: 14px; font-weight: 700; border: ${t.badgeBorder}; display: inline-block; }
     .cta-button { ${ctaStyle} }
@@ -80,7 +80,7 @@ function baseLayout(content: string): string {
     .footer p { margin: 4px 0; line-height: 1.5; }
     .footer a { color: ${t.footerLink}; text-decoration: none; font-weight: 700; }
     .footer-links { margin-top: 8px; }
-    .footer-separator { color: #555555; margin: 0 8px; }
+    .footer-separator { margin: 0 8px; }
   </style>
 </head>
 <body>
