@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default async function AbmeldungPage({
   searchParams,
 }: {
@@ -31,12 +33,12 @@ export default async function AbmeldungPage({
             </p>
           </>
         )}
-        <a
+        <Link
           href="/"
           className="mt-6 inline-block text-primary hover:underline font-bold"
         >
           ← Zurück zur Aktionsübersicht
-        </a>
+        </Link>
       </div>
     </div>
   );

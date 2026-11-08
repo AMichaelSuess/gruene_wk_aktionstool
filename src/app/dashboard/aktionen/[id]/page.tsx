@@ -29,7 +29,7 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
   const isAdmin = session?.user.role === "ADMIN";
   const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -49,7 +49,6 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
   });
 
   useEffect(() => {
-    setLoading(true);
     Promise.all([
       fetch(`/api/aktionen/${id}`).then((r) => r.json()),
       fetch("/api/wahlkreise").then((r) => r.json()),

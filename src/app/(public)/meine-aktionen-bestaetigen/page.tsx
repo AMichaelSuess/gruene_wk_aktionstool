@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
@@ -75,22 +76,22 @@ function BestaetigenContent() {
               >
                 {status === "sending" ? "Wird gesendet …" : "E-Mail senden"}
               </button>
-              <a
+              <Link
                 href="/"
                 className="rounded-button bg-white text-ink font-bold px-6 py-3 border-ui border-line shadow-ui hover:shadow-none hover:press transition-all inline-block"
               >
                 Abbrechen
-              </a>
+              </Link>
             </div>
           </>
         )}
         {(status === "sent" || status === "error" || !isValidEmail) && (
-          <a
+          <Link
             href="/"
             className="mt-6 inline-block text-primary hover:underline font-bold"
           >
             ← Zurück zur Aktionsübersicht
-          </a>
+          </Link>
         )}
       </div>
     </div>
