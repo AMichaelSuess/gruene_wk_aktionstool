@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { prisma } from "./db";
+import { htmlToText } from "./plaintext";
 import type { EmailTyp } from "@prisma/client";
 
 const transporter = nodemailer.createTransport({
@@ -30,6 +31,7 @@ export async function sendEmail({ to, subject, html, typ, aktionId }: SendEmailP
       to,
       subject,
       html,
+      text: htmlToText(html),
     });
 
     await prisma.emailLog.create({
