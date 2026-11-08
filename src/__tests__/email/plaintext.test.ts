@@ -24,6 +24,10 @@ describe("htmlToText", () => {
     expect(htmlToText('<a href="mailto:anna@example.org">anna@example.org</a>')).toBe("anna@example.org");
   });
 
+  it("shows tel links as the readable number", () => {
+    expect(htmlToText('<p>Tel: <a href="tel:01701234567">0170 1234567</a></p>')).toBe("Tel: 0170 1234567");
+  });
+
   it("does not glue adjacent links together", () => {
     expect(htmlToText('<a href="https://a.example">A</a><span>·</span><a href="https://b.example">B</a>')).toBe(
       "A: https://a.example · B: https://b.example"

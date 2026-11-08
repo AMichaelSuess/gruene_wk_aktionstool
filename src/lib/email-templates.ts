@@ -30,6 +30,19 @@ export function escapeHtml(value: string): string {
 }
 const e = escapeHtml;
 
+/**
+ * Telefonnummer als antippbarer Link. Die Nummern sind Freitext ("030/123 456",
+ * "+49 (0)170 …"), für tel: zählen nur Ziffern und ein führendes "+".
+ */
+export function phoneLink(phone: string): string {
+  const dialable = phone
+    .trim()
+    .replace(/^(\+\d+)\s*\(0\)/, "$1") // +49 (0)30 → +4930
+    .replace(/(?!^\+)\D/g, "");
+  if (dialable.replace("+", "").length < 3) return e(phone);
+  return `<a href="tel:${dialable}">${e(phone)}</a>`;
+}
+
 function cancelUrl(token: string): string {
   return `${baseUrl}/api/anmeldungen/abmelden?token=${encodeURIComponent(token)}`;
 }
@@ -124,7 +137,7 @@ function formatAktionCard(aktion: AktionInfo, cancelLink?: string): string {
     <p>📅 ${datumStr}</p>
     <p>🕐 ${e(aktion.startzeit)} – ${e(aktion.endzeit)} Uhr</p>
     <p>📍 ${e(aktion.adresse)}</p>
-    <p>👋 Ansprechperson: ${e(aktion.ansprechpersonName)} · <a href="mailto:${e(aktion.ansprechpersonEmail)}">${e(aktion.ansprechpersonEmail)}</a> · ${e(aktion.ansprechpersonTelefon)}</p>
+    <p>👋 Ansprechperson: ${e(aktion.ansprechpersonName)} · <a href="mailto:${e(aktion.ansprechpersonEmail)}">${e(aktion.ansprechpersonEmail)}</a> · ${phoneLink(aktion.ansprechpersonTelefon)}</p>
     ${cancelLink ? `<p><a href="${e(cancelLink)}" class="cancel-link">❌ Von dieser Aktion abmelden →</a></p>` : ""}
   </div>`;
 }
@@ -318,7 +331,7 @@ export function tagesUebersichtEmail(
         ? `<ul>${a.anmeldungen.map((an) => {
           const kontakt = an.signalName
             ? `Signal: ${e(an.signalName)}`
-            : e(an.telefon || "");
+            : an.telefon ? phoneLink(an.telefon) : "";
           return `<li>${e(an.vorname)} ${e(an.nachname)} · ${e(an.email)}${kontakt ? ` · ${kontakt}` : ""}</li>`;
         }).join("")}</ul>`
         : `<p><em>Noch keine Anmeldungen.</em></p>`;
@@ -343,7 +356,7 @@ export function tagesUebersichtEmail(
         .map((an) => {
           const kontakt = an.signalName
             ? `Signal: ${e(an.signalName)}`
-            : e(an.telefon || "");
+            : an.telefon ? phoneLink(an.telefon) : "";
           return `<li>${e(an.vorname)} ${e(an.nachname)} · ${e(an.email)}${kontakt ? ` · ${kontakt}` : ""}</li>`;
         })
         .join("");

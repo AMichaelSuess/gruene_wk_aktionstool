@@ -13,10 +13,11 @@ export function htmlToText(html: string): string {
     .replace(/\s+/g, " ")
     // Links: Beschriftung plus Adresse, denn im Text kann man nicht klicken
     .replace(/<a\s[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_, href: string, label: string) => {
-      const url = href.replace(/^mailto:/i, "");
       const cleanLabel = stripTags(label).replace(/\s*→\s*$/, "").trim();
-      // Leerzeichen drumherum, damit die URL nicht mit Folgetext verklebt
-      return cleanLabel === url || cleanLabel === "" ? ` ${url} ` : ` ${cleanLabel}: ${url} `;
+      // Leerzeichen drumherum, damit nichts mit Folgetext verklebt.
+      // mailto:/tel:-Links zeigen Adresse bzw. Nummer schon als Beschriftung.
+      if (/^(mailto|tel):/i.test(href)) return ` ${cleanLabel || href.replace(/^[a-z]+:/i, "")} `;
+      return cleanLabel === href || cleanLabel === "" ? ` ${href} ` : ` ${cleanLabel}: ${href} `;
     })
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<hr[^>]*>/gi, "\n\n----------\n\n")
