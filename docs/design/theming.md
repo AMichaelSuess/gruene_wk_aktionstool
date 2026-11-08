@@ -5,7 +5,7 @@ The app ships with several visual themes. Components never hard-code a look: the
 | Theme | Look | Description |
 |---|---|---|
 | `brutalist` (default) | Square, 2 px black borders, hard offset shadows, uppercase labels | [theme-brutalist.md](theme-brutalist.md) |
-| `emerald` | Rounded, soft shadows, wide grotesque type, chevron graphic | [theme-emerald.md](theme-emerald.md) |
+| `emerald` | Rounded, soft shadows, wide grotesque type, campaign hero with arrows | [theme-emerald.md](theme-emerald.md) |
 
 This document covers the mechanism, the token reference and the component patterns shared by all themes. The theme documents describe each theme's look and values.
 
@@ -17,7 +17,7 @@ This document covers the mechanism, the token reference and the component patter
 NEXT_PUBLIC_THEME=emerald            (build time: .env locally, Coolify build variable in production)
         │
         ▼
-src/lib/theme.ts                     parses the name → `theme` object (logo, chevrons, map marker, email colors)
+src/lib/theme.ts                     parses the name → `theme` object (logo, campaign hero, map marker, email colors)
         │
         ▼
 src/app/layout.tsx                   <html data-theme={theme.name}>
@@ -33,7 +33,7 @@ Components                           bg-primary, border-ui, rounded-card, shadow
 
 - **Build-time only.** `NEXT_PUBLIC_THEME` is embedded during `next build` and declared as `ARG` in the `Dockerfile`. Changing it needs a rebuild (Coolify: redeploy), not a restart. Unknown or missing values fall back to `brutalist`.
 - **CSS tokens** live in [`src/app/globals.css`](../../src/app/globals.css). Every visual decision is a `--t-*` variable. The `@theme inline` block maps them to Tailwind utilities.
-- **Non-CSS settings** live in [`src/lib/theme.ts`](../../src/lib/theme.ts): logo images (or a text wordmark), the chevron band, map marker colors and the email palette.
+- **Non-CSS settings** live in [`src/lib/theme.ts`](../../src/lib/theme.ts): logo images (or a text wordmark), the campaign hero on the start page, map marker colors and the email palette.
 - **Emails** cannot use CSS variables, so [`src/lib/email-templates.ts`](../../src/lib/email-templates.ts) reads literal values from `theme.email`.
 
 ---
@@ -169,7 +169,7 @@ Label: `text-sm font-bold case-ui tracking-ui text-ink`.
 **Header:** `bg-chrome text-white sticky top-0 z-50 border-b-ui-thick border-line`. Nav links: active `text-accent`, idle `text-white/70 hover:text-white`.
 **Footer:** `bg-chrome text-white/70 text-sm border-t-ui-thick border-line`
 **Logo:** `<BrandLogo variant="onDark" size={36} />`. It renders nothing when the theme has no logo, so add `wordmarkClass` to the organisation name next to it.
-**Chevron band:** `<ChevronBand />`, rendered only when the theme enables it.
+**Campaign hero:** with `hero: true` in the theme, `PublicHeader` renders `<CampaignHero />` instead of the header on the start page. Everything that sticks below the header (the filter bar) must handle the missing sticky header.
 
 **Sidebar:** `w-64 shrink-0 bg-white border-r-ui border-line p-4`. Nav item: `flex items-center gap-3 rounded-button px-3 py-2 text-sm font-bold case-ui tracking-ui border-ui transition-colors`; active `bg-primary text-white border-line shadow-ui-sm`; idle `text-ink border-transparent hover:border-line hover:shadow-ui-sm`.
 
@@ -183,7 +183,7 @@ Label: `text-sm font-bold case-ui tracking-ui text-ink`.
 
 1. **CSS:** in `src/app/globals.css`, add a `:root[data-theme="<name>"] { … }` block that sets **every** `--t-*` variable. Copy the `emerald` block as a starting point. A variable you leave out silently falls back to brutalist.
 2. **Fonts:** self-host new fonts in `public/fonts/` with an `@font-face` rule. Do not load them from a font CDN, because that is a DSGVO problem. Check the font license.
-3. **Theme module:** in `src/lib/theme.ts`, add the name to `THEME_NAMES` and add a `ThemeConfig` entry with logo, chevrons, map marker and the email palette.
+3. **Theme module:** in `src/lib/theme.ts`, add the name to `THEME_NAMES` and add a `ThemeConfig` entry with logo, hero, map marker and the email palette.
 4. **Theme-specific CSS:** put rules beyond tokens (such as heading weights or Leaflet tweaks) under the `[data-theme="<name>"]` selector at the end of `globals.css`.
 5. **Docs:** add `docs/design/theme-<name>.md` and a row to the table at the top of this file. Add the value to the `NEXT_PUBLIC_THEME` description in `.env.example` and `docs/deployment/coolify-deployment.md`.
 6. **Verify:** build with the new theme and check the public list, map, signup form, login, dashboard, admin overview and one rendered email.

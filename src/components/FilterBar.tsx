@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { KATEGORIEN } from "@/lib/kategorien";
 import { WAHLKREIS_LABEL_SHORT } from "@/lib/wahlkreis-label";
+import { theme } from "@/lib/theme";
 
 interface FilterState {
   datum: string;
@@ -58,8 +59,9 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
     (filters.wahlkreise.length > 0 ? 1 : 0) +
     (filters.kategorien.length > 0 ? 1 : 0);
 
+  // Mit Kampagnen-Kopfbereich gibt es auf der Startseite keinen sticky Header darüber
   return (
-    <div className="bg-white border-b-ui border-line sticky top-[52px] z-40">
+    <div className={`bg-white border-b-ui border-line sticky z-40 ${theme.hero ? "top-0" : "top-[52px]"}`}>
       <div className="max-w-7xl mx-auto px-4">
         {/* Toggle button: visible on mobile and tablet (< lg) */}
         <button

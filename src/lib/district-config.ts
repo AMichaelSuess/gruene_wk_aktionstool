@@ -38,6 +38,13 @@ export const districtConfig = {
   orgSubtitle: process.env.ORG_SUBTITLE || "Kreisvorstand",
   orgTeamNames: process.env.ORG_TEAM_NAMES || "Annalena, Florian, Lara, Linus, Madlen und Timur",
 
+  // Kopfbereich der Startseite (nur in Themes mit Kampagnen-Kopfbereich, z. B. emerald;
+  // das Foto gehört zum Theme, siehe src/lib/theme.ts)
+  heroTitle: process.env.NEXT_PUBLIC_HERO_TITLE || "Mach mit im Wahlkampf!",
+  heroText:
+    process.env.NEXT_PUBLIC_HERO_TEXT ||
+    "Ob Infostand, Haustür oder Plakatieren: Jede helfende Hand zählt. Wir freuen uns auf dich!",
+
   // Kontakt
   contactEmail: process.env.CONTACT_EMAIL || "info@gruene-mitte.de",
   websiteUrl: process.env.WEBSITE_URL || "www.gruene-mitte.de",

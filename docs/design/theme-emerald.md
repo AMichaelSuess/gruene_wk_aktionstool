@@ -10,8 +10,9 @@ The campaign look is calm and confident: deep emerald surfaces, a fresh yellow-g
 
 | Campaign element | In the app |
 |---|---|
-| Emerald backgrounds, dark emerald website menu | Dark emerald header/footer (`chrome`), emerald buttons (`primary`) |
-| Yellow-green arrows on emerald | Chevron band below the public header, lime wordmark, lime active nav link |
+| Emerald backgrounds, dark emerald website menu | Campaign hero on the start page, dark emerald header on all other pages and footer (`chrome`), emerald buttons (`primary`) |
+| Website header: arrows in the lighter emerald on emerald, photo with yellow-green arrows | Campaign hero on the start page, with optional photo |
+| Yellow-green on emerald | Lime wordmark, lime active nav link |
 | Pink pill button with ▶ ("Mehr erfahren") | Pink pill "Jetzt anmelden" on the dark selection bar (`cta`) |
 | Wide grotesque "Obviously" | Archivo at 125 % width for headings |
 | Sentence case, no hard frames | No uppercase, 1 px light borders, rounded corners, soft shadows |
@@ -85,8 +86,9 @@ A selected action card gets a 2 px emerald ring on top of its 1 px border (`shad
 
 ## 6. Signature elements
 
-- **Wordmark instead of logo:** the theme has no logo image. The organisation name is set in the headline font in Gelbgrün on the dark header. Add image paths to `logo` in `src/lib/theme.ts` to use a logo instead.
-- **Chevron band:** a 40 px emerald band with Gelbgrün arrows below the public header ([`ChevronBand.tsx`](../../src/components/ChevronBand.tsx)).
+- **Wordmark instead of logo:** the theme has no logo image. The organisation name is set in the headline font in Gelbgrün on the dark header and on the campaign hero. Add image paths to `logo` in `src/lib/theme.ts` to use a logo instead.
+- **Campaign hero:** on the start page a 16rem high emerald area replaces the header ([`CampaignHero.tsx`](../../src/components/CampaignHero.tsx), switched in [`PublicHeader.tsx`](../../src/app/(public)/PublicHeader.tsx)). Wordmark, "Wahlkampfaktionen" and the menu sit on top, the headline and a short text below. Behind them runs a lattice of 45° arrows in the lighter emerald, bleeding off the top and bottom edge as the manual asks. From 1024 px width the campaign photo ([`public/themes/emerald/hero.jpg`](../../public/themes/emerald/hero.jpg), a crop of the website header from the campaign manual; usage rights cleared) sits flush with the right screen edge; the manual reserves Gelbgrün arrows for photos. The hero is not sticky, so on the start page only the filter bar sticks to the top (`top-0` instead of `top-[52px]`). Headline and text come from `NEXT_PUBLIC_HERO_TITLE` and `NEXT_PUBLIC_HERO_TEXT`. All other public pages, the dashboard and the admin area keep the plain dark emerald header.
+- **Photo and arrow lattice:** photo and lattice are configured together in `hero` of the theme in `src/lib/theme.ts`. The lattice is measured from the photo (640 × 328 px; period 262 px, horizontal band width 124 px, centre-line tip at x = 124.5, y = 143.5), so the emerald arrows continue the photo's Gelbgrün arrows seamlessly. A different photo needs newly measured values. The photo is only 640 px wide and looks slightly soft on high-density screens. With a cut-out photo the Gelbgrün arrows could be drawn in the same lattice instead, which would work for any photo.
 - **Dark selection bar:** the sticky "N Aktionen ausgewählt" bar is dark emerald, so the pink pill button reads like the campaign website's call to action.
 - **Map markers:** emerald pins with a Gelbgrün dot.
 - **Emails:** dark emerald header without logo, Gelbgrün subtitle, rounded cards without shadows, emerald footer with pink links.
@@ -97,6 +99,7 @@ A selected action card gets a 2 px emerald ring on top of its 1 px border (`shad
 
 - Obviously web font (agency: zitronengrau). The manual names it as an Adobe Font; Adobe Fonts serves web fonts from its own CDN, which conflicts with self-hosting fonts for DSGVO reasons, so a separate web license would be needed.
 - Whether the KV Leipzig logo should appear in the header instead of the wordmark.
+- Campaign photo in full resolution, ideally cut out (agency: zitronengrau): sharper on high-density screens, and with a cut-out the Gelbgrün arrows could be drawn in the lattice, which would work for any photo.
 - Native browser checkboxes and the date picker are only partly themed (color via `accent-primary`).
 
 ---

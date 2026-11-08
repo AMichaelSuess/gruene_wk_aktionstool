@@ -45,6 +45,23 @@ export interface EmailTheme {
   buttonShadow: string;
 }
 
+/**
+ * Kampagnen-Kopfbereich der Startseite (siehe CampaignHero). Alle Maße in
+ * Pixeln des Fotos: Das Pfeil-Raster setzt die Pfeile im Foto fort und muss
+ * deshalb zum Foto passen.
+ */
+export interface HeroConfig {
+  /** Foto am rechten Rand (ab 1024 px Breite); null = nur Pfeile */
+  photo: string | null;
+  width: number;
+  height: number;
+  /** 45°-Pfeile: Abstand, horizontale Bandbreite, Spitze der Mittellinie */
+  arrowPeriod: number;
+  arrowBandWidth: number;
+  arrowTipX: number;
+  arrowTipY: number;
+}
+
 export interface ThemeConfig {
   name: ThemeName;
   /**
@@ -52,8 +69,8 @@ export interface ThemeConfig {
    * eines Bildes wird der Organisationsname als Wortmarke gesetzt.
    */
   logo: { onDark: string; onLight: string } | null;
-  /** Pfeil-Grafik der Leipziger Kampagne im öffentlichen Header */
-  chevrons: boolean;
+  /** Kampagnen-Kopfbereich, ersetzt auf der Startseite den Header; null = keiner */
+  hero: HeroConfig | null;
   /** Farben für eigene Karten-Marker; null = Standard-Marker von Leaflet */
   mapMarker: { fill: string; stroke: string; dot: string } | null;
   email: EmailTheme;
@@ -62,7 +79,7 @@ export interface ThemeConfig {
 const brutalist: ThemeConfig = {
   name: "brutalist",
   logo: { onDark: "/logo_white.png", onLight: "/logo_green.png" },
-  chevrons: false,
+  hero: null,
   mapMarker: null,
   email: {
     fontFamily: "Arial, sans-serif",
@@ -96,7 +113,17 @@ const brutalist: ThemeConfig = {
 const emerald: ThemeConfig = {
   name: "emerald",
   logo: null,
-  chevrons: true,
+  // Ausschnitt aus dem Website-Header der Kampagne (Personenkampagne-Manual),
+  // Raster aus den gelbgrünen Pfeilen im Foto ausgemessen
+  hero: {
+    photo: "/themes/emerald/hero.jpg",
+    width: 640,
+    height: 328,
+    arrowPeriod: 262,
+    arrowBandWidth: 124,
+    arrowTipX: 124.5,
+    arrowTipY: 143.5,
+  },
   mapMarker: { fill: "#003C40", stroke: "#002D2D", dot: "#C8DA20" },
   email: {
     fontFamily: "Archivo, Arial, sans-serif",
