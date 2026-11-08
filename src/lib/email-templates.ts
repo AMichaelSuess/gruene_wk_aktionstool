@@ -22,8 +22,7 @@ const t = theme.email;
 const ls = (em: string) => (t.textTransform === "uppercase" ? em : "0");
 const ctaStyle = `display:inline-block;background-color:${t.primary};color:${t.primaryText};font-weight:700;text-transform:${t.textTransform};letter-spacing:${ls("0.08em")};font-size:14px;padding:12px 24px;text-decoration:none;border:${t.cardBorder};border-radius:${t.buttonRadius};box-shadow:${t.buttonShadow};margin-top:8px;`;
 
-function baseLayout(content: string, accentBar?: string): string {
-  const accent = accentBar ?? t.primary;
+function baseLayout(content: string): string {
   return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -175,7 +174,7 @@ export function aenderungsEmail(
     <p>Bei Fragen wende Dich bitte an die Ansprechperson der Aktion.</p>
   `;
 
-  return { subject, html: baseLayout(content, t.warning) };
+  return { subject, html: baseLayout(content) };
 }
 
 export function absageEmail(aktion: AktionInfo): { subject: string; html: string } {
@@ -191,7 +190,7 @@ export function absageEmail(aktion: AktionInfo): { subject: string; html: string
     <p>Wir bedauern die Unannehmlichkeiten. Schau gerne auf <a href="${baseUrl}">unserer Seite</a> nach weiteren Aktionen, bei denen Du mitmachen kannst!</p>
   `;
 
-  return { subject, html: baseLayout(content, t.danger) };
+  return { subject, html: baseLayout(content) };
 }
 
 interface AktionInfoWithToken extends AktionInfo {

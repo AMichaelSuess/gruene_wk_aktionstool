@@ -151,9 +151,7 @@ function AnmeldenPageContent() {
       {/* Registration form */}
       <AnmeldeFormular
         selectedIds={selectedIds}
-        aktionTitles={aktionTitles}
         onSuccess={handleSuccess}
-        onClear={() => router.push("/")}
       />
     </div>
   );

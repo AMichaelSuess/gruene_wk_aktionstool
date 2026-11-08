@@ -7,16 +7,12 @@ import Link from "next/link";
 
 interface AnmeldeFormularProps {
   selectedIds: string[];
-  aktionTitles: Map<string, string>;
   onSuccess: (bereitsAngemeldetIds?: string[]) => void;
-  onClear: () => void;
 }
 
 export default function AnmeldeFormular({
   selectedIds,
-  aktionTitles,
   onSuccess,
-  onClear,
 }: AnmeldeFormularProps) {
   const [form, setForm] = useState({
     vorname: "",

@@ -61,7 +61,7 @@ export default function AktionCard({ aktion, selected, onToggle }: AktionCardPro
               } ${isFull ? "opacity-50" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
-                !isFull && onToggle(aktion.id);
+                if (!isFull) onToggle(aktion.id);
               }}
               role="checkbox"
               aria-checked={selected}
@@ -69,7 +69,7 @@ export default function AktionCard({ aktion, selected, onToggle }: AktionCardPro
               onKeyDown={(e) => {
                 if (e.key === " " || e.key === "Enter") {
                   e.preventDefault();
-                  !isFull && onToggle(aktion.id);
+                  if (!isFull) onToggle(aktion.id);
                 }
               }}
             >

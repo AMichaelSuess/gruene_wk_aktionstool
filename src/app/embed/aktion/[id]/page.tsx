@@ -75,7 +75,6 @@ export default function EmbedAktionPage() {
     );
   }
 
-  const aktionTitles = new Map<string, string>([[aktionId, aktionTitle]]);
 
   return (
     <div className="p-4">
@@ -87,7 +86,6 @@ export default function EmbedAktionPage() {
 
       <AnmeldeFormular
         selectedIds={[aktionId]}
-        aktionTitles={aktionTitles}
         onSuccess={(bereitsAngemeldetIds) => {
           if (bereitsAngemeldetIds?.includes(aktionId)) {
             setBereitsAngemeldet(true);
@@ -95,7 +93,6 @@ export default function EmbedAktionPage() {
             setSuccess(true);
           }
         }}
-        onClear={() => { }}
       />
     </div>
   );
