@@ -16,6 +16,24 @@ interface AktionInfo {
 
 const baseUrl = process.env.NEXTAUTH_URL ?? "https://aktionen.gruene-mitte.de";
 
+/**
+ * Maskiert Werte für HTML. Namen, Titel und Adressen stammen aus Formularen –
+ * ohne Maskierung könnte z. B. ein Vorname Links oder Markup in Mails einschleusen.
+ */
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+const e = escapeHtml;
+
+function cancelUrl(token: string): string {
+  return `${baseUrl}/api/anmeldungen/abmelden?token=${encodeURIComponent(token)}`;
+}
+
 // Farben und Formen kommen aus dem aktiven Theme (src/lib/theme.ts)
 const t = theme.email;
 /** Laufweite nur bei Versalien – ohne Uppercase sieht Sperrung falsch aus */
@@ -102,12 +120,12 @@ function baseLayout(content: string): string {
 function formatAktionCard(aktion: AktionInfo, cancelLink?: string): string {
   const datumStr = format(aktion.datum, "EEEE, d. MMMM yyyy", { locale: de });
   return `<div class="aktion-card">
-    <div class="aktion-card-title">${aktion.titel}</div>
+    <div class="aktion-card-title">${e(aktion.titel)}</div>
     <p>📅 ${datumStr}</p>
-    <p>🕐 ${aktion.startzeit} – ${aktion.endzeit} Uhr</p>
-    <p>📍 ${aktion.adresse}</p>
-    <p>👋 Ansprechpartner*in: ${aktion.ansprechpersonName} · <a href="mailto:${aktion.ansprechpersonEmail}">${aktion.ansprechpersonEmail}</a> · ${aktion.ansprechpersonTelefon}</p>
-    ${cancelLink ? `<p><a href="${cancelLink}" class="cancel-link">❌ Von dieser Aktion abmelden →</a></p>` : ""}
+    <p>🕐 ${e(aktion.startzeit)} – ${e(aktion.endzeit)} Uhr</p>
+    <p>📍 ${e(aktion.adresse)}</p>
+    <p>👋 Ansprechpartner*in: ${e(aktion.ansprechpersonName)} · <a href="mailto:${e(aktion.ansprechpersonEmail)}">${e(aktion.ansprechpersonEmail)}</a> · ${e(aktion.ansprechpersonTelefon)}</p>
+    ${cancelLink ? `<p><a href="${e(cancelLink)}" class="cancel-link">❌ Von dieser Aktion abmelden →</a></p>` : ""}
   </div>`;
 }
 
@@ -120,7 +138,7 @@ export function anmeldebestaetigungEmail(
   const subject = `Deine Anmeldung bei ${districtConfig.orgShortName} – ${aktionen.length} Aktion${aktionen.length > 1 ? "en" : ""}`;
 
   const content = `
-    <p class="greeting">Hallo ${vorname},</p>
+    <p class="greeting">Hallo ${e(vorname)},</p>
     <p>vielen Dank für Deine Anmeldung und Deine Unterstützung im Wahlkampf.</p>
     <p>Wenn sich Deine Pläne ändern, kannst Du Dich jederzeit über den Link in der jeweiligen Aktion von der Teilnahme abmelden.</p>
     <p>Wir freuen uns auf Dich! 💚</p>
@@ -132,7 +150,7 @@ export function anmeldebestaetigungEmail(
     <p>Du hast Dich für ${aktionen.length > 1 ? "folgende Aktionen" : "folgende Aktion"} angemeldet:</p>
     ${aktionen.map((a, i) => {
     const cancelLink = cancelTokens?.[i]
-      ? `${baseUrl}/api/anmeldungen/abmelden?token=${cancelTokens[i]}`
+      ? cancelUrl(cancelTokens[i])
       : undefined;
     return formatAktionCard(a, cancelLink);
   }).join("")}
@@ -148,17 +166,17 @@ export function aenderungsEmail(
 ): { subject: string; html: string } {
   const subject = `Änderung an Wahlkampfaktion: ${aktion.titel}`;
   const cancelLink = cancelToken
-    ? `${baseUrl}/api/anmeldungen/abmelden?token=${cancelToken}`
+    ? cancelUrl(cancelToken)
     : undefined;
 
   const changesList = changes
     .map(
       (c) =>
         `<div class="change-row">
-          <strong>${c.field}</strong>
-          <span class="change-old">${c.oldValue}</span>
+          <strong>${e(c.field)}</strong>
+          <span class="change-old">${e(c.oldValue)}</span>
           <span class="change-arrow">→</span>
-          <span class="change-new">${c.newValue}</span>
+          <span class="change-new">${e(c.newValue)}</span>
         </div>`
     )
     .join("");
@@ -207,7 +225,7 @@ export function meineAktionenEmail(
       <p>Du bist aktuell für folgende ${aktionen.length > 1 ? "Aktionen" : "Aktion"} angemeldet:</p>
       ${aktionen.map((a) => {
       const cancelLink = a.cancelToken
-        ? `${baseUrl}/api/anmeldungen/abmelden?token=${a.cancelToken}`
+        ? cancelUrl(a.cancelToken)
         : undefined;
       return formatAktionCard(a, cancelLink);
     }).join("")}
@@ -232,11 +250,11 @@ export function erinnerungsEmail(
   const subject = `Erinnerung: Deine Aktionen morgen – ${districtConfig.orgShortName}`;
 
   const content = `
-    <p class="greeting">Hallo ${vorname},</p>
+    <p class="greeting">Hallo ${e(vorname)},</p>
     <p>morgen ist es soweit! Morgen ${aktionen.length > 1 ? "finden folgenden Aktionen" : "findet folgende Aktion"} statt:</p>
     ${aktionen.map((a) => {
     const cancelLink = a.cancelToken
-      ? `${baseUrl}/api/anmeldungen/abmelden?token=${a.cancelToken}`
+      ? cancelUrl(a.cancelToken)
       : undefined;
     return formatAktionCard(a, cancelLink);
   }).join("")}
@@ -299,16 +317,16 @@ export function tagesUebersichtEmail(
       const anmeldungenList = a.anmeldungen.length > 0
         ? `<ul>${a.anmeldungen.map((an) => {
           const kontakt = an.signalName
-            ? `Signal: ${an.signalName}`
-            : an.telefon || "";
-          return `<li>${an.vorname} ${an.nachname} · ${an.email}${kontakt ? ` · ${kontakt}` : ""}</li>`;
+            ? `Signal: ${e(an.signalName)}`
+            : e(an.telefon || "");
+          return `<li>${e(an.vorname)} ${e(an.nachname)} · ${e(an.email)}${kontakt ? ` · ${kontakt}` : ""}</li>`;
         }).join("")}</ul>`
         : `<p><em>Noch keine Anmeldungen.</em></p>`;
       return `
           <div class="aktion-card">
-            <div class="aktion-card-title">${a.titel}</div>
-            <p>📅 ${aktionDatum}, ${a.startzeit}–${a.endzeit} Uhr</p>
-            <p>📍 ${a.adresse}</p>
+            <div class="aktion-card-title">${e(a.titel)}</div>
+            <p>📅 ${aktionDatum}, ${e(a.startzeit)}–${e(a.endzeit)} Uhr</p>
+            <p>📍 ${e(a.adresse)}</p>
             <p><span class="count-badge">${a.anmeldungen.length} Anmeldung${a.anmeldungen.length !== 1 ? "en" : ""}</span></p>
             ${anmeldungenList}
           </div>
@@ -324,16 +342,16 @@ export function tagesUebersichtEmail(
       const anmeldungenList = a.anmeldungen
         .map((an) => {
           const kontakt = an.signalName
-            ? `Signal: ${an.signalName}`
-            : an.telefon || "";
-          return `<li>${an.vorname} ${an.nachname} · ${an.email}${kontakt ? ` · ${kontakt}` : ""}</li>`;
+            ? `Signal: ${e(an.signalName)}`
+            : e(an.telefon || "");
+          return `<li>${e(an.vorname)} ${e(an.nachname)} · ${e(an.email)}${kontakt ? ` · ${kontakt}` : ""}</li>`;
         })
         .join("");
       const aktionDatum = format(a.datum, "d. MMMM", { locale: de });
       return `
           <div class="aktion-card">
-            <div class="aktion-card-title">${a.titel}</div>
-            <p>📅 ${aktionDatum}, ${a.startzeit} Uhr</p>
+            <div class="aktion-card-title">${e(a.titel)}</div>
+            <p>📅 ${aktionDatum}, ${e(a.startzeit)} Uhr</p>
             <p><span class="count-badge">${a.anmeldungen.length} neu</span></p>
             <ul>${anmeldungenList}</ul>
           </div>
@@ -348,14 +366,14 @@ export function tagesUebersichtEmail(
       <ul>
         ${abmeldungen.map((a) => {
       const aktionDatum = format(a.aktionDatum, "d. MMMM", { locale: de });
-      return `<li>${a.vorname} ${a.nachname} — ${a.aktionTitel} (${aktionDatum})</li>`;
+      return `<li>${e(a.vorname)} ${e(a.nachname)} — ${e(a.aktionTitel)} (${aktionDatum})</li>`;
     }).join("")}
       </ul>
     `
     : "";
 
   const content = `
-    <p class="greeting">Hallo ${expertName}!</p>
+    <p class="greeting">Hallo ${e(expertName)}!</p>
     <p>Tagesübersicht für <strong>${datumStr}</strong>.</p>
     ${morgenHtml}
     ${morgenHtml && (neueAnmeldungenHtml || abmeldungenHtml) ? '<hr class="section-divider" />' : ""}
