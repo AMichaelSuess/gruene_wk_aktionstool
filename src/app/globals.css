@@ -144,30 +144,30 @@
 
 /* ── Theme: emerald — Leipzig OBM-Kampagne 2027 ───────────────────── */
 :root[data-theme="emerald"] {
-  --t-primary: #014348;        /* Emerald */
-  --t-primary-hover: #015457;  /* Emerald, hellere Abstufung */
-  --t-chrome: #002E33;         /* Emerald, dunklere Abstufung: Website-Menü */
-  --t-accent: #D4DD74;         /* Gelbgrün */
-  --t-cta: #F1CDE0;            /* Rosa */
-  --t-cta-ink: #002E33;
-  --t-cta-hover: #E8B6D0;
-  --t-bar: #002E33;            /* dark bar so the pink CTA stands out */
+  --t-primary: #003C40;        /* Emerald */
+  --t-primary-hover: #004C50;  /* Emerald, hellere Abstufung */
+  --t-chrome: #002D2D;         /* Emerald, dunklere Abstufung: Website-Menü */
+  --t-accent: #C8DA20;         /* Gelbgrün */
+  --t-cta: #FFD2E8;            /* Rosa */
+  --t-cta-ink: #002D2D;
+  --t-cta-hover: #F6BBD8;
+  --t-bar: #002D2D;            /* dark bar so the pink CTA stands out */
   --t-bar-ink: #FFFFFF;
 
-  --t-ink: #002E33;
+  --t-ink: #002D2D;
   --t-line: #C9D7D6;
   --t-line-strong: #5C7A7C;    /* ≥ 3:1 against white for form controls */
-  --t-focus: #014348;
+  --t-focus: #003C40;
   --t-focus-offset: 2px;
   --t-canvas: #F5F8F7;
   --t-muted: #E8F0EF;
 
-  --t-warning: #D4DD74;
+  --t-warning: #C8DA20;
   --t-danger: #B4004E;
   --t-info: #00677F;
-  --t-success: #015457;
-  --t-highlight: #D4DD74;
-  --t-highlight-ink: #002E33;
+  --t-success: #004C50;
+  --t-highlight: #C8DA20;
+  --t-highlight-ink: #002D2D;
 
   --t-font-sans: "Archivo", Arial, Helvetica, sans-serif;
   --t-font-headline: "Archivo", "Arial Black", Arial, sans-serif;
@@ -184,17 +184,17 @@
   --t-radius-button: 9999px;
   --t-radius-badge: 9999px;
 
-  --t-shadow-sm: 0 1px 2px rgb(0 46 51 / 0.08), 0 1px 3px rgb(0 46 51 / 0.08);
-  --t-shadow: 0 1px 3px rgb(0 46 51 / 0.08), 0 4px 12px rgb(0 46 51 / 0.08);
-  --t-shadow-lg: 0 2px 6px rgb(0 46 51 / 0.08), 0 12px 28px rgb(0 46 51 / 0.10);
-  --t-shadow-xl: 0 4px 12px rgb(0 46 51 / 0.10), 0 24px 48px rgb(0 46 51 / 0.18);
-  --t-shadow-brand-sm: 0 1px 2px rgb(0 46 51 / 0.08), 0 1px 3px rgb(0 46 51 / 0.08);
-  --t-shadow-brand: 0 1px 3px rgb(0 46 51 / 0.08), 0 4px 12px rgb(0 46 51 / 0.08);
-  --t-shadow-brand-lg: 0 2px 6px rgb(0 46 51 / 0.08), 0 12px 28px rgb(0 46 51 / 0.10);
-  --t-shadow-up: 0 -4px 16px rgb(0 46 51 / 0.12);
-  --t-shadow-warning: 0 1px 3px rgb(0 46 51 / 0.08);
+  --t-shadow-sm: 0 1px 2px rgb(0 45 45 / 0.08), 0 1px 3px rgb(0 45 45 / 0.08);
+  --t-shadow: 0 1px 3px rgb(0 45 45 / 0.08), 0 4px 12px rgb(0 45 45 / 0.08);
+  --t-shadow-lg: 0 2px 6px rgb(0 45 45 / 0.08), 0 12px 28px rgb(0 45 45 / 0.10);
+  --t-shadow-xl: 0 4px 12px rgb(0 45 45 / 0.10), 0 24px 48px rgb(0 45 45 / 0.18);
+  --t-shadow-brand-sm: 0 1px 2px rgb(0 45 45 / 0.08), 0 1px 3px rgb(0 45 45 / 0.08);
+  --t-shadow-brand: 0 1px 3px rgb(0 45 45 / 0.08), 0 4px 12px rgb(0 45 45 / 0.08);
+  --t-shadow-brand-lg: 0 2px 6px rgb(0 45 45 / 0.08), 0 12px 28px rgb(0 45 45 / 0.10);
+  --t-shadow-up: 0 -4px 16px rgb(0 45 45 / 0.12);
+  --t-shadow-warning: 0 1px 3px rgb(0 45 45 / 0.08);
   /* 1px border + 2px ring = clear 3px outline for selected cards */
-  --t-shadow-selected: 0 0 0 2px #014348, 0 4px 12px rgb(0 46 51 / 0.12);
+  --t-shadow-selected: 0 0 0 2px #003C40, 0 4px 12px rgb(0 45 45 / 0.12);
 
   --t-press-sm: 0;
   --t-press: 0;

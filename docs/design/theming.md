@@ -44,23 +44,23 @@ Components                           bg-primary, border-ui, rounded-card, shadow
 
 | Utility suffix | Variable | Role | brutalist | emerald |
 |---|---|---|---|---|
-| `primary` | `--t-primary` | CTA buttons, active states, headings | `#005538` | `#014348` |
-| `primary-hover` | `--t-primary-hover` | Hover of primary fills | `#006644` | `#015457` |
-| `chrome` | `--t-chrome` | Header and footer background | `#005538` | `#002E33` |
-| `accent` | `--t-accent` | Highlight text on chrome (active nav, wordmark) | `#FFF17A` | `#D4DD74` |
-| `cta` / `cta-ink` / `cta-hover` | `--t-cta*` | Main public call to action ("Jetzt anmelden") | `#005538` / `#FFF` / `#006644` | `#F1CDE0` / `#002E33` / `#E8B6D0` |
-| `bar` / `bar-ink` | `--t-bar*` | Sticky selection bar on the public page | `#FFF` / `#000` | `#002E33` / `#FFF` |
-| `ink` | `--t-ink` | Body text, dark fills | `#000000` | `#002E33` |
+| `primary` | `--t-primary` | CTA buttons, active states, headings | `#005538` | `#003C40` |
+| `primary-hover` | `--t-primary-hover` | Hover of primary fills | `#006644` | `#004C50` |
+| `chrome` | `--t-chrome` | Header and footer background | `#005538` | `#002D2D` |
+| `accent` | `--t-accent` | Highlight text on chrome (active nav, wordmark) | `#FFF17A` | `#C8DA20` |
+| `cta` / `cta-ink` / `cta-hover` | `--t-cta*` | Main public call to action ("Jetzt anmelden") | `#005538` / `#FFF` / `#006644` | `#FFD2E8` / `#002D2D` / `#F6BBD8` |
+| `bar` / `bar-ink` | `--t-bar*` | Sticky selection bar on the public page | `#FFF` / `#000` | `#002D2D` / `#FFF` |
+| `ink` | `--t-ink` | Body text, dark fills | `#000000` | `#002D2D` |
 | `line` | `--t-line` | Container borders and dividers | `#000000` | `#C9D7D6` |
 | `line-strong` | `--t-line-strong` | Borders of form controls and clickable chips (≥ 3:1 against white) | `#000000` | `#5C7A7C` |
-| `focus` | `--t-focus` | Focus outline | `#000000` | `#014348` |
+| `focus` | `--t-focus` | Focus outline | `#000000` | `#003C40` |
 | `canvas` | `--t-canvas` | Page background | `#FFFFFF` | `#F5F8F7` |
 | `muted` | `--t-muted` | Table headers, subtle fills | `#F5F1E9` | `#E8F0EF` |
-| `warning` | `--t-warning` | "Geändert" badge | `#FFF17A` | `#D4DD74` |
+| `warning` | `--t-warning` | "Geändert" badge | `#FFF17A` | `#C8DA20` |
 | `danger` | `--t-danger` | Danger buttons, errors, "Abgesagt" | `#E6007E` | `#B4004E` |
 | `info` | `--t-info` | Info badges and hints | `#0BA1DD` | `#00677F` |
-| `success` | `--t-success` | Progress bars, drop zones | `#008939` | `#015457` |
-| `highlight` / `highlight-ink` | `--t-highlight*` | Secondary progress bars and their text | `#8ABD24` / `#FFF` | `#D4DD74` / `#002E33` |
+| `success` | `--t-success` | Progress bars, drop zones | `#008939` | `#004C50` |
+| `highlight` / `highlight-ink` | `--t-highlight*` | Secondary progress bars and their text | `#8ABD24` / `#FFF` | `#C8DA20` / `#002D2D` |
 
 Use them with any color utility: `bg-primary`, `text-ink`, `border-line-strong`, `divide-line`, `outline-focus`, `accent-primary`, `stroke-accent`, opacity modifiers such as `bg-ink/60`.
 

@@ -1,6 +1,6 @@
 # Theme `emerald`: Leipzig OBM-Kampagne 2027
 
-Activated with `NEXT_PUBLIC_THEME=emerald`. Based on the design brief for the campaign of the Leipzig mayoral candidate in 2027 ("Einer wie Leipzig", agency: zitronengrau). Token mechanics and the shared component patterns are in [theming.md](theming.md).
+Activated with `NEXT_PUBLIC_THEME=emerald`. Based on the design brief and the campaign manual ("Personenkampagne Manual", 2 Nov 2026) for the campaign of the Leipzig mayoral candidate in 2027 ("Einer wie Leipzig", agency: zitronengrau). Token mechanics and the shared component patterns are in [theming.md](theming.md).
 
 ---
 
@@ -20,16 +20,16 @@ The campaign look is calm and confident: deep emerald surfaces, a fresh yellow-g
 
 ## 2. Color palette
 
-Values were measured from the PDF swatches. Ask the agency for the official values before relying on the last digit.
+Values are the official hex codes from the campaign manual (page "Farbwerte").
 
 | Brief name | Value | Brief usage | Tokens |
 |---|---|---|---|
 | Weiß | `#FFFFFF` | Text on photos and dark backgrounds, background | `white`, card surfaces |
-| Gelbgrün | `#D4DD74` | Arrow element, backgrounds | `accent`, `warning`, `highlight` |
-| Emerald | `#014348` | Backgrounds | `primary`, `focus` |
-| Emerald, lighter | `#015457` | Arrow element on emerald | `primary-hover`, `success` |
-| Emerald, darker | `#002E33` | Text, website menu | `chrome`, `ink`, `bar`, `cta-ink`, `highlight-ink` |
-| Rosa | `#F1CDE0` | Text, backgrounds | `cta` (hover `#E8B6D0`) |
+| Gelbgrün | `#C8DA20` | Arrow element, backgrounds | `accent`, `warning`, `highlight` |
+| Emerald | `#003C40` | Backgrounds | `primary`, `focus` |
+| Emerald, lighter | `#004C50` | Arrow element on emerald | `primary-hover`, `success` |
+| Emerald, darker | `#002D2D` | Text, website menu | `chrome`, `ink`, `bar`, `cta-ink`, `highlight-ink` |
+| Rosa | `#FFD2E8` | Text, backgrounds | `cta` (hover `#F6BBD8`) |
 
 Additions that are not in the brief:
 
@@ -44,8 +44,8 @@ Additions that are not in the brief:
 
 ### Contrast rules
 
-- Gelbgrün and Rosa are **never text on white** (about 1.4:1). Use them as fills or as text on emerald.
-- Text on Gelbgrün and Rosa is dark emerald (`#002E33`).
+- Gelbgrün and Rosa are **never text on white** (about 1.5:1). Use them as fills or as text on emerald.
+- Text on Gelbgrün and Rosa is dark emerald (`#002D2D`).
 - Emerald and dark emerald on white, and white on either, are well above 7:1.
 
 ---
@@ -77,7 +77,7 @@ To switch to Obviously later, add its `@font-face` rules and put `"Obviously"` f
 
 ## 5. Elevation and interaction
 
-Soft, emerald-tinted shadows (`rgb(0 46 51 / …)`) replace the hard offsets. Elements do not move on hover (`press*` = 0). Hover feedback comes from color changes and a slightly smaller shadow.
+Soft, emerald-tinted shadows (`rgb(0 45 45 / …)`) replace the hard offsets. Elements do not move on hover (`press*` = 0). Hover feedback comes from color changes and a slightly smaller shadow.
 
 A selected action card gets a 2 px emerald ring on top of its 1 px border (`shadow-ui-selected`), so the selection is as obvious as in the brutalist theme.
 
@@ -95,7 +95,7 @@ A selected action card gets a 2 px emerald ring on top of its 1 px border (`shad
 
 ## 7. Open points
 
-- Official color values and the Obviously web license (agency: zitronengrau).
+- Obviously web font (agency: zitronengrau). The manual names it as an Adobe Font; Adobe Fonts serves web fonts from its own CDN, which conflicts with self-hosting fonts for DSGVO reasons, so a separate web license would be needed.
 - Whether the KV Leipzig logo should appear in the header instead of the wordmark.
 - Native browser checkboxes and the date picker are only partly themed (color via `accent-primary`).
 
