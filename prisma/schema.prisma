@@ -56,8 +56,8 @@ model Team {
   wahlkreisId String?
   wahlkreis   Wahlkreis?        @relation(fields: [wahlkreisId], references: [id])
   members     UserTeam[]
-  aktionen    Aktion[]
-  statistiken AktionStatistik[]
+  aktionen    AktionTeam[]
+  statistiken AktionStatistikTeam[]
   createdAt   DateTime          @default(now())
 
   @@map("teams")
@@ -105,8 +105,7 @@ model Aktion {
   kategorie             AktionKategorie @default(SONSTIGES)
   createdById           String
   createdBy             User         @relation(fields: [createdById], references: [id])
-  teamId                String?
-  team                  Team?        @relation(fields: [teamId], references: [id])
+  teams                 AktionTeam[]
   anmeldungen           Anmeldung[]
   emailLogs             EmailLog[]
   statistik             AktionStatistik?
@@ -114,6 +113,19 @@ model Aktion {
   updatedAt             DateTime     @updatedAt
 
   @@map("aktionen")
+}
+
+// Eine Aktion kann mehreren Teams gehoeren (z. B. Themen-Team + Bezirks-Team).
+// Keine Zeile = Aktion ohne Team (nur Admins und die Person, die sie angelegt hat).
+model AktionTeam {
+  aktionId String
+  teamId   String
+  aktion   Aktion @relation(fields: [aktionId], references: [id], onDelete: Cascade)
+  team     Team   @relation(fields: [teamId], references: [id])
+
+  @@id([aktionId, teamId])
+  @@index([teamId])
+  @@map("aktion_teams")
 }
 
 model Anmeldung {
@@ -152,9 +164,21 @@ model AktionStatistik {
   aktionDatum      DateTime  @db.Date
   wahlkreisId      String
   wahlkreis        Wahlkreis @relation(fields: [wahlkreisId], references: [id])
-  teamId           String?
-  team             Team?     @relation(fields: [teamId], references: [id])
+  teams            AktionStatistikTeam[]
   geloeschtAm      DateTime  @default(now())
 
   @@map("aktion_statistiken")
+}
+
+// Teams einer archivierten Aktion. Wird ein Team geloescht, verschwindet nur
+// die Zuordnung, die Statistik selbst bleibt erhalten.
+model AktionStatistikTeam {
+  statistikId String
+  teamId      String
+  statistik   AktionStatistik @relation(fields: [statistikId], references: [id], onDelete: Cascade)
+  team        Team            @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@id([statistikId, teamId])
+  @@index([teamId])
+  @@map("aktion_statistik_teams")
 }

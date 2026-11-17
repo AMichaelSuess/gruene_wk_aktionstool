@@ -2,7 +2,8 @@
  * Sicherheitstests: Team-Datenisolierung
  *
  * Der KRITISCHSTE Test: Stellt sicher, dass ein EXPERT nur Daten
- * seines eigenen Teams sehen und bearbeiten kann. Verhindert, dass
+ * von Aktionen seiner Teams (eine Aktion kann mehreren Teams gehören) oder
+ * selbst angelegter Aktionen sehen und bearbeiten kann. Verhindert, dass
  * persönliche Daten (Namen, E-Mails, Telefonnummern) an unbefugte
  * Team-Mitglieder gelangen.
  */
@@ -61,7 +62,11 @@ describe("Team-Isolation: Anmeldungen (persönliche Daten)", () => {
     await mockAuth(EXPERT_TEAM_A);
 
     // Aktion gehört zu Team A
-    mockPrisma.aktion.findUnique.mockResolvedValue({ id: "aktion-1", teamId: "team-a" });
+    mockPrisma.aktion.findUnique.mockResolvedValue({
+      id: "aktion-1",
+      createdById: "expert-x",
+      teams: [{ teamId: "team-a" }],
+    });
     mockPrisma.anmeldung.findMany.mockResolvedValue([
       { id: "a1", vorname: "Max", nachname: "Muster", email: "max@test.de", telefon: "0171234", signalName: null },
     ]);
@@ -80,7 +85,11 @@ describe("Team-Isolation: Anmeldungen (persönliche Daten)", () => {
     await mockAuth(EXPERT_TEAM_A);
 
     // Aktion gehört zu Team B – NICHT Team A
-    mockPrisma.aktion.findUnique.mockResolvedValue({ id: "aktion-2", teamId: "team-b" });
+    mockPrisma.aktion.findUnique.mockResolvedValue({
+      id: "aktion-2",
+      createdById: "expert-b",
+      teams: [{ teamId: "team-b" }],
+    });
 
     const { GET } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
     const req = createRequest("/api/aktionen/aktion-2/anmeldungen");
@@ -97,7 +106,11 @@ describe("Team-Isolation: Anmeldungen (persönliche Daten)", () => {
   it("ADMIN kann Anmeldungen aller Teams abrufen", async () => {
     await mockAuth(ADMIN_SESSION);
 
-    mockPrisma.aktion.findUnique.mockResolvedValue({ id: "aktion-2", teamId: "team-b" });
+    mockPrisma.aktion.findUnique.mockResolvedValue({
+      id: "aktion-2",
+      createdById: "expert-b",
+      teams: [{ teamId: "team-b" }],
+    });
     mockPrisma.anmeldung.findMany.mockResolvedValue([
       { id: "a1", vorname: "Lisa", nachname: "Test", email: "lisa@test.de" },
     ]);
@@ -105,6 +118,41 @@ describe("Team-Isolation: Anmeldungen (persönliche Daten)", () => {
     const { GET } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
     const req = createRequest("/api/aktionen/aktion-2/anmeldungen");
     const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-2" }) });
+
+    expect(res.status).toBe(200);
+  });
+
+  it("EXPERT sieht Anmeldungen, wenn sein Team eines von mehreren Teams der Aktion ist", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+
+    // Aktion von Team B angelegt und zusätzlich Team A zugeordnet
+    mockPrisma.aktion.findUnique.mockResolvedValue({
+      id: "aktion-3",
+      createdById: "expert-b",
+      teams: [{ teamId: "team-b" }, { teamId: "team-a" }],
+    });
+    mockPrisma.anmeldung.findMany.mockResolvedValue([]);
+
+    const { GET } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
+    const req = createRequest("/api/aktionen/aktion-3/anmeldungen");
+    const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-3" }) });
+
+    expect(res.status).toBe(200);
+  });
+
+  it("EXPERT sieht Anmeldungen selbst angelegter Aktionen, auch wenn nur fremde Teams zugeordnet sind", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+
+    mockPrisma.aktion.findUnique.mockResolvedValue({
+      id: "aktion-4",
+      createdById: "expert-a",
+      teams: [{ teamId: "team-b" }],
+    });
+    mockPrisma.anmeldung.findMany.mockResolvedValue([]);
+
+    const { GET } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
+    const req = createRequest("/api/aktionen/aktion-4/anmeldungen");
+    const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-4" }) });
 
     expect(res.status).toBe(200);
   });
@@ -116,7 +164,8 @@ describe("Team-Isolation: Aktionen bearbeiten", () => {
 
     mockPrisma.aktion.findUnique.mockResolvedValue({
       id: "aktion-2",
-      teamId: "team-b",
+      createdById: "expert-b",
+      teams: [{ teamId: "team-b" }],
       anmeldungen: [],
       adresse: "Alte Straße 1",
       datum: new Date("2025-06-01"),
@@ -148,7 +197,8 @@ describe("Team-Isolation: Aktionen bearbeiten", () => {
 
     mockPrisma.aktion.findUnique.mockResolvedValue({
       id: "aktion-2",
-      teamId: "team-b",
+      createdById: "expert-b",
+      teams: [{ teamId: "team-b" }],
       anmeldungen: [],
     });
 
@@ -175,8 +225,7 @@ describe("Team-Isolation: Datenexport", () => {
 
     // Prüfen, dass der Prisma-Aufruf den Team-Filter enthält
     const callArgs = mockPrisma.anmeldung.findMany.mock.calls[0][0];
-    expect(callArgs.where.aktion).toBeDefined();
-    expect(callArgs.where.aktion.teamId).toEqual({ in: ["team-a"] });
+    expect(callArgs.where.aktion).toEqual({ OR: [{ teams: { some: { teamId: { in: ["team-a"] } } } }, { createdById: "expert-a" }] });
   });
 
   it("EXPERT kann NICHT Daten anderer Teams exportieren (teamId-Parameter wird ignoriert)", async () => {
@@ -193,7 +242,7 @@ describe("Team-Isolation: Datenexport", () => {
 
     // Auch wenn teamId=team-b übergeben wird, muss der Filter team-a verwenden
     const callArgs = mockPrisma.anmeldung.findMany.mock.calls[0][0];
-    expect(callArgs.where.aktion.teamId).toEqual({ in: ["team-a"] });
+    expect(callArgs.where.aktion).toEqual({ OR: [{ teams: { some: { teamId: { in: ["team-a"] } } } }, { createdById: "expert-a" }] });
   });
 
   it("EXPERT ohne Team exportiert nur Anmeldungen selbst erstellter Aktionen", async () => {
@@ -208,7 +257,7 @@ describe("Team-Isolation: Datenexport", () => {
     expect(res.status).toBe(200);
 
     const callArgs = mockPrisma.anmeldung.findMany.mock.calls[0][0];
-    expect(callArgs.where.aktion).toEqual({ createdById: "expert-ohne-team" });
+    expect(callArgs.where.aktion).toEqual({ OR: [{ createdById: "expert-ohne-team" }] });
   });
 
   it("EXPERT ohne Team kann NICHT per teamId-Parameter fremde Anmeldungen exportieren", async () => {
@@ -223,7 +272,7 @@ describe("Team-Isolation: Datenexport", () => {
     expect(res.status).toBe(200);
 
     const callArgs = mockPrisma.anmeldung.findMany.mock.calls[0][0];
-    expect(callArgs.where.aktion).toEqual({ createdById: "expert-ohne-team" });
+    expect(callArgs.where.aktion).toEqual({ OR: [{ createdById: "expert-ohne-team" }] });
   });
 });
 
@@ -240,7 +289,7 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
     expect(res.status).toBe(200);
 
     const callArgs = mockPrisma.aktion.findMany.mock.calls[0][0];
-    expect(callArgs.where.teamId).toEqual({ in: ["team-a"] });
+    expect(callArgs.where.OR).toEqual({ OR: [{ teams: { some: { teamId: { in: ["team-a"] } } } }, { createdById: "expert-a" }] }.OR);
   });
 
   it("EXPERT kann NICHT Aktionen anderer Teams exportieren (teamId-Parameter wird ignoriert)", async () => {
@@ -256,7 +305,8 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
 
     // Auch wenn teamId=team-b übergeben wird, muss der Filter team-a verwenden
     const callArgs = mockPrisma.aktion.findMany.mock.calls[0][0];
-    expect(callArgs.where.teamId).toEqual({ in: ["team-a"] });
+    expect(callArgs.where.OR).toEqual({ OR: [{ teams: { some: { teamId: { in: ["team-a"] } } } }, { createdById: "expert-a" }] }.OR);
+    expect(callArgs.where).not.toHaveProperty("teams");
   });
 
   it("EXPERT ohne Team exportiert nur selbst erstellte Aktionen", async () => {
@@ -271,8 +321,8 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
     expect(res.status).toBe(200);
 
     const callArgs = mockPrisma.aktion.findMany.mock.calls[0][0];
-    expect(callArgs.where).not.toHaveProperty("teamId");
-    expect(callArgs.where.createdById).toBe("expert-ohne-team");
+    expect(callArgs.where).not.toHaveProperty("teams");
+    expect(callArgs.where.OR).toEqual([{ createdById: "expert-ohne-team" }]);
   });
 
   it("ADMIN sieht alle Aktionen ohne Filter", async () => {
@@ -287,7 +337,8 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
     expect(res.status).toBe(200);
 
     const callArgs = mockPrisma.aktion.findMany.mock.calls[0][0];
-    expect(callArgs.where).not.toHaveProperty("teamId");
+    expect(callArgs.where).not.toHaveProperty("teams");
+    expect(callArgs.where).not.toHaveProperty("OR");
   });
 
   it("ADMIN kann nach teamId filtern", async () => {
@@ -302,19 +353,19 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
     expect(res.status).toBe(200);
 
     const callArgs = mockPrisma.aktion.findMany.mock.calls[0][0];
-    expect(callArgs.where.teamId).toBe("team-b");
+    expect(callArgs.where.teams).toEqual({ some: { teamId: "team-b" } });
   });
 });
 
 describe("PII-Schutz: Oeffentlicher Aktionszugriff", () => {
   const aktionMitPII = {
     id: "aktion-1",
-    teamId: "team-a",
+    createdById: "expert-a",
     ansprechpersonName: "Max Muster",
     ansprechpersonEmail: "max@test.de",
     ansprechpersonTelefon: "0171234",
     wahlkreis: { id: "wk-1", name: "WK1", nummer: 1 },
-    team: { id: "team-a", name: "Team A" },
+    teams: [{ team: { id: "team-a", name: "Team A" } }],
     _count: { anmeldungen: 3 },
   };
 
@@ -353,7 +404,7 @@ describe("PII-Schutz: Oeffentlicher Aktionszugriff", () => {
 });
 
 describe("Team-Isolation: Bulk-Umkategorisierung", () => {
-  it("EXPERT-Bulk-Update setzt teamId-Filter im where", async () => {
+  it("EXPERT-Bulk-Update setzt Team-Filter im where", async () => {
     await mockAuth(EXPERT_TEAM_A);
     mockPrisma.aktion.updateMany.mockResolvedValue({ count: 1 });
 
@@ -369,7 +420,7 @@ describe("Team-Isolation: Bulk-Umkategorisierung", () => {
 
     const where = mockPrisma.aktion.updateMany.mock.calls[0][0].where;
     // Ohne diesen Filter koennte ein EXPERT fremde Aktionen umkategorisieren
-    expect(where.teamId).toEqual({ in: ["team-a"] });
+    expect(where.OR).toEqual({ OR: [{ teams: { some: { teamId: { in: ["team-a"] } } } }, { createdById: "expert-a" }] }.OR);
     expect(where.id).toEqual({ in: ["aktion-1", "fremde-aktion"] });
   });
 
@@ -391,7 +442,7 @@ describe("Team-Isolation: Bulk-Umkategorisierung", () => {
     expect(data.count).toBe(0);
   });
 
-  it("ADMIN-Bulk-Update ohne teamId-Filter", async () => {
+  it("ADMIN-Bulk-Update ohne Team-Filter", async () => {
     await mockAuth(ADMIN_SESSION);
     mockPrisma.aktion.updateMany.mockResolvedValue({ count: 2 });
 
@@ -405,7 +456,7 @@ describe("Team-Isolation: Bulk-Umkategorisierung", () => {
 
     expect(res.status).toBe(200);
     const where = mockPrisma.aktion.updateMany.mock.calls[0][0].where;
-    expect(where.teamId).toBeUndefined();
+    expect(where.OR).toBeUndefined();
   });
 
   it("Bulk-Update verschickt keine E-Mails und aendert den Status nicht", async () => {

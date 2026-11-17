@@ -18,7 +18,7 @@ interface Aktion {
   status: string;
   kategorie: string;
   wahlkreis: { nummer: number; name: string };
-  team: { name: string } | null;
+  teams: { id: string; name: string }[];
   _count: { anmeldungen: number };
   maxTeilnehmer: number | null;
 }
@@ -87,7 +87,7 @@ export default function AdminAktionenPage() {
               <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Titel</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Datum</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">{WAHLKREIS_LABEL}</th>
-              <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Team</th>
+              <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Teams</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Art</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Status</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Anmeldungen</th>
@@ -108,7 +108,7 @@ export default function AdminAktionenPage() {
                 <td className="px-4 py-3 text-gray-700">
                   WK {aktion.wahlkreis.nummer}
                 </td>
-                <td className="px-4 py-3 text-gray-700">{aktion.team?.name ?? "–"}</td>
+                <td className="px-4 py-3 text-gray-700">{aktion.teams.length > 0 ? aktion.teams.map((t) => t.name).join(", ") : "–"}</td>
                 <td className="px-4 py-3">
                   {aktion.kategorie && (
                     <Badge variant="info">{kategorieLabel(aktion.kategorie)}</Badge>

@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { ZodError } from "zod";
 import { bulkKategorieSchema } from "@/lib/validators";
+import { expertAktionWhere } from "@/lib/aktion-teams";
 
 /**
  * PATCH: Kategorie mehrerer Aktionen auf einmal setzen.
@@ -24,13 +25,10 @@ export async function PATCH(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = { id: { in: validated.ids } };
 
-    // Team-Isolation: EXPERT darf nur eigene Team-Aktionen umkategorisieren
+    // Team-Isolation: EXPERT darf nur Aktionen seiner Teams oder selbst
+    // angelegte umkategorisieren
     if (session.user.role === "EXPERT") {
-      if (session.user.teamIds?.length > 0) {
-        where.teamId = { in: session.user.teamIds };
-      } else {
-        where.createdById = session.user.id;
-      }
+      Object.assign(where, expertAktionWhere(session.user));
     }
 
     const result = await prisma.aktion.updateMany({

@@ -5,10 +5,9 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
-import Select from "@/components/ui/Select";
+import TeamAuswahl from "@/components/TeamAuswahl";
 import { kategorieLabel } from "@/lib/kategorien";
 import { WAHLKREIS_LABEL_SHORT } from "@/lib/wahlkreis-label";
-import { KEIN_TEAM_VALUE } from "@/lib/teams";
 
 interface ValidationResult {
   index: number;
@@ -18,11 +17,21 @@ interface ValidationResult {
 }
 
 interface ExcelUploadProps {
-  teamOptions?: { value: string; label: string }[];
-  needsTeamSelect?: boolean;
+  teams: { id: string; name: string }[];
+  // Teams fuer alle Zeilen ohne eigene Angabe in der Spalte "Teams"
+  teamIds: string[];
+  onTeamIdsChange: (teamIds: string[]) => void;
+  ownTeamIds?: string[];
+  isAdmin?: boolean;
 }
 
-export default function ExcelUpload({ teamOptions = [], needsTeamSelect = false }: ExcelUploadProps) {
+export default function ExcelUpload({
+  teams,
+  teamIds,
+  onTeamIdsChange,
+  ownTeamIds,
+  isAdmin = false,
+}: ExcelUploadProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [results, setResults] = useState<ValidationResult[]>([]);
@@ -31,7 +40,6 @@ export default function ExcelUpload({ teamOptions = [], needsTeamSelect = false 
   const [dragOver, setDragOver] = useState(false);
   const [fileName, setFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedTeamId, setSelectedTeamId] = useState("");
 
   async function handleFile(file: File) {
     setFileName(file.name);
@@ -64,8 +72,12 @@ export default function ExcelUpload({ teamOptions = [], needsTeamSelect = false 
   }
 
   async function handleImport() {
-    if (needsTeamSelect && teamOptions.length > 0 && !selectedTeamId) {
-      alert("Bitte wähle ein Team aus.");
+    // Zeilen ohne eigene "Teams"-Angabe brauchen bei Experts eine Auswahl
+    const rowsWithoutTeams = results.some(
+      (r) => r.valid && !(Array.isArray(r.row.teams) && r.row.teams.length > 0)
+    );
+    if (!isAdmin && teams.length > 0 && teamIds.length === 0 && rowsWithoutTeams) {
+      alert("Bitte wähle mindestens ein Team aus.");
       return;
     }
 
@@ -80,8 +92,8 @@ export default function ExcelUpload({ teamOptions = [], needsTeamSelect = false 
 
     formData.append("file", file);
     formData.append("import", "true");
-    if (selectedTeamId && selectedTeamId !== KEIN_TEAM_VALUE) {
-      formData.append("teamId", selectedTeamId);
+    for (const teamId of teamIds) {
+      formData.append("teamIds", teamId);
     }
 
     const res = await fetch("/api/upload", {
@@ -92,7 +104,9 @@ export default function ExcelUpload({ teamOptions = [], needsTeamSelect = false 
     if (res.ok) {
       router.push("/dashboard");
     } else {
-      alert("Fehler beim Import");
+      // Begruendung vom Server anzeigen (z. B. unbekanntes Team), falls vorhanden
+      const data = await res.json().catch(() => null);
+      alert(data?.error ? `Fehler beim Import: ${data.error}` : "Fehler beim Import");
     }
     setImporting(false);
   }
@@ -114,17 +128,16 @@ export default function ExcelUpload({ teamOptions = [], needsTeamSelect = false 
         </a>
       </div>
 
-      {needsTeamSelect && teamOptions.length > 0 && (
-        <div className="mb-4">
-          <Select
-            label="Team"
-            value={selectedTeamId}
-            onChange={(e) => setSelectedTeamId(e.target.value)}
-            options={teamOptions}
-            placeholder="Bitte Team wählen"
-          />
-        </div>
-      )}
+      <div className="mb-4">
+        <TeamAuswahl
+          teams={teams}
+          value={teamIds}
+          onChange={onTeamIdsChange}
+          ownTeamIds={ownTeamIds}
+          isAdmin={isAdmin}
+          hint="Die Auswahl gilt für alle Zeilen, bei denen die Spalte „Teams“ in der Excel-Datei leer ist."
+        />
+      </div>
 
       <div
         onDragOver={(e) => {
@@ -176,6 +189,7 @@ export default function ExcelUpload({ teamOptions = [], needsTeamSelect = false 
                   <th className="text-left py-2 px-2">Adresse</th>
                   <th className="text-left py-2 px-2">{WAHLKREIS_LABEL_SHORT}</th>
                   <th className="text-left py-2 px-2">Kategorie</th>
+                  <th className="text-left py-2 px-2">Teams</th>
                   <th className="text-left py-2 px-2">Fehler</th>
                 </tr>
               </thead>
@@ -197,6 +211,11 @@ export default function ExcelUpload({ teamOptions = [], needsTeamSelect = false 
                     <td className="py-2 px-2">{String(r.row.wahlkreis || "")}</td>
                     <td className="py-2 px-2">
                       {kategorieLabel(String(r.row.kategorie || ""))}
+                    </td>
+                    <td className="py-2 px-2">
+                      {Array.isArray(r.row.teams) && r.row.teams.length > 0
+                        ? r.row.teams.join(", ")
+                        : "–"}
                     </td>
                     <td className="py-2 px-2 text-red-600">
                       {r.errors.join(", ")}

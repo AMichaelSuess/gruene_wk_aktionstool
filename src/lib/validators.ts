@@ -53,6 +53,8 @@ export const aktionSchema = z.object({
   ansprechpersonEmail: emailSchema(),
   ansprechpersonTelefon: z.string().min(5, "Telefonnummer erforderlich"),
   maxTeilnehmer: z.number().int().positive().optional().nullable(),
+  // Fehlt das Feld beim Bearbeiten, bleibt die Team-Zuordnung unveraendert
+  teamIds: z.array(z.string()).optional(),
 }).refine(
   (data) => data.startzeit < data.endzeit,
   { message: "Endzeit muss nach der Startzeit liegen", path: ["endzeit"] }
@@ -108,6 +110,8 @@ export const excelRowSchema = z.object({
   ansprechpersonEmail: emailSchema("Ungültige E-Mail der Ansprechperson"),
   ansprechpersonTelefon: z.string().min(1, "Telefon der Ansprechperson fehlt"),
   maxTeilnehmer: z.number().int().positive().optional().nullable(),
+  // Team-Namen aus der optionalen Spalte "Teams"; leer = Auswahl beim Hochladen
+  teams: z.array(z.string()).optional(),
 }).refine(
   (data) => data.startzeit < data.endzeit,
   { message: "Endzeit muss nach der Startzeit liegen", path: ["endzeit"] }

@@ -43,6 +43,17 @@ interface ExcelRow {
   ansprechpersonEmail: string;
   ansprechpersonTelefon: string;
   maxTeilnehmer?: number | null;
+  teams?: string[];
+}
+
+// Spalte "Teams": mehrere Team-Namen mit Komma oder Semikolon getrennt
+export const TEAMS_SPALTE = "Teams";
+
+export function splitTeamNames(value: unknown): string[] {
+  return String(value ?? "")
+    .split(/[,;]/)
+    .map((name) => name.trim())
+    .filter((name) => name.length > 0);
 }
 
 const COLUMN_MAP: Record<string, keyof ExcelRow> = {
@@ -59,6 +70,8 @@ const COLUMN_MAP: Record<string, keyof ExcelRow> = {
   "Ansprechperson E-Mail": "ansprechpersonEmail",
   "Ansprechperson Telefon": "ansprechpersonTelefon",
   "Max. Teilnehmer": "maxTeilnehmer",
+  [TEAMS_SPALTE]: "teams",
+  "Team": "teams",
 };
 
 function formatDate(value: ExcelJS.CellValue): string {
@@ -122,6 +135,8 @@ export async function parseExcelFile(buffer: ArrayBuffer): Promise<ExcelRow[]> {
         // Bei unbekannten Werten den Rohwert durchreichen, damit Zod eine
         // verständliche Fehlermeldung für die Vorschau erzeugt.
         partial.kategorie = parseKategorie(value) ?? String(value ?? "").trim();
+      } else if (key === "teams") {
+        partial.teams = splitTeamNames(value);
       } else if (key === "maxTeilnehmer") {
         const num = parseInt(String(value ?? ""), 10);
         partial.maxTeilnehmer = isNaN(num) ? null : num;
@@ -221,7 +236,7 @@ export interface AktionExport {
   adresse: string;
   wahlkreis: string;
   kategorie: string;
-  team: string;
+  teams: string;
   status: string;
   anmeldungen: number;
   maxTeilnehmer?: number | null;
@@ -240,7 +255,7 @@ export async function createAktionenExcel(aktionen: AktionExport[]): Promise<Buf
     { header: "Adresse", key: "adresse", width: 40 },
     { header: WAHLKREIS_LABEL, key: "wahlkreis", width: 10 },
     { header: "Kategorie", key: "kategorie", width: 12 },
-    { header: "Team", key: "team", width: 20 },
+    { header: "Teams", key: "teams", width: 30 },
     { header: "Status", key: "status", width: 12 },
     { header: "Anmeldungen", key: "anmeldungen", width: 14 },
     { header: "Max. Teilnehmer", key: "maxTeilnehmer", width: 15 },
@@ -255,7 +270,7 @@ export async function createAktionenExcel(aktionen: AktionExport[]): Promise<Buf
       adresse: a.adresse,
       wahlkreis: a.wahlkreis,
       kategorie: a.kategorie,
-      team: a.team,
+      teams: a.teams,
       status: a.status,
       anmeldungen: a.anmeldungen,
       maxTeilnehmer: a.maxTeilnehmer ?? "",
@@ -359,7 +374,12 @@ export async function createVorlageExcel(): Promise<Buffer> {
     { header: "Ansprechperson E-Mail", key: "ansprechpersonEmail", width: 25 },
     { header: "Ansprechperson Telefon", key: "ansprechpersonTelefon", width: 20 },
     { header: "Max. Teilnehmer", key: "maxTeilnehmer", width: 15 },
+    { header: TEAMS_SPALTE, key: "teams", width: 30 },
   ];
+
+  sheet.getCell(1, sheet.columns.length).note =
+    "Optional: Namen der Teams, mit Komma getrennt (z. B. „Team Flyern, Team Ost“). " +
+    "Leer lassen = es gelten die Teams, die beim Hochladen ausgewählt sind.";
 
   sheet.getColumn("datum").style = { numFmt: "DD.MM.YYYY" };
   sheet.getColumn("startzeit").style = { numFmt: "HH:MM" };
@@ -377,6 +397,7 @@ export async function createVorlageExcel(): Promise<Buffer> {
     ansprechpersonEmail: "max@example.com",
     ansprechpersonTelefon: "030 1234567",
     maxTeilnehmer: "",
+    teams: "",
   });
 
   return Buffer.from(await workbook.xlsx.writeBuffer());

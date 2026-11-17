@@ -5,6 +5,7 @@ import { createAktionenExcel, createAktionenTxt } from "@/lib/excel";
 import { KATEGORIE_VALUES, kategorieLabel } from "@/lib/kategorien";
 import { format, startOfDay, endOfDay, addDays, startOfWeek, endOfWeek } from "date-fns";
 import { de } from "date-fns/locale";
+import { TEAMS_INCLUDE, expertAktionWhere } from "@/lib/aktion-teams";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -23,14 +24,10 @@ export async function GET(req: NextRequest) {
   const where: any = {};
 
   if (session.user.role === "EXPERT") {
-    // Team-Isolation: ohne Team nur selbst erstellte Aktionen
-    if (session.user.teamIds?.length > 0) {
-      where.teamId = { in: session.user.teamIds };
-    } else {
-      where.createdById = session.user.id;
-    }
+    // Team-Isolation: nur Aktionen der eigenen Teams oder selbst erstellte
+    Object.assign(where, expertAktionWhere(session.user));
   } else if (teamId) {
-    where.teamId = teamId;
+    where.teams = { some: { teamId } };
   }
 
   // Datums-Filter auf Prisma anwenden
@@ -74,7 +71,7 @@ export async function GET(req: NextRequest) {
     where,
     include: {
       wahlkreis: true,
-      team: true,
+      teams: TEAMS_INCLUDE,
       _count: { select: { anmeldungen: true } },
     },
     orderBy: [{ datum: "asc" }, { startzeit: "asc" }],
@@ -89,7 +86,7 @@ export async function GET(req: NextRequest) {
     adresse: a.adresse,
     wahlkreis: `WK ${a.wahlkreis.nummer} – ${a.wahlkreis.name}`,
     kategorie: kategorieLabel(a.kategorie),
-    team: a.team?.name ?? "",
+    teams: a.teams.map((t) => t.team.name).join(", "),
     status: a.status,
     anmeldungen: a._count.anmeldungen,
     maxTeilnehmer: a.maxTeilnehmer,

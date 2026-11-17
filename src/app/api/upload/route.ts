@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { parseExcelFile, convertDatumToISO } from "@/lib/excel";
 import { excelRowSchema, type ExcelRowInput } from "@/lib/validators";
 import { geocodeAddress } from "@/lib/geocoding";
+import { normalizeTeamIds, teamsExist, UNBEKANNTES_TEAM_FEHLER } from "@/lib/aktion-teams";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -49,6 +50,26 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Team-Namen aus der Spalte "Teams" in IDs uebersetzen (Gross-/Kleinschreibung egal)
+    const alleTeams = await prisma.team.findMany({ select: { id: true, name: true } });
+    const teamIdByName = new Map(alleTeams.map((t) => [t.name.trim().toLowerCase(), t.id]));
+    const rowTeamIds = new Map<number, string[]>();
+
+    for (const result of results) {
+      if (!result.valid || !result.row.teams?.length) continue;
+      const ids: string[] = [];
+      for (const name of result.row.teams) {
+        const teamId = teamIdByName.get(name.toLowerCase());
+        if (teamId) {
+          ids.push(teamId);
+        } else {
+          result.valid = false;
+          result.errors.push(`Unbekanntes Team: ${name}`);
+        }
+      }
+      rowTeamIds.set(result.index, [...new Set(ids)]);
+    }
+
     // Check for duplicates against existing Aktionen
     for (const result of results) {
       if (!result.valid) continue;
@@ -80,25 +101,22 @@ export async function POST(req: NextRequest) {
       const wahlkreise = await prisma.wahlkreis.findMany();
       const wahlkreisMap = new Map(wahlkreise.map((wk) => [wk.nummer, wk.id]));
 
-      const teamIds = session.user.teamIds ?? [];
-      const requestedTeamId = (formData.get("teamId") as string | null) || null;
-      let teamId: string | null;
-      if (session.user.role === "ADMIN") {
-        // Admins stehen über den Teams: gewähltes Team oder bewusst keins
-        teamId = requestedTeamId;
-      } else if (requestedTeamId) {
-        // Team-Isolation: EXPERT darf nur in eigene Teams importieren
-        if (!teamIds.includes(requestedTeamId)) {
-          return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
-        }
-        teamId = requestedTeamId;
-      } else {
-        teamId = teamIds[0] ?? null;
+      // Beim Hochladen gewaehlte Teams gelten fuer alle Zeilen ohne eigene
+      // "Teams"-Angabe. Admins duerfen bewusst keins waehlen; bei Experts wird
+      // ohne Auswahl das eigene Team gesetzt.
+      let defaultTeamIds = normalizeTeamIds(formData.getAll("teamIds"));
+      const ownTeamIds = session.user.teamIds ?? [];
+      if (defaultTeamIds.length === 0 && session.user.role === "EXPERT" && ownTeamIds.length > 0) {
+        defaultTeamIds = [ownTeamIds[0]];
+      }
+      if (!(await teamsExist(defaultTeamIds))) {
+        return NextResponse.json({ error: UNBEKANNTES_TEAM_FEHLER }, { status: 400 });
       }
 
       const created = [];
 
-      for (const { row } of validRows) {
+      for (const { row, index } of validRows) {
+        const teamIds = rowTeamIds.get(index) ?? defaultTeamIds;
         const isoDate = convertDatumToISO(row.datum);
         const wahlkreisId = wahlkreisMap.get(row.wahlkreis);
 
@@ -131,7 +149,7 @@ export async function POST(req: NextRequest) {
             ansprechpersonTelefon: row.ansprechpersonTelefon,
             maxTeilnehmer: row.maxTeilnehmer || null,
             createdById: session.user.id,
-            teamId,
+            teams: { create: teamIds.map((teamId) => ({ teamId })) },
           },
         });
 

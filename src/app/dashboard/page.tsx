@@ -20,7 +20,7 @@ interface Aktion {
   status: string;
   kategorie: string;
   wahlkreis: { nummer: number; name: string };
-  team: { name: string } | null;
+  teams: { id: string; name: string }[];
   _count: { anmeldungen: number };
   maxTeilnehmer: number | null;
 }
@@ -300,11 +300,16 @@ export default function DashboardPage() {
                       📅 {format(new Date(aktion.datum), "EEEE, d. MMMM yyyy", { locale: de })} · {aktion.startzeit} – {aktion.endzeit}
                     </p>
                     <p>📍 {aktion.adresse}</p>
-                    {aktion.team && (
-                      <p>
-                        <span className="text-xs font-bold case-ui tracking-ui rounded-badge bg-ink text-white px-2 py-0.5 inline-block mt-1">
-                          {aktion.team.name}
-                        </span>
+                    {aktion.teams.length > 0 && (
+                      <p className="flex flex-wrap gap-1">
+                        {aktion.teams.map((team) => (
+                          <span
+                            key={team.id}
+                            className="text-xs font-bold case-ui tracking-ui rounded-badge bg-ink text-white px-2 py-0.5 inline-block mt-1"
+                          >
+                            {team.name}
+                          </span>
+                        ))}
                       </p>
                     )}
                     <p className="pt-1">

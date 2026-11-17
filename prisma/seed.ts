@@ -95,7 +95,7 @@ async function main() {
       maxTeilnehmer: 8,
       kategorie: "SONSTIGES" as const,
       createdById: expert.id,
-      teamId: team.id,
+      teams: { create: [{ teamId: team.id }] },
     },
     {
       titel: "Haustürwahlkampf Moabit",
@@ -112,7 +112,7 @@ async function main() {
       maxTeilnehmer: null,
       kategorie: "HAUSTUER" as const,
       createdById: expert.id,
-      teamId: team.id,
+      teams: { create: [{ teamId: team.id }] },
     },
     {
       titel: "Plakate kleben Wedding",
@@ -129,7 +129,7 @@ async function main() {
       maxTeilnehmer: 5,
       kategorie: "SONSTIGES" as const,
       createdById: expert.id,
-      teamId: team.id,
+      teams: { create: [{ teamId: team.id }] },
     },
   ];
 

@@ -9,7 +9,7 @@ import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import { KATEGORIEN } from "@/lib/kategorien";
 import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
-import { KEIN_TEAM_LABEL } from "@/lib/teams";
+import TeamAuswahl from "@/components/TeamAuswahl";
 
 interface Wahlkreis {
   id: string;
@@ -29,6 +29,7 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
   const isAdmin = session?.user.role === "ADMIN";
   const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [teamIds, setTeamIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -41,7 +42,6 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
     adresse: "",
     wahlkreisId: "",
     kategorie: "",
-    teamId: "",
     ansprechpersonName: "",
     ansprechpersonEmail: "",
     ansprechpersonTelefon: "",
@@ -52,10 +52,11 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
     Promise.all([
       fetch(`/api/aktionen/${id}`).then((r) => r.json()),
       fetch("/api/wahlkreise").then((r) => r.json()),
-      isAdmin ? fetch("/api/admin/teams").then((r) => r.json()) : Promise.resolve([]),
+      fetch("/api/teams").then((r) => r.json()),
     ]).then(([aktion, wk, tm]) => {
       setWahlkreise(wk);
       setTeams(tm);
+      setTeamIds((aktion.teams ?? []).map((t: Team) => t.id));
       setForm({
         titel: aktion.titel,
         datum: aktion.datum.split("T")[0],
@@ -64,7 +65,6 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
         adresse: aktion.adresse,
         wahlkreisId: aktion.wahlkreisId,
         kategorie: aktion.kategorie ?? "",
-        teamId: aktion.teamId ?? "",
         ansprechpersonName: aktion.ansprechpersonName,
         ansprechpersonEmail: aktion.ansprechpersonEmail,
         ansprechpersonTelefon: aktion.ansprechpersonTelefon,
@@ -72,7 +72,7 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
       });
       setLoading(false);
     });
-  }, [id, isAdmin]);
+  }, [id]);
 
   function updateForm(field: string, value: string) {
     setForm({ ...form, [field]: value });
@@ -85,6 +85,7 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
 
     const body = {
       ...form,
+      teamIds,
       maxTeilnehmer: form.maxTeilnehmer ? parseInt(form.maxTeilnehmer) : null,
     };
 
@@ -176,17 +177,13 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
             required
           />
 
-          {isAdmin && teams.length > 0 && (
-            <Select
-              label="Team"
-              value={form.teamId}
-              onChange={(e) => updateForm("teamId", e.target.value)}
-              options={[
-                { value: "", label: KEIN_TEAM_LABEL },
-                ...teams.map((t) => ({ value: t.id, label: t.name })),
-              ]}
-            />
-          )}
+          <TeamAuswahl
+            teams={teams}
+            value={teamIds}
+            onChange={setTeamIds}
+            ownTeamIds={session?.user.teamIds}
+            isAdmin={isAdmin}
+          />
 
           <div className="border-t border-gray-200 pt-4 mt-4">
             <h3 className="font-bold text-gray-700 mb-3">Ansprechperson</h3>

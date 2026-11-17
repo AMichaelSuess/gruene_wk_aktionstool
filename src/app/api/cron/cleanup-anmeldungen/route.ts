@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       datum: true,
       endzeit: true,
       wahlkreisId: true,
-      teamId: true,
+      teams: { select: { teamId: true } },
       _count: { select: { anmeldungen: true } },
     },
   });
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
             anmeldungenCount: count,
             aktionDatum: aktion.datum,
             wahlkreisId: aktion.wahlkreisId,
-            teamId: aktion.teamId ?? null,
+            teams: { create: aktion.teams.map(({ teamId }) => ({ teamId })) },
           },
         });
 

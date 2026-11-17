@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { createAnmeldungenExcel, createAnmeldungenTxt } from "@/lib/excel";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { expertAktionWhere } from "@/lib/aktion-teams";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -25,13 +26,11 @@ export async function GET(req: NextRequest) {
   }
 
   if (session.user.role === "EXPERT") {
-    // Team-Isolation: ohne Team nur Anmeldungen selbst erstellter Aktionen
-    where.aktion =
-      session.user.teamIds?.length > 0
-        ? { teamId: { in: session.user.teamIds } }
-        : { createdById: session.user.id };
+    // Team-Isolation: nur Anmeldungen von Aktionen der eigenen Teams oder
+    // selbst erstellter Aktionen
+    where.aktion = expertAktionWhere(session.user);
   } else if (teamId) {
-    where.aktion = { ...(where.aktion || {}), teamId };
+    where.aktion = { ...(where.aktion || {}), teams: { some: { teamId } } };
   }
 
   if (wahlkreisId) {

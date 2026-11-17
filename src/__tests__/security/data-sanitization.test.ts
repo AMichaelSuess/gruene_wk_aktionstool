@@ -151,7 +151,7 @@ describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
         adresse: "Musterstr. 1",
         status: "AKTIV",
         wahlkreis: { id: "wk-1", name: "Wahlkreis 1", nummer: 1 },
-        team: { id: "team-1", name: "Team 1" },
+        teams: [{ team: { id: "team-1", name: "Team 1" } }],
         _count: { anmeldungen: 5 },
         // Persönliche Daten die NICHT exponiert werden sollten:
         ansprechpersonName: "Kontakt Person",

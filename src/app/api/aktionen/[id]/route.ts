@@ -8,6 +8,16 @@ import { sendEmail } from "@/lib/email";
 import { aenderungsEmail, absageEmail } from "@/lib/email-templates";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import {
+  TEAMS_INCLUDE,
+  EIGENES_TEAM_BEHALTEN_FEHLER,
+  UNBEKANNTES_TEAM_FEHLER,
+  flattenTeams,
+  hasAktionAccess,
+  keepsOwnTeam,
+  normalizeTeamIds,
+  teamsExist,
+} from "@/lib/aktion-teams";
 
 // Rate limiting for public GET endpoint (SEC-05)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -39,18 +49,19 @@ export async function GET(
 
   const { id } = await params;
 
-  const aktion = await prisma.aktion.findUnique({
+  const found = await prisma.aktion.findUnique({
     where: { id },
     include: {
       wahlkreis: true,
-      team: true,
+      teams: TEAMS_INCLUDE,
       _count: { select: { anmeldungen: true } },
     },
   });
 
-  if (!aktion) {
+  if (!found) {
     return NextResponse.json({ error: "Aktion nicht gefunden" }, { status: 404 });
   }
+  const aktion = flattenTeams(found);
 
   const session = await auth();
   if (!session) {
@@ -74,20 +85,16 @@ export async function PUT(
 
   const existing = await prisma.aktion.findUnique({
     where: { id },
-    include: { anmeldungen: true },
+    include: { anmeldungen: true, teams: { select: { teamId: true } } },
   });
 
   if (!existing) {
     return NextResponse.json({ error: "Aktion nicht gefunden" }, { status: 404 });
   }
 
-  // Check team access for experts (also allow if user created the action without a team)
-  if (session.user.role === "EXPERT") {
-    const inTeam = existing.teamId != null && session.user.teamIds?.includes(existing.teamId);
-    const isCreator = existing.createdById === session.user.id;
-    if (!inTeam && !isCreator) {
-      return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
-    }
+  // Experts: nur Aktionen eines ihrer Teams oder selbst angelegte
+  if (!hasAktionAccess(session.user, existing)) {
+    return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
   }
 
   try {
@@ -123,11 +130,17 @@ export async function PUT(
       changes.push({ field: "Adresse", oldValue: existing.adresse, newValue: validated.adresse });
     }
 
-    // Allow admin to reassign team (null = bewusst kein Team)
-    const newTeamId =
-      session.user.role === "ADMIN" && body.teamId !== undefined
-        ? body.teamId || null
-        : undefined;
+    // Team-Zuordnung ersetzen, falls mitgeschickt (leere Liste = kein Team)
+    const newTeamIds =
+      validated.teamIds !== undefined ? normalizeTeamIds(validated.teamIds) : undefined;
+    if (newTeamIds !== undefined) {
+      if (!keepsOwnTeam(session.user, existing, newTeamIds)) {
+        return NextResponse.json({ error: EIGENES_TEAM_BEHALTEN_FEHLER }, { status: 400 });
+      }
+      if (!(await teamsExist(newTeamIds))) {
+        return NextResponse.json({ error: UNBEKANNTES_TEAM_FEHLER }, { status: 400 });
+      }
+    }
 
     const aktion = await prisma.aktion.update({
       where: { id },
@@ -149,7 +162,14 @@ export async function PUT(
         ansprechpersonTelefon: validated.ansprechpersonTelefon,
         maxTeilnehmer: validated.maxTeilnehmer || null,
         status: changes.length > 0 ? "GEAENDERT" : existing.status,
-        ...(newTeamId !== undefined ? { teamId: newTeamId } : {}),
+        ...(newTeamIds !== undefined
+          ? {
+              teams: {
+                deleteMany: {},
+                create: newTeamIds.map((teamId) => ({ teamId })),
+              },
+            }
+          : {}),
       },
       include: { wahlkreis: true },
     });
@@ -205,7 +225,7 @@ export async function DELETE(
 
   const existing = await prisma.aktion.findUnique({
     where: { id },
-    include: { anmeldungen: true },
+    include: { anmeldungen: true, teams: { select: { teamId: true } } },
     // createdById is a scalar field – included automatically
   });
 
@@ -213,12 +233,8 @@ export async function DELETE(
     return NextResponse.json({ error: "Aktion nicht gefunden" }, { status: 404 });
   }
 
-  if (session.user.role === "EXPERT") {
-    const inTeam = existing.teamId != null && session.user.teamIds?.includes(existing.teamId);
-    const isCreator = existing.createdById === session.user.id;
-    if (!inTeam && !isCreator) {
-      return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
-    }
+  if (!hasAktionAccess(session.user, existing)) {
+    return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
   }
 
   await prisma.aktion.update({

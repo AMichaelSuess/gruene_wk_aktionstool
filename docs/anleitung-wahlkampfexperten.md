@@ -30,7 +30,9 @@ Die **Aktionskoordination** ist das Online-Tool des Kreisverbands Berlin-Mitte f
 - Anmeldedaten exportieren – für Auswertungen oder Signal-Nachrichten
 - Aktionen absagen und alle Angemeldeten automatisch benachrichtigen lassen
 
-Du hast die **Rolle Wahlkampfexperte** und siehst nur die Aktionen deines eigenen Teams.
+Du hast die **Rolle Wahlkampfexperte** und siehst die Aktionen deiner Teams sowie die Aktionen, die du selbst angelegt hast.
+
+Eine Aktion kann **mehreren Teams** gehören – zum Beispiel einem Themen-Team ("Team Flyern") und dem Team vor Ort ("Team Ost"). Alle Mitglieder dieser Teams können die Aktion bearbeiten und die Anmeldungen sehen.
 
 ---
 
@@ -49,7 +51,7 @@ Du hast die **Rolle Wahlkampfexperte** und siehst nur die Aktionen deines eigene
 
 Nach dem Login siehst du das Dashboard unter dem Menüpunkt **Übersicht**.
 
-Dort findest du eine Liste aller Aktionen deines Teams. Für jede Aktion werden angezeigt:
+Dort findest du eine Liste aller Aktionen deiner Teams. Für jede Aktion werden angezeigt:
 
 | Feld | Bedeutung |
 |---|---|
@@ -57,7 +59,7 @@ Dort findest du eine Liste aller Aktionen deines Teams. Für jede Aktion werden 
 | **Status** | Aktiv / Geändert / Abgesagt |
 | **Datum & Uhrzeit** | Wann findet die Aktion statt |
 | **Adresse** | Wo findet sie statt |
-| **Team** | Welches Team ist zuständig |
+| **Teams** | Welche Teams zuständig sind |
 | **Anmeldungen** | Anzahl angemeldeter Freiwilliger (/ max. Plätze) |
 
 Zu jeder Aktion gibt es drei Schaltflächen:
@@ -93,7 +95,7 @@ Fülle das Formular aus:
 | **Adresse** | Ja | Vollständige Adresse inkl. PLZ, z.B. "Karl-Marx-Allee 1, 10178 Berlin" – wird automatisch auf der Karte verortet |
 | **Wahlkreis** | Ja | Aus der Dropdown-Liste wählen |
 | **Art der Aktion** | Ja | Haustür, Flyern, Infostand, Plakatieren oder Sonstiges – danach kann öffentlich gefiltert werden |
-| **Team** | Nur wenn du mehreren Teams angehörst | Wähle das zuständige Team |
+| **Teams** | Ja | Hake alle zuständigen Teams an – auch Teams, denen du nicht angehörst (z. B. das Team vor Ort). Gehörst du nur einem Team an, ist es schon angehakt. |
 
 #### Ansprechperson
 
@@ -132,6 +134,11 @@ Fülle die Vorlage mit deinen Aktionen aus. Jede Zeile ist eine Aktion. Pflichtf
 > Bleibt die Spalte leer oder steht dort etwas anderes, wird die Zeile in der Vorschau als
 > Fehler markiert und nicht importiert.
 
+> **Optionale Spalte "Teams":** Hier kannst du pro Zeile die Namen der zuständigen Teams
+> eintragen, mehrere mit Komma getrennt – z. B. "Team Flyern, Team Ost". Groß-/Kleinschreibung
+> ist egal. Bleibt die Spalte leer, gelten die Teams, die du beim Hochladen angehakt hast.
+> Ein unbekannter Team-Name wird in der Vorschau als Fehler markiert.
+
 **Schritt 3: Datei hochladen**
 
 Ziehe die fertige Excel-Datei in den gestrichelten Bereich, oder klicke auf **Datei wählen** und wähle sie aus.
@@ -147,7 +154,7 @@ Nach dem Hochladen siehst du eine Vorschau aller Zeilen:
 
 Klicke auf **X Aktionen importieren**. Nur gültige Zeilen werden übernommen. Fehlerhafte Zeilen werden übersprungen – du kannst die Excel-Datei korrigieren und erneut hochladen.
 
-> **Hinweis:** Wenn du mehreren Teams angehörst, musst du vor dem Import ein Team auswählen.
+> **Hinweis:** Hake vor dem Import die Teams an, die für alle Zeilen ohne Eintrag in der Spalte "Teams" gelten sollen.
 
 ---
 
@@ -156,6 +163,10 @@ Klicke auf **X Aktionen importieren**. Nur gültige Zeilen werden übernommen. F
 1. Klicke im Dashboard bei der gewünschten Aktion auf **Bearbeiten**.
 2. Ändere die gewünschten Felder (dieselben Felder wie beim Erstellen).
 3. Klicke auf **Speichern**.
+
+> **Teams ändern:** Du kannst weitere Teams anhaken oder Haken entfernen. Mindestens eines deiner
+> eigenen Teams muss angehakt bleiben – sonst könntest du die Aktion danach nicht mehr bearbeiten.
+> Ausnahme: Aktionen, die du selbst angelegt hast, kannst du immer bearbeiten.
 
 > **Wichtig:** Wenn du eine Aktion änderst, erhalten alle bereits angemeldeten Freiwilligen automatisch eine **Änderungs-E-Mail** mit den neuen Details.
 
@@ -275,7 +286,7 @@ Mögliche Gründe:
 
 **Warum sehe ich nicht alle Aktionen?**
 
-Als Wahlkampfexperte siehst du nur die Aktionen deines eigenen Teams. Für eine Übersicht aller Aktionen wende dich an die Administration.
+Als Wahlkampfexperte siehst du nur die Aktionen deiner Teams und die Aktionen, die du selbst angelegt hast. Für eine Übersicht aller Aktionen wende dich an die Administration.
 
 **Meine Adresse wird auf der Karte falsch angezeigt – was tun?**
 

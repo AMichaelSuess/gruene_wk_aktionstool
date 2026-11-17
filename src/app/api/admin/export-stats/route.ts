@@ -50,14 +50,15 @@ export async function GET() {
         id: true,
         name: true,
         _count: { select: { aktionen: true } },
-        aktionen: { select: { _count: { select: { anmeldungen: true } } } },
+        aktionen: {
+          select: { aktion: { select: { _count: { select: { anmeldungen: true } } } } },
+        },
       },
       orderBy: { name: "asc" },
     }),
-    prisma.aktionStatistik.groupBy({
-      by: ["teamId"],
-      _sum: { anmeldungenCount: true },
-      _count: { _all: true },
+    // Eine archivierte Aktion zaehlt fuer jedes ihrer Teams
+    prisma.aktionStatistikTeam.findMany({
+      select: { teamId: true, statistik: { select: { anmeldungenCount: true } } },
     }),
     prisma.aktion.findMany({
       select: { datum: true, anmeldungen: { select: { id: true } } },
@@ -80,14 +81,13 @@ export async function GET() {
       (archivedMap.get(wk.id) ?? 0),
   }));
 
-  const archivedTeamMap = new Map(
-    archivedByTeam
-      .filter((r) => r.teamId !== null)
-      .map((r) => [
-        r.teamId!,
-        { staende: r._count._all, anmeldungen: r._sum.anmeldungenCount ?? 0 },
-      ])
-  );
+  const archivedTeamMap = new Map<string, { staende: number; anmeldungen: number }>();
+  for (const r of archivedByTeam) {
+    const entry = archivedTeamMap.get(r.teamId) ?? { staende: 0, anmeldungen: 0 };
+    entry.staende += 1;
+    entry.anmeldungen += r.statistik.anmeldungenCount;
+    archivedTeamMap.set(r.teamId, entry);
+  }
 
   const staendeByTeam = teams
     .map((t) => ({
@@ -100,7 +100,7 @@ export async function GET() {
     .map((t) => ({
       team: t.name,
       count:
-        t.aktionen.reduce((sum, a) => sum + a._count.anmeldungen, 0) +
+        t.aktionen.reduce((sum, a) => sum + a.aktion._count.anmeldungen, 0) +
         (archivedTeamMap.get(t.id)?.anmeldungen ?? 0),
     }))
     .sort((a, b) => b.count - a.count);

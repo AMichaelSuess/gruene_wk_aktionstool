@@ -5,6 +5,14 @@ import { ZodError } from "zod";
 import { aktionSchema } from "@/lib/validators";
 import { KATEGORIE_VALUES } from "@/lib/kategorien";
 import { geocodeAddress } from "@/lib/geocoding";
+import {
+  TEAMS_INCLUDE,
+  expertAktionWhere,
+  flattenTeams,
+  normalizeTeamIds,
+  teamsExist,
+  UNBEKANNTES_TEAM_FEHLER,
+} from "@/lib/aktion-teams";
 
 // Rate limiting for public GET endpoint (SEC-05)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -44,23 +52,19 @@ export async function GET(req: NextRequest) {
   const isPublic = searchParams.get("public") === "true";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = {};
+  let where: any = {};
 
   // Public: only active/changed, future actions
   if (!session || isPublic) {
     where.status = { in: ["AKTIV", "GEAENDERT"] };
     where.datum = { gte: new Date(new Date().toISOString().split("T")[0]) };
   } else if (session.user.role === "EXPERT") {
-    if (session.user.teamIds?.length > 0) {
-      where.teamId = { in: session.user.teamIds };
-    } else {
-      where.createdById = session.user.id;
-    }
+    where = expertAktionWhere(session.user);
   }
 
   // Filters
   if (teamId && session?.user.role === "ADMIN") {
-    where.teamId = teamId;
+    where.teams = { some: { teamId } };
   }
 
   if (wahlkreis) {
@@ -90,13 +94,13 @@ export async function GET(req: NextRequest) {
     include: {
       wahlkreis: true,
       _count: { select: { anmeldungen: true } },
-      team: true,
+      teams: TEAMS_INCLUDE,
     },
     orderBy: [{ datum: "asc" }, { startzeit: "asc" }],
   });
 
   // Filter by tageszeit client-side (based on startzeit); supports multiple values (comma-separated)
-  let filtered = aktionen;
+  let filtered = aktionen.map(flattenTeams);
 
   // NEU: Aktionen ausblenden, deren Startzeit bereits erreicht wurde (nur für öffentliche Ansicht)
   if (!session || isPublic) {
@@ -167,14 +171,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    let teamId: string | null = null;
-    if (session.user.role === "ADMIN") {
-      // Admins stehen über den Teams: gewähltes Team oder bewusst keins
-      teamId = body.teamId || null;
-    } else if (body.teamId && session.user.teamIds?.includes(body.teamId)) {
-      teamId = body.teamId;
-    } else if (session.user.teamIds?.length === 1) {
-      teamId = session.user.teamIds[0];
+    // Admins und Experts duerfen beliebige Teams zuordnen (z. B. Themen-Team
+    // + Bezirks-Team). Admins duerfen bewusst keins waehlen; bei Experts wird
+    // ohne Auswahl das eigene Team gesetzt.
+    let teamIds = normalizeTeamIds(validated.teamIds);
+    if (teamIds.length === 0 && session.user.role === "EXPERT" && session.user.teamIds?.length > 0) {
+      teamIds = [session.user.teamIds[0]];
+    }
+    if (!(await teamsExist(teamIds))) {
+      return NextResponse.json({ error: UNBEKANNTES_TEAM_FEHLER }, { status: 400 });
     }
 
     const aktion = await prisma.aktion.create({
@@ -193,7 +198,7 @@ export async function POST(req: NextRequest) {
         ansprechpersonTelefon: validated.ansprechpersonTelefon,
         maxTeilnehmer: validated.maxTeilnehmer || null,
         createdById: session.user.id,
-        teamId,
+        teams: { create: teamIds.map((teamId) => ({ teamId })) },
       },
       include: { wahlkreis: true },
     });

@@ -144,7 +144,7 @@ describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
       titel: "Test Aktion",
       kategorie: "SONSTIGES",
       wahlkreis: { id: "wk-1", name: "Mitte", nummer: 1 },
-      team: null,
+      teams: [],
       _count: { anmeldungen: 0 },
     });
 
@@ -167,7 +167,7 @@ describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
       titel: "Test Aktion",
       kategorie: "SONSTIGES",
       wahlkreis: { id: "wk-1", name: "Mitte", nummer: 1 },
-      team: null,
+      teams: [],
       _count: { anmeldungen: 0 },
     });
 
@@ -197,7 +197,7 @@ describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
       titel: "Test Aktion",
       kategorie: "SONSTIGES",
       wahlkreis: { id: "wk-1", name: "Mitte", nummer: 1 },
-      team: null,
+      teams: [],
       _count: { anmeldungen: 0 },
     });
 

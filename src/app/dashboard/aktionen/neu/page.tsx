@@ -10,7 +10,7 @@ import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import ExcelUpload from "@/components/ExcelUpload";
 import { KATEGORIEN } from "@/lib/kategorien";
 import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
-import { KEIN_TEAM_LABEL, KEIN_TEAM_VALUE } from "@/lib/teams";
+import TeamAuswahl from "@/components/TeamAuswahl";
 
 interface Wahlkreis {
   id: string;
@@ -44,8 +44,9 @@ export default function NewAktionPage() {
     ansprechpersonEmail: "",
     ansprechpersonTelefon: "",
     maxTeilnehmer: "",
-    teamId: "",
   });
+  // null = noch nichts ausgewählt (dann gilt die Vorauswahl unten)
+  const [chosenTeamIds, setTeamIds] = useState<string[] | null>(null);
 
   useEffect(() => {
     fetch("/api/wahlkreise")
@@ -53,22 +54,18 @@ export default function NewAktionPage() {
       .then(setWahlkreise);
   }, []);
 
-  const teamIds = session?.user.teamIds ?? [];
+  const ownTeamIds = session?.user.teamIds;
   const isAdmin = session?.user.role === "ADMIN";
-  // Admins stehen über den Teams und wählen aus allen; Experts aus ihren eigenen
-  const needsTeamSelect = isAdmin || teamIds.length > 1;
 
   useEffect(() => {
-    if (!needsTeamSelect) return;
-    fetch(isAdmin ? "/api/admin/teams" : "/api/user/teams")
+    fetch("/api/teams")
       .then((r) => r.json())
       .then((data: Team[]) => setTeams(data));
-  }, [needsTeamSelect, isAdmin]);
+  }, []);
 
-  const teamOptions = [
-    ...(isAdmin ? [{ value: KEIN_TEAM_VALUE, label: KEIN_TEAM_LABEL }] : []),
-    ...teams.map((t) => ({ value: t.id, label: t.name })),
-  ];
+  // Experts mit genau einem Team: eigenes Team ist vorausgewählt
+  const teamIds =
+    chosenTeamIds ?? (!isAdmin && ownTeamIds?.length === 1 ? [ownTeamIds[0]] : []);
 
   function updateForm(field: string, value: string) {
     setForm({ ...form, [field]: value });
@@ -79,18 +76,15 @@ export default function NewAktionPage() {
     setLoading(true);
     setError("");
 
-    let selectedTeamId: string | null | undefined;
-    if (form.teamId === KEIN_TEAM_VALUE) {
-      selectedTeamId = null;
-    } else if (form.teamId) {
-      selectedTeamId = form.teamId;
-    } else if (!isAdmin && teamIds.length === 1) {
-      selectedTeamId = teamIds[0];
+    if (!isAdmin && teams.length > 0 && teamIds.length === 0) {
+      setError("Bitte wähle mindestens ein Team aus.");
+      setLoading(false);
+      return;
     }
 
     const body = {
       ...form,
-      teamId: selectedTeamId,
+      teamIds,
       maxTeilnehmer: form.maxTeilnehmer ? parseInt(form.maxTeilnehmer) : null,
     };
 
@@ -206,16 +200,13 @@ export default function NewAktionPage() {
               required
             />
 
-            {needsTeamSelect && teams.length > 0 && (
-              <Select
-                label="Team"
-                value={form.teamId}
-                onChange={(e) => updateForm("teamId", e.target.value)}
-                options={teamOptions}
-                placeholder="Bitte Team wählen"
-                required
-              />
-            )}
+            <TeamAuswahl
+              teams={teams}
+              value={teamIds}
+              onChange={setTeamIds}
+              ownTeamIds={ownTeamIds}
+              isAdmin={isAdmin}
+            />
 
             <div className="border-t-ui border-line pt-4 mt-4">
               <h3 className="font-headline font-bold case-ui tracking-ui text-ink mb-3">Ansprechperson</h3>
@@ -271,7 +262,13 @@ export default function NewAktionPage() {
           </form>
         </Card>
       ) : (
-        <ExcelUpload teamOptions={teams.length > 0 ? teamOptions : []} needsTeamSelect={needsTeamSelect} />
+        <ExcelUpload
+          teams={teams}
+          teamIds={teamIds}
+          onTeamIdsChange={setTeamIds}
+          ownTeamIds={ownTeamIds}
+          isAdmin={isAdmin}
+        />
       )}
     </div>
   );

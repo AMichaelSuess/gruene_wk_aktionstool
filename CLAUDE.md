@@ -64,7 +64,7 @@ Public API routes:
 
 Core entities in `prisma/schema.prisma`:
 - **User** (ADMIN | EXPERT roles) → belongs to Teams via UserTeam
-- **Team** → belongs to Wahlkreis, owns Aktionen
+- **Team** → belongs to Wahlkreis; linked to Aktionen many-to-many via AktionTeam (an Aktion can belong to several teams, e.g. a topic team plus a local team)
 - **Wahlkreis** — electoral district
 - **Aktion** — campaign action with geocoordinates, contact person, status (AKTIV/ABGESAGT/GEAENDERT)
 - **Anmeldung** — volunteer registration, unique per (aktionId, email), has `cancelToken` for self-service unsubscribe
@@ -327,8 +327,8 @@ All UI must work in every theme. See `docs/design/theming.md` for the token tabl
 ## Key Abstractions
 - Purpose: Restrict EXPERTs to only their team's data
 - Implementation: `session.user.teamIds` (array of team IDs) embedded in JWT at login (`src/lib/auth.ts`)
-- Enforcement: Every API handler for EXPERT access adds `where: { teamId: { in: session.user.teamIds } }` to Prisma queries
-- Examples: `src/app/api/aktionen/route.ts` (lines 26–31), `src/app/api/aktionen/[id]/route.ts` (lines 54–59), `src/app/api/export/route.ts` (lines 27–30)
+- Enforcement: list/export queries use `expertAktionWhere()` and single-Aktion handlers use `hasAktionAccess()` from `src/lib/aktion-teams.ts` (access = member of any assigned team, or creator). Experts may assign any team; when editing someone else's Aktion they must keep one of their own teams (`keepsOwnTeam()`)
+- Examples: `src/app/api/aktionen/route.ts`, `src/app/api/aktionen/[id]/route.ts`, `src/app/api/export/route.ts`
 - Purpose: Single source of truth for all input shapes
 - Location: `src/lib/validators.ts`
 - Schemas: `loginSchema`, `userSchema`, `teamSchema`, `aktionSchema`, `anmeldungSchema`, `excelRowSchema`
