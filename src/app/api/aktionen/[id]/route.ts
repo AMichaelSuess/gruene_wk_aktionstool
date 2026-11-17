@@ -65,7 +65,12 @@ export async function GET(
 
   const session = await auth();
   if (!session) {
-    const { ansprechpersonEmail: _, ansprechpersonTelefon: __, ...publicAktion } = aktion;
+    const {
+      ansprechpersonEmail: _e,
+      ansprechpersonTelefon: _t,
+      createdById: _c,
+      ...publicAktion
+    } = aktion;
     return NextResponse.json(publicAktion);
   }
 

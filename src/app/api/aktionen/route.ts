@@ -146,6 +146,17 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  // Public view: never expose the contact person's email/phone or internal user IDs.
+  // The public pages only show the contact person's name.
+  if (!session || isPublic) {
+    return NextResponse.json(
+      filtered.map(
+        ({ ansprechpersonEmail: _e, ansprechpersonTelefon: _t, createdById: _c, ...publicAktion }) =>
+          publicAktion
+      )
+    );
+  }
+
   return NextResponse.json(filtered);
 }
 

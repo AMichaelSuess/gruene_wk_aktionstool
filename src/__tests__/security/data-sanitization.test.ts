@@ -5,7 +5,7 @@
  * auftauchen und dass öffentliche Endpunkte keine persönlichen Daten leaken.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mockAuth, ADMIN_SESSION, createJsonRequest } from "./helpers";
+import { mockAuth, ADMIN_SESSION, EXPERT_TEAM_A, createJsonRequest } from "./helpers";
 
 vi.mock("@/lib/auth", () => ({
   auth: vi.fn(),
@@ -174,7 +174,67 @@ describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
     const responseText = JSON.stringify(data);
     expect(responseText).not.toContain("vorname");
     expect(responseText).not.toContain("nachname");
-    // Anmelder-E-Mail darf nicht enthalten sein (Ansprechperson-E-Mail ist OK da öffentlich)
     expect(data[0]).not.toHaveProperty("anmeldungen");
+
+    // Kontaktdaten der Ansprechperson und interne User-IDs sind nicht öffentlich
+    expect(data[0].ansprechpersonName).toBe("Kontakt Person");
+    expect(data[0]).not.toHaveProperty("ansprechpersonEmail");
+    expect(data[0]).not.toHaveProperty("ansprechpersonTelefon");
+    expect(data[0]).not.toHaveProperty("createdById");
+  });
+
+  it("GET /api/aktionen?public=true (eingeloggt) → keine Kontaktdaten der Ansprechperson", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+
+    mockPrisma.aktion.findMany.mockResolvedValue([
+      {
+        id: "aktion-1",
+        titel: "Haustürwahlkampf",
+        datum: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        startzeit: "10:00",
+        status: "AKTIV",
+        teams: [],
+        _count: { anmeldungen: 0 },
+        createdById: "user-1",
+        ansprechpersonName: "Kontakt Person",
+        ansprechpersonEmail: "kontakt@gruene.de",
+        ansprechpersonTelefon: "030123456",
+      },
+    ]);
+
+    const { GET } = await import("@/app/api/aktionen/route");
+    const res = await GET(new Request("http://localhost:3000/api/aktionen?public=true") as any);
+    const data = await res.json();
+
+    expect(data[0]).not.toHaveProperty("ansprechpersonEmail");
+    expect(data[0]).not.toHaveProperty("ansprechpersonTelefon");
+    expect(data[0]).not.toHaveProperty("createdById");
+  });
+
+  it("GET /api/aktionen/[id] (öffentlich) → keine Kontaktdaten und keine User-ID", async () => {
+    await mockAuth(null);
+
+    mockPrisma.aktion.findUnique.mockResolvedValue({
+      id: "aktion-1",
+      titel: "Haustürwahlkampf",
+      teams: [],
+      _count: { anmeldungen: 0 },
+      createdById: "user-1",
+      ansprechpersonName: "Kontakt Person",
+      ansprechpersonEmail: "kontakt@gruene.de",
+      ansprechpersonTelefon: "030123456",
+    });
+
+    const { GET } = await import("@/app/api/aktionen/[id]/route");
+    const res = await GET(new Request("http://localhost:3000/api/aktionen/aktion-1") as any, {
+      params: Promise.resolve({ id: "aktion-1" }),
+    });
+    const data = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(data.ansprechpersonName).toBe("Kontakt Person");
+    expect(data).not.toHaveProperty("ansprechpersonEmail");
+    expect(data).not.toHaveProperty("ansprechpersonTelefon");
+    expect(data).not.toHaveProperty("createdById");
   });
 });
