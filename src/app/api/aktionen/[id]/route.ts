@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { ZodError } from "zod";
 import { aktionSchema } from "@/lib/validators";
 import { geocodeAddress } from "@/lib/geocoding";
@@ -20,27 +21,13 @@ import {
 } from "@/lib/aktion-teams";
 
 // Rate limiting for public GET endpoint (SEC-05)
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 30; // max requests per minute for detail endpoint
-const RATE_WINDOW = 60 * 1000; // 1 minute
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
-    return false;
-  }
-  entry.count++;
-  return entry.count > RATE_LIMIT;
-}
+const isRateLimited = createRateLimiter(30, 60 * 1000); // per minute, detail endpoint
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-  if (isRateLimited(ip)) {
+  if (isRateLimited(clientIp(req))) {
     return NextResponse.json(
       { error: "Zu viele Anfragen. Bitte versuche es spaeter erneut." },
       { status: 429 }

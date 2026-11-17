@@ -1,48 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email";
 import { meineAktionenEmail } from "@/lib/email-templates";
 
 // Rate limiting: 5 requests per minute per IP
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 5;
-const RATE_WINDOW = 60 * 1000;
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
-    return false;
-  }
-
-  entry.count++;
-  return entry.count > RATE_LIMIT;
-}
+const isRateLimited = createRateLimiter(5, 60 * 1000);
 
 // Rate limiting: 2 requests per 15 minutes per email address
-const emailRateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const EMAIL_RATE_LIMIT = 2;
-const EMAIL_RATE_WINDOW = 15 * 60 * 1000;
-
-function isEmailRateLimited(email: string): boolean {
-  const now = Date.now();
-  const entry = emailRateLimitMap.get(email);
-
-  if (!entry || now > entry.resetAt) {
-    emailRateLimitMap.set(email, { count: 1, resetAt: now + EMAIL_RATE_WINDOW });
-    return false;
-  }
-
-  entry.count++;
-  return entry.count > EMAIL_RATE_LIMIT;
-}
+const isEmailRateLimited = createRateLimiter(2, 15 * 60 * 1000);
 
 export async function GET(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-  if (isRateLimited(ip)) {
+  if (isRateLimited(clientIp(req))) {
     return NextResponse.json(
       { error: "Zu viele Anfragen. Bitte versuche es später erneut." },
       { status: 429 }

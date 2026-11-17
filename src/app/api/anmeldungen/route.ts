@@ -1,27 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
+import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { anmeldungSchema } from "@/lib/validators";
 import { sendEmail } from "@/lib/email";
 import { anmeldebestaetigungEmail } from "@/lib/email-templates";
 
-// Simple in-memory rate limiting
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 10; // max requests
-const RATE_WINDOW = 60 * 1000; // per minute
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
-    return false;
-  }
-
-  entry.count++;
-  return entry.count > RATE_LIMIT;
-}
+// Rate limiting per client IP
+const isRateLimited = createRateLimiter(10, 60 * 1000); // per minute
 
 interface AktionWithCount {
   id: string;
@@ -40,8 +26,7 @@ interface AktionWithCount {
 
 export async function POST(req: NextRequest) {
   // Rate limiting
-  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-  if (isRateLimited(ip)) {
+  if (isRateLimited(clientIp(req))) {
     return NextResponse.json(
       { error: "Zu viele Anfragen. Bitte versuche es später erneut." },
       { status: 429 }

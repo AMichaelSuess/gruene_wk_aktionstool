@@ -619,4 +619,4 @@ entsprechend kurz halten und in der Datenschutzerklärung berücksichtigen.
 | Kopfzeile, Karte oder Gebietsbezeichnung falsch | Build-Variable ([5.3](#53-build-variablen--buildtime-und-runtime)) fehlt oder „Available at Buildtime“ ist nicht gesetzt – korrigieren und **Redeploy**. |
 | Datenschutz/Impressum zeigt Berlin-Mitte | Variable aus [5.4](#54-kreisverbands-konfiguration--runtime) fehlt – setzen und Restart. |
 | Scheduled Task liefert `Nicht autorisiert` | `CRON_SECRET` im Befehl nicht aufgelöst – siehe [Abschnitt 8](#8-scheduled-tasks-cron-jobs). |
-| Anmeldungen werden mit „Zu viele Anfragen“ abgelehnt | Das Rate-Limiting zählt pro IP im Speicher des Containers; ein Restart setzt die Zähler zurück. |
+| Anmeldungen werden mit „Zu viele Anfragen“ abgelehnt | Das Rate-Limiting zählt pro IP im Speicher des Containers; ein Restart setzt die Zähler zurück. Als IP gilt der letzte Eintrag in `X-Forwarded-For`, den Traefik anhängt. Steht ein weiterer Proxy oder ein CDN davor, landen alle Besucher in einem Zähler – dann muss `clientIp()` in `src/lib/rate-limit.ts` angepasst werden. |
