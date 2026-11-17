@@ -148,3 +148,34 @@ describe("Geocoding: höchstens 1 Anfrage pro Sekunde", () => {
     expect(times[2] - times[1]).toBeGreaterThanOrEqual(1100);
   });
 });
+
+describe("Geocoding: Zeitlimit und User-Agent", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("Anfrage hat ein Zeitlimit und einen User-Agent mit Kontakt-URL", async () => {
+    const fetchMock = vi.fn(async () => new Response("[]", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { geocodeAddress } = await vi.importActual<typeof import("@/lib/geocoding")>("@/lib/geocoding");
+
+    await geocodeAddress("Alexanderplatz 1");
+
+    const init = (fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+    expect((init.headers as Record<string, string>)["User-Agent"]).toMatch(
+      /^[A-Za-z0-9]+-Wahlkampf-App\/1\.0 \(\+https:\/\/\S+\)$/
+    );
+  });
+
+  it("Zeitüberschreitung → null statt hängender Anfrage", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new DOMException("timeout", "TimeoutError");
+      })
+    );
+    const { geocodeAddress } = await vi.importActual<typeof import("@/lib/geocoding")>("@/lib/geocoding");
+    expect(await geocodeAddress("Irgendwo")).toBeNull();
+  });
+});

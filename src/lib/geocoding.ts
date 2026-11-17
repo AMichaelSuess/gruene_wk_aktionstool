@@ -8,6 +8,21 @@ interface GeocodingResult {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const TIMEOUT_MS = 5000;
+
+// Nominatim's usage policy asks for an identifying User-Agent with a way to
+// reach the operator, e.g. "B90GRUeNELeipzig-Wahlkampf-App/1.0 (+https://www.gruene-leipzig.de)".
+export function userAgent(): string {
+  const name =
+    districtConfig.orgShortName
+      .replace(/Ä/g, "Ae").replace(/Ö/g, "Oe").replace(/Ü/g, "Ue")
+      .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+      .replace(/[^a-zA-Z0-9]/g, "") || "GrueneAktionen";
+  const site = districtConfig.websiteUrl.trim();
+  const contact = site ? ` (+${/^https?:\/\//.test(site) ? site : `https://${site}`})` : "";
+  return `${name}-Wahlkampf-App/1.0${contact}`;
+}
+
 // Nominatim's usage policy allows at most one request per second. All calls
 // in this process are queued so that imports cannot exceed it (and get the
 // server's IP banned).
@@ -44,9 +59,9 @@ async function fetchGeocode(address: string): Promise<GeocodingResult | null> {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?${params}`,
       {
-        headers: {
-          "User-Agent": `${process.env.ORG_SHORT_NAME?.replace(/[^a-zA-Z0-9]/g, "") || "GrueneAktionen"}-Wahlkampf-App/1.0`,
-        },
+        headers: { "User-Agent": userAgent() },
+        // A hanging Nominatim response must not hang the create/edit/import request
+        signal: AbortSignal.timeout(TIMEOUT_MS),
       }
     );
 
