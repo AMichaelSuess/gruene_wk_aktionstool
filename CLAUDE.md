@@ -124,6 +124,7 @@ Eine Web-App zur Koordinierung und Anmeldung von Aktiven bei Wahlkampf-Aktionen 
 - **DSGVO:** Alle Änderungen, die personenbezogene Daten betreffen, müssen DSGVO-konform bleiben
 - **Zielgruppe:** UI-Änderungen müssen für ältere, weniger technikaffine Nutzer verständlich sein — keine cleveren Tricks, klare Beschriftungen
 - **Kein Double-Opt-in (bewusst):** Anmeldungen gelten sofort, ohne Bestätigungslink – ein zusätzlicher Schritt wäre für die Zielgruppe eine Hürde. Akzeptiertes Risiko: Fremde können eine E-Mail-Adresse anmelden. Abgemildert durch Rate-Limiting, Honeypot und eine einheitliche Antwort, die bestehende Anmeldungen nicht verrät
+- **CSP ohne Nonces (bewusst, D-04):** Die Content-Security-Policy erlaubt in Produktion `script-src 'self' 'unsafe-inline'`, weil Next.js eigene Inline-Skripte einfügt und Nonces jede Seite dynamisch rendern müssten. Akzeptiert, solange es keine XSS-Senke gibt: kein `dangerouslySetInnerHTML`/`innerHTML`, kein aus Daten gebautes `href`/`src`, kein Rendern von gespeichertem HTML oder Markdown. Wer so etwas einführt, muss die Entscheidung neu treffen (Nonce-CSP über `src/proxy.ts`), denn dann hätte ein XSS-Fehler im Dashboard die vollen Export-Rechte der eingeloggten Person. `src/__tests__/security/csp-header.test.ts` hält den Stand fest
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:codebase/STACK.md -->
