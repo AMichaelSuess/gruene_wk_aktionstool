@@ -178,6 +178,36 @@ um, der nicht funktioniert.
 `/api/health` antwortet mit `200 {"status":"ok"}`, wenn die App läuft und die Datenbank
 erreichbar ist, sonst mit `503 {"status":"error"}`.
 
+### Größenlimit für Anfragen
+
+Next.js liest einen Request-Body ohne Obergrenze ein. Die eigenen öffentlichen Endpunkte der App
+begrenzen das selbst, der Login (NextAuth) aber nicht. Damit niemand mit riesigen Anfragen den
+Speicher des Containers füllt, begrenzt Traefik alle Anfragen auf 6 MB (genug für den
+Excel-Import mit höchstens 5 MB).
+
+Unter **General** → **Container Labels** (ggf. **Readonly labels** abschalten):
+
+1. Eine Middleware ergänzen (`<NAME>` frei wählbar, z. B. `aktionen`):
+   ```
+   traefik.http.middlewares.<NAME>-body-limit.buffering.maxRequestBodyBytes=6291456
+   ```
+2. In der vorhandenen Zeile `traefik.http.routers.https-0-<…>.middlewares=…` den Namen anhängen,
+   die bestehenden Einträge bleiben stehen, z. B.:
+   ```
+   traefik.http.routers.https-0-<…>.middlewares=gzip,<NAME>-body-limit
+   ```
+3. Speichern und **Redeploy**.
+
+Prüfen (antwortet Traefik mit `413`, greift das Limit):
+
+```bash
+head -c 7000000 /dev/zero | curl -s -o /dev/null -w "%{http_code}\n" -X POST \
+  --data-binary @- https://<DOMAIN>/api/auth/callback/credentials
+```
+
+Die Labels erzeugt Coolify bei Änderungen an Domain oder Ports neu – danach prüfen, ob die
+Middleware noch eingetragen ist.
+
 ---
 
 ## 5. Umgebungsvariablen
@@ -490,6 +520,7 @@ Ein erneuter Start schickt niemandem eine zweite Erinnerung oder Tagesübersicht
 - [ ] `https://<DOMAIN>` lädt mit gültigem Zertifikat
 - [ ] `https://<DOMAIN>/api/health` liefert `{"status":"ok"}`
 - [ ] Health-Check in Coolify ist aktiv und grün
+- [ ] Größenlimit für Anfragen greift (Prüfbefehl liefert `413`, siehe [Abschnitt 4](#größenlimit-für-anfragen))
 - [ ] Login mit dem Bootstrap-Admin funktioniert
 - [ ] `BOOTSTRAP_ADMIN_PASSWORD` ist aus Coolify gelöscht
 - [ ] **Datenschutzerklärung** (`/datenschutz`) zeigt die richtigen Angaben: Kreisverband,
