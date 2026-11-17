@@ -469,7 +469,7 @@ in der Regel bereits vorausgewählt).
 | Task | Zweck | Zeitpunkt |
 |---|---|---|
 | `daily-summary` | Tagesübersicht an die Ansprechpersonen | 21:00 Sommerzeit / 20:00 Winterzeit. Der Endpunkt rechnet mit dem UTC-Datum, darf also nicht nach 24:00 UTC laufen. |
-| `cleanup-anmeldungen` | löscht Anmeldedaten 72 h nach Aktionsende (DSGVO) | stündlich |
+| `cleanup-anmeldungen` | löscht Anmeldedaten 72 h nach Aktionsende und Versandprotokolle nach 7 Tagen (DSGVO) | stündlich |
 | `send-erinnerungen` | Erinnerung an Angemeldete am Abend vor der Aktion | 19:00 Sommerzeit / 18:00 Winterzeit |
 
 **Zeitzone:** Coolify interpretiert die Frequenz in der Zeitzone, die unter **Servers** →

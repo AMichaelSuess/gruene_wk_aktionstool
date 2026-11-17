@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { isCronAuthorized } from "@/lib/cron-auth";
 
+const EMAIL_LOG_RETENTION_DAYS = 7;
+
 function computeDeletionThreshold(datum: Date, endzeit: string): Date {
   const parts = endzeit.split(":");
   const hours = parseInt(parts[0], 10);
@@ -65,6 +67,7 @@ export async function POST(req: NextRequest) {
         });
 
         await tx.anmeldung.deleteMany({ where: { aktionId: aktion.id } });
+        await tx.emailLog.deleteMany({ where: { aktionId: aktion.id } });
       });
 
       processed++;
@@ -74,10 +77,19 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Send logs hold recipients' email addresses (and names for ABMELDUNG), and
+  // confirmation logs carry no aktionId, so they are deleted by age as well.
+  // The daily summary only reads today's logs, so 7 days is enough.
+  const emailLogCutoff = new Date(now.getTime() - EMAIL_LOG_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const { count: emailLogsDeleted } = await prisma.emailLog.deleteMany({
+    where: { gesendetAm: { lt: emailLogCutoff } },
+  });
+
   return NextResponse.json({
-    message: `${processed} Aktionen bereinigt, ${deleted} Anmeldungen gelöscht`,
+    message: `${processed} Aktionen bereinigt, ${deleted} Anmeldungen gelöscht, ${emailLogsDeleted} Versandprotokolle gelöscht`,
     processed,
     deleted,
+    emailLogsDeleted,
     errors,
   });
 }

@@ -17,6 +17,7 @@ vi.mock("@/lib/db", () => ({
     },
     emailLog: {
       findMany: vi.fn(),
+      deleteMany: vi.fn(),
     },
   },
 }));
@@ -125,4 +126,31 @@ describe("Cron-Endpunkte sind gesperrt, wenn CRON_SECRET fehlt oder zu kurz ist"
       expect(res.status).toBe(401);
     });
   }
+});
+
+describe("Cleanup-Cron löscht Versandprotokolle (DSGVO)", () => {
+  it("löscht EmailLog-Einträge, die älter als 7 Tage sind", async () => {
+    const { POST } = await import("@/app/api/cron/cleanup-anmeldungen/route");
+    const { prisma } = await import("@/lib/db");
+
+    (prisma.aktion.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    (prisma.emailLog.deleteMany as ReturnType<typeof vi.fn>).mockResolvedValue({ count: 3 });
+
+    const before = Date.now();
+    const res = await POST(
+      new Request("http://localhost:3000/api/cron/cleanup-anmeldungen", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${CRON_SECRET}` },
+      }) as any
+    );
+
+    expect(res.status).toBe(200);
+    expect((await res.json()).emailLogsDeleted).toBe(3);
+
+    const { where } = (prisma.emailLog.deleteMany as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    const cutoff = (where.gesendetAm.lt as Date).getTime();
+    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+    expect(cutoff).toBeGreaterThanOrEqual(before - sevenDays - 1000);
+    expect(cutoff).toBeLessThanOrEqual(Date.now() - sevenDays);
+  });
 });

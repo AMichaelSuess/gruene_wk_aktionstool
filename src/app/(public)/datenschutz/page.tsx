@@ -161,8 +161,13 @@ export default function DatenschutzPage() {
             Deine Anmeldedaten (Vorname, Nachname, E-Mail-Adresse, Telefonnummer, Signal-Name)
             werden <strong>72 Stunden nach Ende der jeweiligen Aktion automatisch gelöscht</strong>.
             Anschließend werden ausschließlich anonymisierte Gesamtzahlen (Anzahl der Anmeldungen
-            pro Aktion) zu statistischen Zwecken gespeichert. Ein Rückschluss auf einzelne Personen
-            ist danach nicht mehr möglich.
+            pro Aktion) zu statistischen Zwecken gespeichert. Aus diesen Zahlen ist kein Rückschluss
+            auf einzelne Personen möglich.
+          </p>
+          <p className="mb-3">
+            Zu jeder E-Mail, die wir verschicken, speichern wir ein kurzes Versandprotokoll
+            (E-Mail-Adresse, Art der Nachricht, Zeitpunkt; bei einer Abmeldung auch deinen Namen).
+            Diese Versandprotokolle werden <strong>nach 7 Tagen automatisch gelöscht</strong>.
           </p>
           <p>
             Nutzer-Accounts der Expert*innen und Administrator*innen sowie Team-Zuordnungen werden
