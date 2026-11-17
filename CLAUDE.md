@@ -123,6 +123,7 @@ Eine Web-App zur Koordinierung und Anmeldung von Aktiven bei Wahlkampf-Aktionen 
 - **Sprache:** UI und Domänensprache ist Deutsch — bleibt so
 - **DSGVO:** Alle Änderungen, die personenbezogene Daten betreffen, müssen DSGVO-konform bleiben
 - **Zielgruppe:** UI-Änderungen müssen für ältere, weniger technikaffine Nutzer verständlich sein — keine cleveren Tricks, klare Beschriftungen
+- **Kein Double-Opt-in (bewusst):** Anmeldungen gelten sofort, ohne Bestätigungslink – ein zusätzlicher Schritt wäre für die Zielgruppe eine Hürde. Akzeptiertes Risiko: Fremde können eine E-Mail-Adresse anmelden. Abgemildert durch Rate-Limiting, Honeypot und eine einheitliche Antwort, die bestehende Anmeldungen nicht verrät
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:codebase/STACK.md -->
