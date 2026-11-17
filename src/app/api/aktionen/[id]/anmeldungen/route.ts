@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { audit } from "@/lib/audit";
 import { hasAktionAccess } from "@/lib/aktion-teams";
 
 export async function GET(
@@ -73,5 +74,6 @@ export async function DELETE(
   if (result.count === 0) {
     return NextResponse.json({ error: "Anmeldung nicht gefunden" }, { status: 404 });
   }
+  audit("ANMELDUNG_GELOESCHT", session.user.id, { anmeldungId, aktionId: id });
   return NextResponse.json({ message: "Anmeldung gelöscht" });
 }

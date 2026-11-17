@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { audit } from "@/lib/audit";
 import { createAnmeldungenExcel, createAnmeldungenTxt } from "@/lib/excel";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -41,6 +42,14 @@ export async function GET(req: NextRequest) {
     where,
     include: { aktion: true },
     orderBy: { createdAt: "desc" },
+  });
+
+  audit("EXPORT_ANMELDUNGEN", session.user.id, {
+    format: exportFormat,
+    aktionId,
+    teamId,
+    wahlkreisId,
+    count: anmeldungen.length,
   });
 
   const exportData = anmeldungen.map((a) => ({

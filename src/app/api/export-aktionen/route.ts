@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { audit } from "@/lib/audit";
 import { createAktionenExcel, createAktionenTxt } from "@/lib/excel";
 import { KATEGORIE_VALUES, kategorieLabel } from "@/lib/kategorien";
 import { format, startOfDay, endOfDay, addDays, startOfWeek, endOfWeek } from "date-fns";
@@ -76,6 +77,14 @@ export async function GET(req: NextRequest) {
       _count: { select: { anmeldungen: true } },
     },
     orderBy: [{ datum: "asc" }, { startzeit: "asc" }],
+  });
+
+  audit("EXPORT_AKTIONEN", session.user.id, {
+    format: exportFormat,
+    teamId,
+    dateFilter,
+    kategorie,
+    count: aktionen.length,
   });
 
   const exportData = aktionen.map((a) => ({

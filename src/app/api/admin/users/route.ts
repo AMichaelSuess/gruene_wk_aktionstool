@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { audit } from "@/lib/audit";
 import { userSchema, userUpdateSchema } from "@/lib/validators";
 import bcrypt from "bcryptjs";
 
@@ -58,6 +59,12 @@ export async function POST(req: NextRequest) {
       include: { teams: { include: { team: true } } },
     });
 
+    audit("USER_ERSTELLT", session.user.id, {
+      userId: user.id,
+      role: user.role,
+      teamIds: validated.teamIds ?? [],
+    });
+
     const { password: _, ...sanitized } = user;
     return NextResponse.json(
       { ...sanitized, teams: sanitized.teams.map((ut) => ut.team) },
@@ -103,6 +110,15 @@ export async function PUT(req: NextRequest) {
       include: { teams: { include: { team: true } } },
     });
 
+    // Field names only (never the values of name, email or password)
+    audit("USER_GEAENDERT", session.user.id, {
+      userId: user.id,
+      fields: Object.keys(updateData),
+      role: validated.role,
+      active: validated.active,
+      teamIds: validated.teamIds,
+    });
+
     const { password: _, ...sanitized } = user;
     return NextResponse.json({ ...sanitized, teams: sanitized.teams.map((ut) => ut.team) });
   } catch (error) {
@@ -127,5 +143,6 @@ export async function DELETE(req: NextRequest) {
   }
 
   await prisma.user.delete({ where: { id } });
+  audit("USER_GELOESCHT", session.user.id, { userId: id });
   return NextResponse.json({ message: "Benutzer gelöscht" });
 }

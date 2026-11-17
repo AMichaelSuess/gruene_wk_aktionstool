@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { audit } from "@/lib/audit";
 
 // DELETE: Hard-delete action (admin only, no email notifications)
 export async function DELETE(
@@ -27,6 +28,7 @@ export async function DELETE(
   }
 
   await prisma.aktion.delete({ where: { id } });
+  audit("AKTION_ENDGUELTIG_GELOESCHT", session.user.id, { aktionId: id });
 
   return NextResponse.json({ message: "Aktion gelöscht" });
 }

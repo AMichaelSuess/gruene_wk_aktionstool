@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { audit } from "@/lib/audit";
 import { createAuswertungExcel } from "@/lib/excel";
 import { getISOWeek, getISOWeekYear } from "date-fns";
 
@@ -145,6 +146,8 @@ export async function GET() {
     anmeldungenByTeam,
     byKalenderwoche,
   });
+
+  audit("EXPORT_STATISTIK", session.user.id);
 
   return new NextResponse(buffer as unknown as BodyInit, {
     headers: {
