@@ -32,7 +32,7 @@ function BestaetigenContent() {
     })
       .then(async (res) => {
         if (!res.ok) {
-          setStatus("invalid");
+          setStatus(res.status === 404 || res.status === 400 ? "invalid" : "error");
           return;
         }
         setAktion(await res.json());
