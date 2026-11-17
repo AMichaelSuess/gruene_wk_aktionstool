@@ -97,3 +97,45 @@ describe("EXPERT darf nicht auf Admin-Statistiken zugreifen", () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe("EXPERT darf nicht auf weitere Admin-Endpunkte zugreifen", () => {
+  it("GET /api/admin/wahlkreise → 401 für EXPERT", async () => {
+    const { GET } = await import("@/app/api/admin/wahlkreise/route");
+    const { prisma } = await import("@/lib/db");
+    const res = await GET();
+    expect(res.status).toBe(401);
+    expect(prisma.wahlkreis.findMany).not.toHaveBeenCalled();
+  });
+
+  it("PUT /api/admin/wahlkreise → 401 für EXPERT", async () => {
+    const { PUT } = await import("@/app/api/admin/wahlkreise/route");
+    const req = createJsonRequest("/api/admin/wahlkreise", { id: "wk-1", name: "Neu", nummer: 1 }, "PUT");
+    const res = await PUT(req as any);
+    expect(res.status).toBe(401);
+  });
+
+  it("GET /api/admin/export-stats → 401 für EXPERT", async () => {
+    const { GET } = await import("@/app/api/admin/export-stats/route");
+    const res = await GET();
+    expect(res.status).toBe(401);
+  });
+
+  it("DELETE /api/admin/aktionen/[id] → 403 für EXPERT, nichts gelöscht", async () => {
+    const { DELETE } = await import("@/app/api/admin/aktionen/[id]/route");
+    const { prisma } = await import("@/lib/db");
+    const req = createRequest("/api/admin/aktionen/aktion-1", { method: "DELETE" });
+    const res = await DELETE(req as any, { params: Promise.resolve({ id: "aktion-1" }) });
+    expect(res.status).toBe(403);
+    expect(prisma.aktion.delete).not.toHaveBeenCalled();
+  });
+});
+
+describe("Ohne Login kein Zugriff auf Admin-Endpunkte", () => {
+  it("GET /api/admin/export-stats und /api/admin/wahlkreise → 401", async () => {
+    await mockAuth(null);
+    const stats = await import("@/app/api/admin/export-stats/route");
+    const wk = await import("@/app/api/admin/wahlkreise/route");
+    expect((await stats.GET()).status).toBe(401);
+    expect((await wk.GET()).status).toBe(401);
+  });
+});
