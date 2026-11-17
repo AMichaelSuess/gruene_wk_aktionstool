@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { clientIp, createRateLimiter } from "@/lib/rate-limit";
+import { BodyTooLargeError, readJsonLimited } from "@/lib/request-body";
 import { anmeldungSchema } from "@/lib/validators";
 import { sendEmail } from "@/lib/email";
 import { anmeldebestaetigungEmail } from "@/lib/email-templates";
 
 // Rate limiting per client IP
 const isRateLimited = createRateLimiter(10, 60 * 1000); // per minute
+
+const MAX_BODY_BYTES = 32 * 1024;
 
 interface AktionWithCount {
   id: string;
@@ -34,10 +37,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json();
+    // A real signup is well under 1 KB; reject anything large before parsing
+    const body = (await readJsonLimited(req, MAX_BODY_BYTES)) as Record<string, unknown>;
 
     // Honeypot check
-    if (body.honeypot && body.honeypot.length > 0) {
+    if (typeof body?.honeypot === "string" && body.honeypot.length > 0) {
       // Silently accept but don't process (bot trap)
       return NextResponse.json({ message: "Anmeldung erfolgreich" });
     }
@@ -52,7 +56,8 @@ export async function POST(req: NextRequest) {
     const successfulAktionen: Array<{ aktion: AktionWithCount; cancelToken: string }> = [];
     const existingAktionen: Array<{ aktion: AktionWithCount; cancelToken: string }> = [];
 
-    for (const aktionId of validated.aktionIds) {
+    // Each action only once, even if the request lists it several times
+    for (const aktionId of new Set(validated.aktionIds)) {
       // Check if action exists and is active
       const aktion = await prisma.aktion.findUnique({
         where: { id: aktionId },
@@ -135,6 +140,12 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (error) {
+    if (error instanceof BodyTooLargeError) {
+      return NextResponse.json({ error: "Anfrage zu groß" }, { status: 413 });
+    }
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ error: "Ungültige Anfrage" }, { status: 400 });
+    }
     if (error instanceof Error && error.name === "ZodError") {
       return NextResponse.json({ error: "Validierungsfehler", details: error }, { status: 400 });
     }

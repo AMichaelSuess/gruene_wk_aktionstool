@@ -329,3 +329,73 @@ describe("Input-Validierung: PATCH /api/aktionen/bulk-kategorie", () => {
     expect(body.count).toBe(1);
   });
 });
+
+describe("Eingabevalidierung: Grenzen der öffentlichen Anmeldung", () => {
+  function post(body: unknown, ip: string, headers: Record<string, string> = {}) {
+    return new Request("http://localhost:3000/api/anmeldungen", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-forwarded-for": ip, ...headers },
+      body: typeof body === "string" ? body : JSON.stringify(body),
+    });
+  }
+
+  it("101 Aktionen auf einmal → 400", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/route");
+    const ids = Array.from({ length: 101 }, (_, i) => `aktion-${i}`);
+    const res = await POST(post(createAnmeldungBody({ aktionIds: ids }), "10.1.0.1") as any);
+    expect(res.status).toBe(400);
+  });
+
+  it("Vorname mit 101 Zeichen → 400", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/route");
+    const res = await POST(post(createAnmeldungBody({ vorname: "a".repeat(101) }), "10.1.0.2") as any);
+    expect(res.status).toBe(400);
+  });
+
+  it("Anfrage über 32 KB → 413, ohne Datenbankzugriff", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { prisma } = await import("@/lib/db");
+    const body = JSON.stringify(createAnmeldungBody({ nachname: "x".repeat(40_000) }));
+    const res = await POST(post(body, "10.1.0.3") as any);
+    expect(res.status).toBe(413);
+    expect(prisma.aktion.findUnique).not.toHaveBeenCalled();
+  });
+
+  it("Content-Length über dem Limit → 413 vor dem Lesen", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/route");
+    const res = await POST(post(createAnmeldungBody(), "10.1.0.4", { "content-length": "999999" }) as any);
+    expect(res.status).toBe(413);
+  });
+
+  it("Ungültiges JSON → 400", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/route");
+    const res = await POST(post("{kaputt", "10.1.0.5") as any);
+    expect(res.status).toBe(400);
+  });
+
+  it("doppelte Aktions-IDs → nur eine Anmeldung", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { prisma } = await import("@/lib/db");
+    (prisma.aktion.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: "aktion-1",
+      titel: "T",
+      datum: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      startzeit: "10:00",
+      endzeit: "12:00",
+      adresse: "A",
+      ansprechpersonName: "N",
+      ansprechpersonEmail: "n@test.de",
+      ansprechpersonTelefon: "030",
+      maxTeilnehmer: null,
+      status: "AKTIV",
+      _count: { anmeldungen: 0 },
+    });
+    (prisma.anmeldung.create as ReturnType<typeof vi.fn>).mockResolvedValue({});
+
+    const res = await POST(
+      post(createAnmeldungBody({ aktionIds: ["aktion-1", "aktion-1", "aktion-1"] }), "10.1.0.6") as any
+    );
+    expect(res.status).toBe(200);
+    expect(prisma.anmeldung.create).toHaveBeenCalledTimes(1);
+  });
+});
