@@ -1,14 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { isCronAuthorized } from "@/lib/cron-auth";
+import { bereitsBenachrichtigt, createRunGuard } from "@/lib/cron-guard";
 import { sendEmail } from "@/lib/email";
 import { erinnerungsEmail } from "@/lib/email-templates";
+
+const runExclusive = createRunGuard();
 
 export async function POST(req: NextRequest) {
   if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
   }
 
+  const run = await runExclusive(versenden);
+  if (!run.ran) {
+    return NextResponse.json({ error: "Läuft bereits" }, { status: 409 });
+  }
+  return run.result;
+}
+
+async function versenden() {
   // Determine "tomorrow" in Berlin local time.
   // The cron runs at 17:00 UTC (= 19:00 CEST / 18:00 CET).
   // We compute tomorrow's date boundaries in the Europe/Berlin timezone so
@@ -88,11 +99,14 @@ export async function POST(req: NextRequest) {
       setTimeout(resolve, 25_000 + Math.random() * 20_000)
     );
 
-  // Send one reminder email per volunteer
+  // Send one reminder email per volunteer, skipping anyone already reminded
+  // by an earlier run today
+  const bereits = await bereitsBenachrichtigt("ERINNERUNG");
   let emailsSent = 0;
   let first = true;
 
   for (const [email, { vorname, aktionen }] of byEmail) {
+    if (bereits.has(email)) continue;
     if (!first) await randomDelay();
     first = false;
     const emailData = erinnerungsEmail(vorname, aktionen);

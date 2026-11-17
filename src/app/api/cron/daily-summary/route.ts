@@ -1,14 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { isCronAuthorized } from "@/lib/cron-auth";
+import { bereitsBenachrichtigt, createRunGuard } from "@/lib/cron-guard";
 import { sendEmail } from "@/lib/email";
 import { tagesUebersichtEmail } from "@/lib/email-templates";
+
+const runExclusive = createRunGuard();
 
 export async function POST(req: NextRequest) {
   if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
   }
 
+  const run = await runExclusive(versenden);
+  if (!run.ran) {
+    return NextResponse.json({ error: "Läuft bereits" }, { status: 409 });
+  }
+  return run.result;
+}
+
+async function versenden() {
   const now = new Date();
   const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const tomorrowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
@@ -137,11 +148,14 @@ export async function POST(req: NextRequest) {
       setTimeout(resolve, 25_000 + Math.random() * 20_000)
     );
 
-  // Send one email per Ansprechperson
+  // Send one email per Ansprechperson, skipping anyone who already got
+  // today's summary from an earlier run
+  const bereits = await bereitsBenachrichtigt("TAEGLICHE_UEBERSICHT");
   let emailsSent = 0;
   let first = true;
 
   for (const [email, { name, aktionen, aktionenMorgen: morgenList, abmeldungen }] of byAnsprechperson) {
+    if (bereits.has(email)) continue;
     if (!first) await randomDelay();
     first = false;
     const aktionenList = Array.from(aktionen.values()).map((a) => ({

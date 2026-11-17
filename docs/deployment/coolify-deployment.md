@@ -480,6 +480,8 @@ die Einstellung einmal prüfen.
 JSON-Antwort wie `{"message":"0 Aktionen bereinigt, ..."}` stehen. Erscheint stattdessen
 `401` bzw. `Nicht autorisiert`, wurde `$CRON_SECRET` nicht aufgelöst – den Befehl dann als
 `sh -c '<Befehl>'` eintragen.
+Ein erneuter Start schickt niemandem eine zweite Erinnerung oder Tagesübersicht: Wer in den letzten
+12 Stunden schon eine bekommen hat, wird übersprungen; läuft der Task noch, antwortet er mit `409`.
 
 ---
 
