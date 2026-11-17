@@ -6,6 +6,7 @@ import { excelRowSchema, type ExcelRowInput } from "@/lib/validators";
 import { geocodeAddress } from "@/lib/geocoding";
 import { normalizeTeamIds, teamsExist, UNBEKANNTES_TEAM_FEHLER } from "@/lib/aktion-teams";
 import { WAHLKREIS_LABEL, findWahlkreis, formatWahlkreis } from "@/lib/wahlkreis-label";
+import { audit, logServerError } from "@/lib/audit";
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
 const MAX_UNCOMPRESSED_BYTES = 100 * 1024 * 1024; // 100 MB unpacked
@@ -203,6 +204,12 @@ export async function POST(req: NextRequest) {
         created.push(aktion);
       }
 
+      audit("AKTIONEN_IMPORTIERT", session.user.id, {
+        count: created.length,
+        zeilen: rows.length,
+        teamIds: defaultTeamIds,
+      });
+
       return NextResponse.json({
         message: `${created.length} Aktion(en) importiert`,
         created: created.length,
@@ -212,7 +219,8 @@ export async function POST(req: NextRequest) {
 
     // Preview mode: return validation results
     return NextResponse.json({ results, total: rows.length });
-  } catch {
+  } catch (error) {
+    logServerError("POST /api/upload", error);
     return NextResponse.json({ error: "Fehler beim Verarbeiten der Datei" }, { status: 500 });
   }
 }

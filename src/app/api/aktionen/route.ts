@@ -7,6 +7,7 @@ import { aktionSchema } from "@/lib/validators";
 import { KATEGORIE_VALUES } from "@/lib/kategorien";
 import { geocodeAddress } from "@/lib/geocoding";
 import { hatBegonnen } from "@/lib/aktion-zeit";
+import { logServerError } from "@/lib/audit";
 import {
   TEAMS_INCLUDE,
   expertAktionWhere,
@@ -195,6 +196,7 @@ export async function POST(req: NextRequest) {
       const firstMessage = error.issues[0]?.message ?? "Validierungsfehler";
       return NextResponse.json({ error: firstMessage, details: error }, { status: 400 });
     }
+    logServerError("POST /api/aktionen", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

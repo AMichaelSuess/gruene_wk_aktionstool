@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "./db";
 import { clientIp, createFailureCounter } from "./rate-limit";
+import { audit, emailPseudonym } from "./audit";
 
 // Online guessing limits (in memory, reset on deploy/restart)
 const FAILURE_WINDOW = 15 * 60 * 1000; // 15 minutes
@@ -52,6 +53,16 @@ export async function authorizeCredentials(
   if (!usable || !passwordMatch) {
     emailFailures.recordFailure(emailKey);
     ipFailures.recordFailure(ipKey);
+    const emailHash = emailPseudonym(emailKey);
+    audit("LOGIN_FEHLGESCHLAGEN", null, { ip: ipKey, emailHash });
+    // Attempts are not counted while blocked, so this fires once per window
+    const gesperrt = [
+      ...(emailFailures.isBlocked(emailKey) ? ["email"] : []),
+      ...(ipFailures.isBlocked(ipKey) ? ["ip"] : []),
+    ];
+    if (gesperrt.length > 0) {
+      audit("LOGIN_GESPERRT", null, { ip: ipKey, emailHash, gesperrt });
+    }
     return null;
   }
 

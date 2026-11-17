@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { BodyTooLargeError, readJsonLimited } from "@/lib/request-body";
+import { logServerError } from "@/lib/audit";
 
 const tokenSchema = z.object({ token: z.string().min(1).max(128) });
 
@@ -44,6 +45,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({ error: "Ungültiger Abmelde-Link" }, { status: 400 });
     }
+    logServerError("POST /api/anmeldungen/abmelden/info", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

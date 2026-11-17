@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email";
 import { meineAktionenEmail } from "@/lib/email-templates";
+import { logServerError } from "@/lib/audit";
 
 // Rate limiting: 5 requests per minute per IP
 const isRateLimited = createRateLimiter(5, 60 * 1000);
@@ -66,7 +67,8 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ message: "E-Mail wurde gesendet" });
-  } catch {
+  } catch (error) {
+    logServerError("GET /api/anmeldungen/meine-aktionen", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

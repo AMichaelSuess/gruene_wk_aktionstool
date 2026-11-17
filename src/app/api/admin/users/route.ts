@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { audit, logServerError } from "@/lib/audit";
 import { userSchema, userUpdateSchema } from "@/lib/validators";
 import bcrypt from "bcryptjs";
 
@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof Error && error.name === "ZodError") {
       return NextResponse.json({ error: "Validierungsfehler", details: error }, { status: 400 });
     }
+    logServerError("POST /api/admin/users", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }
@@ -125,6 +126,7 @@ export async function PUT(req: NextRequest) {
     if (error instanceof Error && error.name === "ZodError") {
       return NextResponse.json({ error: "Validierungsfehler", details: error }, { status: 400 });
     }
+    logServerError("PUT /api/admin/users", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

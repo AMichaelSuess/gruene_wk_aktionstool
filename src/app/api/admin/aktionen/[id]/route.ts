@@ -14,6 +14,7 @@ export async function DELETE(
   }
 
   if (session.user.role !== "ADMIN") {
+    audit("ZUGRIFF_VERWEIGERT", session.user.id, { route: "DELETE /api/admin/aktionen/[id]" });
     return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
   }
 

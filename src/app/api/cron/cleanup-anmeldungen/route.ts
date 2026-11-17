@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { isCronAuthorized } from "@/lib/cron-auth";
+import { logServerError } from "@/lib/audit";
 
 const EMAIL_LOG_RETENTION_DAYS = 7;
 
@@ -81,7 +82,8 @@ export async function POST(req: NextRequest) {
 
       processed++;
       deleted += aktion._count.anmeldungen;
-    } catch {
+    } catch (error) {
+      logServerError("POST /api/cron/cleanup-anmeldungen", error);
       errors.push(aktion.id);
     }
   }

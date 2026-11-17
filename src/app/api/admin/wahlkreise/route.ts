@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { wahlkreisUpdateSchema } from "@/lib/validators";
 import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
+import { logServerError } from "@/lib/audit";
 
 export async function GET() {
   const session = await auth();
@@ -54,6 +55,7 @@ export async function PUT(req: NextRequest) {
         { status: 409 }
       );
     }
+    logServerError("PUT /api/admin/wahlkreise", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

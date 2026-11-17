@@ -7,6 +7,7 @@ import { BodyTooLargeError, readJsonLimited } from "@/lib/request-body";
 import { anmeldungSchema } from "@/lib/validators";
 import { sendEmail } from "@/lib/email";
 import { anmeldebestaetigungEmail } from "@/lib/email-templates";
+import { logServerError } from "@/lib/audit";
 
 // Rate limiting per client IP
 const isRateLimited = createRateLimiter(10, 60 * 1000); // per minute
@@ -152,6 +153,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof Error && error.name === "ZodError") {
       return NextResponse.json({ error: "Validierungsfehler", details: error }, { status: 400 });
     }
+    logServerError("POST /api/anmeldungen", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

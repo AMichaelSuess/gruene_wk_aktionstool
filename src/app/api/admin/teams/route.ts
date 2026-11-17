@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { teamSchema } from "@/lib/validators";
+import { logServerError } from "@/lib/audit";
 
 export async function GET() {
   const session = await auth();
@@ -44,6 +45,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof Error && error.name === "ZodError") {
       return NextResponse.json({ error: "Validierungsfehler", details: error }, { status: 400 });
     }
+    logServerError("POST /api/admin/teams", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }
@@ -71,7 +73,8 @@ export async function PUT(req: NextRequest) {
     });
 
     return NextResponse.json(team);
-  } catch {
+  } catch (error) {
+    logServerError("PUT /api/admin/teams", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

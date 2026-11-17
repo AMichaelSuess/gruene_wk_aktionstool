@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { ZodError } from "zod";
 import { bulkKategorieSchema } from "@/lib/validators";
 import { expertAktionWhere } from "@/lib/aktion-teams";
+import { logServerError } from "@/lib/audit";
 
 /**
  * PATCH: Kategorie mehrerer Aktionen auf einmal setzen.
@@ -42,6 +43,7 @@ export async function PATCH(req: NextRequest) {
       const firstMessage = error.issues[0]?.message ?? "Validierungsfehler";
       return NextResponse.json({ error: firstMessage, details: error }, { status: 400 });
     }
+    logServerError("PATCH /api/aktionen/bulk-kategorie", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

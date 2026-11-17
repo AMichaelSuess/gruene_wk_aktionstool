@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { BodyTooLargeError, readJsonLimited } from "@/lib/request-body";
+import { logServerError } from "@/lib/audit";
 
 // Required in production (checked at startup in src/instrumentation.ts)
 const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3200";
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({ error: "Ungültiger Abmelde-Link" }, { status: 400 });
     }
+    logServerError("POST /api/anmeldungen/abmelden", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }
