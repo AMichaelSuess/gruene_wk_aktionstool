@@ -119,3 +119,14 @@ describe("X-Powered-By", () => {
     expect(nextConfig.poweredByHeader).toBe(false);
   });
 });
+
+describe("img-src", () => {
+  it("erlaubt Bilder nur von der eigenen Domain und den OpenStreetMap-Kacheln", async () => {
+    const headersConfig = await nextConfig.headers!();
+    for (const route of headersConfig) {
+      const csp = route.headers.find((h) => h.key === "Content-Security-Policy")!.value;
+      const imgSrc = csp.split(";").map((d) => d.trim()).find((d) => d.startsWith("img-src"));
+      expect(imgSrc).toBe("img-src 'self' data: https://*.tile.openstreetmap.org");
+    }
+  });
+});

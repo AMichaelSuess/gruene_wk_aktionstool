@@ -7,8 +7,8 @@ const allowedEmbedDomain = process.env.ALLOWED_EMBED_DOMAIN || "";
 // In production the strict CSP is enforced.
 const cspBase = (extra: string) =>
   isDev
-    ? `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws: wss: https://*.tile.openstreetmap.org; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'${extra}`
-    : `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.tile.openstreetmap.org; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'${extra}`;
+    ? `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self' ws: wss: https://*.tile.openstreetmap.org; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'${extra}`
+    : `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self' https://*.tile.openstreetmap.org; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'${extra}`;
 
 // Regular routes: no embedding allowed
 const csp = cspBase("; frame-ancestors 'none'");
