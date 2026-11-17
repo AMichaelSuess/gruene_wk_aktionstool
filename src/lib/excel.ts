@@ -217,15 +217,19 @@ export async function createAnmeldungenExcel(anmeldungen: AnmeldungExport[]): Pr
   return Buffer.from(await workbook.xlsx.writeBuffer());
 }
 
+// One registration per line: collapse line breaks and other whitespace in
+// values (older records may still contain them), so no one can add lines.
+const einzeilig = (s: string | null | undefined) => (s ?? "").replace(/[\s\p{Cc}]+/gu, " ").trim();
+
 export function createAnmeldungenTxt(anmeldungen: AnmeldungExport[]): string {
   return anmeldungen
     .map((a) => {
       const kontakt = a.signalName
-        ? `Signal: ${a.signalName}`
+        ? `Signal: ${einzeilig(a.signalName)}`
         : a.telefon
-        ? `Tel: ${a.telefon}`
+        ? `Tel: ${einzeilig(a.telefon)}`
         : "";
-      return `${a.vorname} ${a.nachname}${kontakt ? ` – ${kontakt}` : ""}`;
+      return `${einzeilig(a.vorname)} ${einzeilig(a.nachname)}${kontakt ? ` – ${kontakt}` : ""}`;
     })
     .join("\n");
 }

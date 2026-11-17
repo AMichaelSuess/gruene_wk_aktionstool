@@ -17,6 +17,10 @@ const passwordSchema = z
     message: "Passwort darf höchstens 72 Zeichen lang sein",
   });
 
+// No line breaks or other control characters in public free-text names:
+// they end up line by line in the Signal text export experts paste into chats.
+const KEINE_STEUERZEICHEN = /^[^\p{Cc}]*$/u;
+
 export const loginSchema = z.object({
   email: emailSchema(),
   password: z.string().min(1, "Bitte gib dein Passwort ein"),
@@ -85,12 +89,14 @@ export const anmeldungSchema = z.object({
     .string()
     .trim()
     .min(2, "Vorname muss mindestens 2 Zeichen lang sein")
-    .max(100, "Vorname darf höchstens 100 Zeichen lang sein"),
+    .max(100, "Vorname darf höchstens 100 Zeichen lang sein")
+    .regex(KEINE_STEUERZEICHEN, "Vorname darf keine Zeilenumbrüche enthalten"),
   nachname: z
     .string()
     .trim()
     .min(2, "Nachname muss mindestens 2 Zeichen lang sein")
-    .max(100, "Nachname darf höchstens 100 Zeichen lang sein"),
+    .max(100, "Nachname darf höchstens 100 Zeichen lang sein")
+    .regex(KEINE_STEUERZEICHEN, "Nachname darf keine Zeilenumbrüche enthalten"),
   email: emailSchema(),
   telefon: z
     .string()

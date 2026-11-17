@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { z } from "zod";
 import { teamSchema } from "@/lib/validators";
 
 export async function GET() {
@@ -54,12 +55,11 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const body = await req.json();
-    const { id, name, wahlkreisId } = body;
-
-    if (!id || !name) {
-      return NextResponse.json({ error: "ID und Name erforderlich" }, { status: 400 });
+    const parsed = teamSchema.extend({ id: z.string().min(1) }).safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Validierungsfehler", details: parsed.error }, { status: 400 });
     }
+    const { id, name, wahlkreisId } = parsed.data;
 
     const team = await prisma.team.update({
       where: { id },

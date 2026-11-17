@@ -19,6 +19,12 @@ import {
 // Rate limiting for public GET endpoint (SEC-05)
 const isRateLimited = createRateLimiter(60, 60 * 1000); // per minute, list endpoint
 
+function parseIsoDate(value: string | null): Date | null {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 // GET: Public listing (active actions) or authenticated (team-filtered)
 export async function GET(req: NextRequest) {
   if (isRateLimited(clientIp(req))) {
@@ -56,8 +62,11 @@ export async function GET(req: NextRequest) {
   }
 
   if (wahlkreis) {
-    const wahlkreisNummern = wahlkreis.split(",").map(Number);
-    where.wahlkreis = { nummer: { in: wahlkreisNummern } };
+    // Ignore anything that is not a whole number (would make Prisma throw)
+    const wahlkreisNummern = wahlkreis.split(",").map(Number).filter(Number.isInteger);
+    if (wahlkreisNummern.length > 0) {
+      where.wahlkreis = { nummer: { in: wahlkreisNummern } };
+    }
   }
 
   if (kategorie) {
@@ -70,10 +79,13 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  if (datum) {
-    where.datum = { ...(where.datum || {}), gte: new Date(datum) };
-    if (datumBis) {
-      where.datum.lte = new Date(datumBis);
+  // Invalid dates are ignored instead of making Prisma throw
+  const von = parseIsoDate(datum);
+  if (von) {
+    where.datum = { ...(where.datum || {}), gte: von };
+    const bis = parseIsoDate(datumBis);
+    if (bis) {
+      where.datum.lte = bis;
     }
   }
 
