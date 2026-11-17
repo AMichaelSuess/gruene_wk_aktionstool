@@ -29,6 +29,8 @@ const sharedHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // No "X-Powered-By: Next.js": it only helps attackers pick exploits
+  poweredByHeader: false,
   headers: async () => [
     {
       // All non-embed routes: full iframe lockdown

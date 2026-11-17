@@ -113,3 +113,9 @@ describe("HSTS", () => {
     }
   });
 });
+
+describe("X-Powered-By", () => {
+  it("verrät das Framework nicht (poweredByHeader: false)", () => {
+    expect(nextConfig.poweredByHeader).toBe(false);
+  });
+});
