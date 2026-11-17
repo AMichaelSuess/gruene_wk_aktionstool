@@ -120,7 +120,7 @@ Lokal ausführen und die Werte in Bitwarden (oder einem anderen Passwortmanager)
 # NEXTAUTH_SECRET – signiert die Login-Sessions (min. 32 Zeichen)
 openssl rand -base64 32
 
-# CRON_SECRET – schützt die Cron-Endpunkte
+# CRON_SECRET – schützt die Cron-Endpunkte (min. 32 Zeichen, sonst sind sie gesperrt)
 openssl rand -hex 32
 
 # BOOTSTRAP_ADMIN_PASSWORD – Passwort des ersten Admin-Accounts (min. 12 Zeichen)

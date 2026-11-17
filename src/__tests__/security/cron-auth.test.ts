@@ -24,9 +24,10 @@ vi.mock("@/lib/db", () => ({
 vi.mock("@/lib/email", () => ({ sendEmail: vi.fn() }));
 vi.mock("@/lib/email-templates", () => ({
   tagesUebersichtEmail: vi.fn(() => ({ subject: "", html: "" })),
+  erinnerungsEmail: vi.fn(() => ({ subject: "", html: "" })),
 }));
 
-const CRON_SECRET = "test-cron-secret-12345";
+const CRON_SECRET = "test-cron-secret-0123456789abcdef"; // ≥ 32 Zeichen
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -91,4 +92,37 @@ describe("Cron-Endpunkt-Schutz", () => {
     const res = await POST(req as any);
     expect(res.status).toBe(401);
   });
+});
+
+const CRON_ROUTES = [
+  ["daily-summary", () => import("@/app/api/cron/daily-summary/route")],
+  ["cleanup-anmeldungen", () => import("@/app/api/cron/cleanup-anmeldungen/route")],
+  ["send-erinnerungen", () => import("@/app/api/cron/send-erinnerungen/route")],
+] as const;
+
+describe("Cron-Endpunkte sind gesperrt, wenn CRON_SECRET fehlt oder zu kurz ist", () => {
+  for (const [name, load] of CRON_ROUTES) {
+    it(`${name}: CRON_SECRET leer + "Bearer undefined" → 401`, async () => {
+      vi.stubEnv("CRON_SECRET", "");
+      const { POST } = await load();
+      const req = new Request(`http://localhost:3000/api/cron/${name}`, {
+        method: "POST",
+        headers: { Authorization: "Bearer undefined" },
+      });
+      const res = await POST(req as any);
+      expect(res.status).toBe(401);
+    });
+
+    it(`${name}: CRON_SECRET mit 31 Zeichen → 401 auch mit passendem Token`, async () => {
+      const shortSecret = "a".repeat(31);
+      vi.stubEnv("CRON_SECRET", shortSecret);
+      const { POST } = await load();
+      const req = new Request(`http://localhost:3000/api/cron/${name}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${shortSecret}` },
+      });
+      const res = await POST(req as any);
+      expect(res.status).toBe(401);
+    });
+  }
 });

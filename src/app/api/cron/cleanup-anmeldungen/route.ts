@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { isCronAuthorized } from "@/lib/cron-auth";
 
 function computeDeletionThreshold(datum: Date, endzeit: string): Date {
   const parts = endzeit.split(":");
@@ -16,8 +17,7 @@ function computeDeletionThreshold(datum: Date, endzeit: string): Date {
 }
 
 export async function POST(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
   }
 
