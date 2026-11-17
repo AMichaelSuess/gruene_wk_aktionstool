@@ -14,9 +14,11 @@ function BestaetigenContent() {
   async function handleSend() {
     setStatus("sending");
     try {
-      const res = await fetch(
-        `/api/anmeldungen/meine-aktionen?email=${encodeURIComponent(email)}`
-      );
+      const res = await fetch("/api/anmeldungen/meine-aktionen", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
       if (res.ok) {
         setStatus("sent");
       } else {

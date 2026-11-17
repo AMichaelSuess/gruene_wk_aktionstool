@@ -53,6 +53,13 @@ const PUBLIC_ROUTES: PublicRoute[] = [
     limitBytes: 1024,
     rateLimitPerMinute: 20,
   },
+  {
+    name: "POST /api/anmeldungen/meine-aktionen",
+    file: "anmeldungen/meine-aktionen/route.ts",
+    load: () => import("@/app/api/anmeldungen/meine-aktionen/route"),
+    limitBytes: 1024,
+    rateLimitPerMinute: 5,
+  },
 ];
 
 let ipCounter = 0;
@@ -98,6 +105,27 @@ describe.each(PUBLIC_ROUTES)("$name", (route) => {
       expect(last!.status).toBe(429);
     });
   }
+});
+
+describe("Meine Aktionen per E-Mail", () => {
+  it("POST mit Adresse im Body verschickt die Übersicht an genau diese Adresse", async () => {
+    const { prisma } = await import("@/lib/db");
+    const { sendEmail } = await import("@/lib/email");
+    (prisma.anmeldung.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    const { POST } = await import("@/app/api/anmeldungen/meine-aktionen/route");
+
+    const res = await POST(
+      request("http://localhost/api/anmeldungen/meine-aktionen", JSON.stringify({ email: " Max@Example.org " }))
+    );
+
+    expect(res.status).toBe(200);
+    expect(sendEmail).toHaveBeenCalledWith(expect.objectContaining({ to: "max@example.org" }));
+  });
+
+  it("kein GET mehr – die Adresse gehört nicht in die URL", async () => {
+    const mod = await import("@/app/api/anmeldungen/meine-aktionen/route");
+    expect("GET" in mod).toBe(false);
+  });
 });
 
 describe("Öffentliche API-Routen lesen Bodies nur begrenzt ein", () => {
