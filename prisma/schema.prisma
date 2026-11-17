@@ -44,8 +44,8 @@ model User {
   active    Boolean    @default(true)
   teams     UserTeam[]
   aktionen  Aktion[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime   @updatedAt @db.Timestamptz(3)
 
   @@map("users")
 }
@@ -58,7 +58,7 @@ model Team {
   members     UserTeam[]
   aktionen    AktionTeam[]
   statistiken AktionStatistikTeam[]
-  createdAt   DateTime          @default(now())
+  createdAt   DateTime          @default(now()) @db.Timestamptz(3)
 
   @@map("teams")
 }
@@ -80,7 +80,7 @@ model Wahlkreis {
   teams       Team[]
   aktionen    Aktion[]
   statistiken AktionStatistik[]
-  createdAt   DateTime          @default(now())
+  createdAt   DateTime          @default(now()) @db.Timestamptz(3)
 
   @@map("wahlkreise")
 }
@@ -109,8 +109,8 @@ model Aktion {
   anmeldungen           Anmeldung[]
   emailLogs             EmailLog[]
   statistik             AktionStatistik?
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
+  createdAt             DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime     @updatedAt @db.Timestamptz(3)
 
   @@map("aktionen")
 }
@@ -138,7 +138,7 @@ model Anmeldung {
   telefon    String?
   signalName  String?
   cancelToken String?  @unique
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
 
   @@unique([aktionId, email])
   @@map("anmeldungen")
@@ -150,7 +150,7 @@ model EmailLog {
   empfaengerEmail String
   aktionId        String?
   aktion          Aktion?  @relation(fields: [aktionId], references: [id], onDelete: SetNull)
-  gesendetAm      DateTime @default(now())
+  gesendetAm      DateTime @default(now()) @db.Timestamptz(3)
   status          String
 
   @@map("email_logs")
@@ -165,7 +165,7 @@ model AktionStatistik {
   wahlkreisId      String
   wahlkreis        Wahlkreis @relation(fields: [wahlkreisId], references: [id])
   teams            AktionStatistikTeam[]
-  geloeschtAm      DateTime  @default(now())
+  geloeschtAm      DateTime  @default(now()) @db.Timestamptz(3)
 
   @@map("aktion_statistiken")
 }
