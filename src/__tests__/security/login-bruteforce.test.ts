@@ -97,6 +97,15 @@ describe("Login: Begrenzung von Fehlversuchen", () => {
 });
 
 describe("Login: Antwortzeit verrät keine Konten", () => {
+  it("Groß-/Kleinschreibung und Leerzeichen der E-Mail spielen keine Rolle", async () => {
+    const { authorizeCredentials } = await import("@/lib/credentials");
+    const user = await authorizeCredentials({ email: " Expert@Example.ORG ", password: "richtig" }, req("10.0.5.1"));
+    expect(mockPrisma.user.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { email: "expert@example.org" } })
+    );
+    expect(user?.id).toBe("u1");
+  });
+
   it("unbekannte E-Mail → trotzdem genau ein bcrypt-Vergleich", async () => {
     const { authorizeCredentials } = await import("@/lib/credentials");
     mockPrisma.user.findUnique.mockResolvedValue(null);

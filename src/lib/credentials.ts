@@ -42,8 +42,9 @@ export async function authorizeCredentials(
     return null;
   }
 
+  // Accounts are stored lowercase (see emailSchema), so "Max@…" must find "max@…"
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: { email: emailKey },
     include: { teams: { select: { teamId: true } } },
   });
 
