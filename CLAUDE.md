@@ -325,7 +325,7 @@ All UI must work in every theme. See `docs/design/theming.md` for the token tabl
 ## Key Abstractions
 - Purpose: Restrict EXPERTs to only their team's data
 - Implementation: `session.user.teamIds` (array of team IDs) embedded in JWT at login (`src/lib/auth.ts`)
-- Enforcement: list/export queries use `expertAktionWhere()` and single-Aktion handlers use `hasAktionAccess()` from `src/lib/aktion-teams.ts` (access = member of any assigned team, or creator). Experts may assign any team; when editing someone else's Aktion they must keep one of their own teams (`keepsOwnTeam()`)
+- Enforcement: list/export queries use `expertAktionWhere()` and single-Aktion handlers use `hasAktionAccess()` from `src/lib/aktion-teams.ts` (access = member of any assigned team, or creator). Experts may assign any team; when editing someone else's Aktion they must keep one of their own teams (`keepsOwnTeam()`) and may only remove their own teams (`removesForeignTeam()`; only the creator or an ADMIN removes others). Without access, `GET /api/aktionen/[id]` returns the public shape (no contact email/phone, no `createdById`), also to logged-in experts
 - Examples: `src/app/api/aktionen/route.ts`, `src/app/api/aktionen/[id]/route.ts`, `src/app/api/export/route.ts`
 - Purpose: Single source of truth for all input shapes
 - Location: `src/lib/validators.ts`

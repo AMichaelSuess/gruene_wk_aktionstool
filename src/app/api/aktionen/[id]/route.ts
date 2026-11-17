@@ -12,10 +12,12 @@ import { de } from "date-fns/locale";
 import {
   TEAMS_INCLUDE,
   EIGENES_TEAM_BEHALTEN_FEHLER,
+  FREMDES_TEAM_ENTFERNEN_FEHLER,
   UNBEKANNTES_TEAM_FEHLER,
   flattenTeams,
   hasAktionAccess,
   keepsOwnTeam,
+  removesForeignTeam,
   normalizeTeamIds,
   teamsExist,
 } from "@/lib/aktion-teams";
@@ -50,8 +52,16 @@ export async function GET(
   }
   const aktion = flattenTeams(found);
 
+  // Contact details only for people who may work on this action; everyone
+  // else (anonymous visitors, experts of other teams) gets the public view
   const session = await auth();
-  if (!session) {
+  const darfBearbeiten =
+    !!session &&
+    hasAktionAccess(session.user, {
+      createdById: aktion.createdById,
+      teams: aktion.teams.map((t) => ({ teamId: t.id })),
+    });
+  if (!darfBearbeiten) {
     const {
       ansprechpersonEmail: _e,
       ansprechpersonTelefon: _t,
@@ -128,6 +138,9 @@ export async function PUT(
     if (newTeamIds !== undefined) {
       if (!keepsOwnTeam(session.user, existing, newTeamIds)) {
         return NextResponse.json({ error: EIGENES_TEAM_BEHALTEN_FEHLER }, { status: 400 });
+      }
+      if (removesForeignTeam(session.user, existing, newTeamIds)) {
+        return NextResponse.json({ error: FREMDES_TEAM_ENTFERNEN_FEHLER }, { status: 403 });
       }
       if (!(await teamsExist(newTeamIds))) {
         return NextResponse.json({ error: UNBEKANNTES_TEAM_FEHLER }, { status: 400 });

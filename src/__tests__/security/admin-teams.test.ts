@@ -8,7 +8,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mockAuth, createRequest, createJsonRequest, EXPERT_TEAM_A, type MockSession } from "./helpers";
-import { EIGENES_TEAM_BEHALTEN_FEHLER, UNBEKANNTES_TEAM_FEHLER } from "@/lib/aktion-teams";
+import { EIGENES_TEAM_BEHALTEN_FEHLER, FREMDES_TEAM_ENTFERNEN_FEHLER, UNBEKANNTES_TEAM_FEHLER } from "@/lib/aktion-teams";
 
 vi.mock("@/lib/auth", () => ({
   auth: vi.fn(),
@@ -284,6 +284,86 @@ describe("Team-Zuordnung: Aktion bearbeiten", () => {
 
     expect(res.status).toBe(400);
     expect(mockPrisma.aktion.update).not.toHaveBeenCalled();
+  });
+
+  // Gemeinsame Aktion von Team A und Team B, angelegt von jemand Drittem
+  const gemeinsam = { ...existing, teams: [{ teamId: "team-a" }, { teamId: "team-b" }] };
+
+  it("EXPERT kann ein fremdes Team NICHT aus einer gemeinsamen Aktion entfernen → 403", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+
+    const res = await put({ ...aktionBody, teamIds: ["team-a"] }, gemeinsam);
+
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe(FREMDES_TEAM_ENTFERNEN_FEHLER);
+    expect(mockPrisma.aktion.update).not.toHaveBeenCalled();
+  });
+
+  it("EXPERT darf sein eigenes Team aus einer gemeinsamen Aktion entfernen, wenn ein eigenes bleibt", async () => {
+    await mockAuth({ ...EXPERT_TEAM_A, user: { ...EXPERT_TEAM_A.user, teamIds: ["team-a", "team-c"] } });
+
+    const res = await put(
+      { ...aktionBody, teamIds: ["team-b", "team-c"] },
+      { ...gemeinsam, teams: [{ teamId: "team-a" }, { teamId: "team-b" }, { teamId: "team-c" }] }
+    );
+
+    expect(res.status).toBe(200);
+  });
+
+  it("wer die Aktion angelegt hat, darf auch fremde Teams entfernen", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+
+    const res = await put({ ...aktionBody, teamIds: ["team-a"] }, { ...gemeinsam, createdById: "expert-a" });
+
+    expect(res.status).toBe(200);
+  });
+
+  it("ADMIN darf fremde Teams entfernen", async () => {
+    await mockAuth(ADMIN_IN_TEAM_A);
+
+    const res = await put({ ...aktionBody, teamIds: ["team-a"] }, gemeinsam);
+
+    expect(res.status).toBe(200);
+  });
+});
+
+describe("Aktion ansehen: Kontaktdaten nur mit Zugriff", () => {
+  const fremd = {
+    id: "aktion-9",
+    ...aktionBody,
+    datum: new Date("2099-06-01"),
+    teams: [{ team: { id: "team-b", name: "Team B" } }],
+    _count: { anmeldungen: 0 },
+    wahlkreis: null,
+    createdById: "expert-b",
+  };
+
+  async function get(aktion: Record<string, unknown>) {
+    mockPrisma.aktion.findUnique.mockResolvedValue(aktion);
+    const { GET } = await import("@/app/api/aktionen/[id]/route");
+    const req = createRequest("/api/aktionen/aktion-9");
+    return (await GET(req as any, { params: Promise.resolve({ id: "aktion-9" }) })).json();
+  }
+
+  it("EXPERT eines anderen Teams sieht keine E-Mail/Telefon der Ansprechperson", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+    const data = await get(fremd);
+    expect(data.titel).toBe(aktionBody.titel);
+    expect(data).not.toHaveProperty("ansprechpersonEmail");
+    expect(data).not.toHaveProperty("ansprechpersonTelefon");
+    expect(data).not.toHaveProperty("createdById");
+  });
+
+  it("EXPERT mit Zugriff (eigenes Team) sieht die Kontaktdaten", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+    const data = await get({ ...fremd, teams: [{ team: { id: "team-a", name: "Team A" } }] });
+    expect(data.ansprechpersonEmail).toBe(aktionBody.ansprechpersonEmail);
+  });
+
+  it("ADMIN sieht die Kontaktdaten", async () => {
+    await mockAuth(ADMIN_IN_TEAM_A);
+    const data = await get(fremd);
+    expect(data.ansprechpersonEmail).toBe(aktionBody.ansprechpersonEmail);
   });
 });
 

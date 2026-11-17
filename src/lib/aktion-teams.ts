@@ -62,6 +62,25 @@ export function keepsOwnTeam(
   return newTeamIds.some((id) => teamIds.includes(id));
 }
 
+/**
+ * Wer eine fremde Aktion (nicht selbst angelegt) bearbeitet, darf nur eigene
+ * Teams entfernen. Sonst könnte ein Team ein anderes aus einer gemeinsamen
+ * Aktion werfen und ihm den Zugriff auf die Anmeldungen nehmen.
+ */
+export function removesForeignTeam(
+  user: Session["user"],
+  aktion: { createdById: string; teams: { teamId: string }[] },
+  newTeamIds: string[]
+): boolean {
+  if (user.role === "ADMIN") return false;
+  if (aktion.createdById === user.id) return false;
+  const teamIds = user.teamIds ?? [];
+  return aktion.teams.some((t) => !newTeamIds.includes(t.teamId) && !teamIds.includes(t.teamId));
+}
+
+export const FREMDES_TEAM_ENTFERNEN_FEHLER =
+  "Teams, denen du nicht angehörst, kann nur die Person entfernen, die die Aktion angelegt hat, oder ein Admin.";
+
 export const EIGENES_TEAM_BEHALTEN_FEHLER =
   "Mindestens eines deiner eigenen Teams muss der Aktion zugeordnet bleiben, sonst kannst du sie nicht mehr bearbeiten.";
 
