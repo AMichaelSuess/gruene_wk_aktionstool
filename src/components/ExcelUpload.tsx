@@ -156,7 +156,7 @@ export default function ExcelUpload({
         <input
           ref={fileInputRef}
           type="file"
-          accept=".xlsx,.xls"
+          accept=".xlsx"
           onChange={handleFileInput}
           className="hidden"
         />

@@ -410,3 +410,42 @@ export async function createVorlageExcel(): Promise<Buffer> {
 
   return Buffer.from(await workbook.xlsx.writeBuffer());
 }
+
+/**
+ * Total uncompressed size declared in an .xlsx (zip) central directory, or
+ * null if the buffer is not a readable zip. Lets the upload reject a zip
+ * bomb before ExcelJS inflates the whole workbook in memory. ZIP64 entries
+ * (sizes >= 4 GB) are reported as Infinity.
+ */
+export function xlsxUncompressedSize(buffer: ArrayBuffer): number | null {
+  const view = new DataView(buffer);
+  const len = buffer.byteLength;
+  if (len < 22) return null;
+
+  // End of central directory record: last 22 bytes plus an optional comment
+  let eocd = -1;
+  for (let i = len - 22; i >= Math.max(0, len - 22 - 0xffff); i--) {
+    if (view.getUint32(i, true) === 0x06054b50) {
+      eocd = i;
+      break;
+    }
+  }
+  if (eocd < 0) return null;
+
+  const entries = view.getUint16(eocd + 10, true);
+  let offset = view.getUint32(eocd + 16, true);
+  let total = 0;
+
+  for (let n = 0; n < entries; n++) {
+    if (offset + 46 > len || view.getUint32(offset, true) !== 0x02014b50) return null;
+    const size = view.getUint32(offset + 24, true);
+    if (size === 0xffffffff) return Infinity;
+    total += size;
+    offset +=
+      46 +
+      view.getUint16(offset + 28, true) +
+      view.getUint16(offset + 30, true) +
+      view.getUint16(offset + 32, true);
+  }
+  return total;
+}

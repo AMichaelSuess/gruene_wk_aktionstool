@@ -53,6 +53,8 @@ const excelRow = {
 
 vi.mock("@/lib/excel", () => ({
   parseExcelFile: vi.fn(async () => [excelRow]),
+  // Die Testdatei ist kein echtes .xlsx; Größenprüfung hier als bestanden annehmen
+  xlsxUncompressedSize: vi.fn(() => 1),
   convertDatumToISO: (datum: string) => {
     const m = datum.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
     return m ? `${m[3]}-${m[2]}-${m[1]}` : datum;

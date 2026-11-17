@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { parseExcelFile, convertDatumToISO } from "@/lib/excel";
+import { parseExcelFile, convertDatumToISO, xlsxUncompressedSize } from "@/lib/excel";
 import { excelRowSchema, type ExcelRowInput } from "@/lib/validators";
 import { geocodeAddress } from "@/lib/geocoding";
 import { normalizeTeamIds, teamsExist, UNBEKANNTES_TEAM_FEHLER } from "@/lib/aktion-teams";
 import { WAHLKREIS_LABEL, findWahlkreis, formatWahlkreis } from "@/lib/wahlkreis-label";
+
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_UNCOMPRESSED_BYTES = 100 * 1024 * 1024; // 100 MB unpacked
+const MAX_ROWS = 2000;
+const DATEI_ZU_GROSS = "Datei zu groß (höchstens 5 MB)";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -13,16 +18,43 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
   }
 
+  // Reject oversized requests before the form data is buffered
+  if (Number(req.headers.get("content-length") ?? 0) > MAX_FILE_BYTES + 64 * 1024) {
+    return NextResponse.json({ error: DATEI_ZU_GROSS }, { status: 413 });
+  }
+
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file");
 
-    if (!file) {
+    if (!(file instanceof File)) {
       return NextResponse.json({ error: "Keine Datei hochgeladen" }, { status: 400 });
+    }
+    if (file.size > MAX_FILE_BYTES) {
+      return NextResponse.json({ error: DATEI_ZU_GROSS }, { status: 413 });
+    }
+    if (!file.name.toLowerCase().endsWith(".xlsx")) {
+      return NextResponse.json({ error: "Bitte eine Excel-Datei im Format .xlsx hochladen" }, { status: 400 });
     }
 
     const buffer = await file.arrayBuffer();
+
+    // A small zip can expand to gigabytes; check the declared size first
+    const unpacked = xlsxUncompressedSize(buffer);
+    if (unpacked === null) {
+      return NextResponse.json({ error: "Die Datei ist keine gültige Excel-Datei (.xlsx)" }, { status: 400 });
+    }
+    if (unpacked > MAX_UNCOMPRESSED_BYTES) {
+      return NextResponse.json({ error: DATEI_ZU_GROSS }, { status: 413 });
+    }
+
     const rows = await parseExcelFile(buffer);
+    if (rows.length > MAX_ROWS) {
+      return NextResponse.json(
+        { error: `Zu viele Zeilen (höchstens ${MAX_ROWS} pro Datei)` },
+        { status: 400 }
+      );
+    }
 
     // Spalte "Wahlkreis" (Nummer oder Name) einem vorhandenen Eintrag zuordnen
     const wahlkreise = await prisma.wahlkreis.findMany({
@@ -124,6 +156,7 @@ export async function POST(req: NextRequest) {
       }
 
       const created = [];
+      const geoCache = new Map<string, Awaited<ReturnType<typeof geocodeAddress>>>();
 
       for (const { row, index } of validRows) {
         const teamIds = rowTeamIds.get(index) ?? defaultTeamIds;
@@ -135,7 +168,11 @@ export async function POST(req: NextRequest) {
         // Geocode
         let latitude: number | null = null;
         let longitude: number | null = null;
-        const geo = await geocodeAddress(row.adresse);
+        // Same address only once per import (geocoding is throttled to 1/s)
+        if (!geoCache.has(row.adresse)) {
+          geoCache.set(row.adresse, await geocodeAddress(row.adresse));
+        }
+        const geo = geoCache.get(row.adresse);
         if (geo) {
           latitude = geo.latitude;
           longitude = geo.longitude;
