@@ -16,6 +16,8 @@ import {
 } from "@/lib/kategorien";
 import { excelRowSchema } from "@/lib/validators";
 import { createVorlageExcel, formatSignalInfo, parseExcelFile } from "@/lib/excel";
+import { districtConfig } from "@/lib/district-config";
+import { findWahlkreis } from "@/lib/wahlkreis-label";
 
 const ERWARTET = [
   { value: "HAUSTUER", label: "Haustür" },
@@ -180,6 +182,10 @@ describe("Excel-Import: Kategorie-Spalte", () => {
     const rows = await parseExcelFile(new Uint8Array(vorlage).buffer);
     expect(rows).toHaveLength(1);
     expect(rows[0].kategorie).toBe("INFOSTAND");
-    expect(excelRowSchema.safeParse(rows[0]).success).toBe(true);
+    // Wie in der Upload-Route: Name oder Nummer des Wahlkreises erst zuordnen.
+    // Je nach NEXT_PUBLIC_WAHLKREIS_NUMMERN enthält die Vorlage "1" oder einen Namen.
+    const wahlkreis = findWahlkreis(rows[0].wahlkreis, districtConfig.wahlkreise);
+    expect(wahlkreis).toBeDefined();
+    expect(excelRowSchema.safeParse({ ...rows[0], wahlkreis: wahlkreis?.nummer }).success).toBe(true);
   });
 });
