@@ -14,7 +14,8 @@ interface AktionInfo {
   ansprechpersonTelefon: string;
 }
 
-const baseUrl = process.env.NEXTAUTH_URL ?? "https://aktionen.gruene-mitte.de";
+// Required in production (checked at startup in src/instrumentation.ts)
+const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3200";
 
 /**
  * Maskiert Werte für HTML. Namen, Titel und Adressen stammen aus Formularen –

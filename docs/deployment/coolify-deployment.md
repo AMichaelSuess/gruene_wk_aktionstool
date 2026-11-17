@@ -211,7 +211,7 @@ Metadaten des Images; Secrets haben dort nichts zu suchen.
 
 | Variable | Beispiel | Hinweis |
 |---|---|---|
-| `NEXTAUTH_URL` | `https://<DOMAIN>` | **Muss gesetzt sein.** Basis für alle Links in E-Mails (Abmelde-Links!). Fehlt der Wert, zeigen die Links auf die Berlin-Mitte-Domain. |
+| `NEXTAUTH_URL` | `https://<DOMAIN>` | **Muss gesetzt sein.** Basis für alle Links in E-Mails (Abmelde-Links!). Fehlt der Wert, startet die App nicht. |
 | `AUTH_TRUST_HOST` | `true` | nötig hinter dem Reverse-Proxy |
 | `SMTP_HOST` | `smtp.example.org` | leer = es werden keine E-Mails versendet |
 | `SMTP_PORT` | `587` | |
@@ -620,4 +620,5 @@ entsprechend kurz halten und in der Datenschutzerklärung berücksichtigen.
 | Datenschutz/Impressum zeigt Berlin-Mitte | Variable aus [5.4](#54-kreisverbands-konfiguration--runtime) fehlt – setzen und Restart. |
 | Scheduled Task liefert `Nicht autorisiert` | `CRON_SECRET` im Befehl nicht aufgelöst – siehe [Abschnitt 8](#8-scheduled-tasks-cron-jobs). |
 | Nachvollziehen, wer Daten exportiert oder Accounts geändert hat | Die App schreibt dafür je eine JSON-Zeile mit `"audit":true` ins Container-Log (Ereignis, Account-ID, Zeitpunkt, Anzahl – keine Namen oder E-Mail-Adressen). Im Log nach `"audit":true` suchen. Wie lange Coolify die Logs aufbewahrt, hängt von der Server-Einstellung ab. |
+| Container startet nicht, Log zeigt `Konfiguration unvollständig` | Beim Start prüft die App `DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET` (min. 32 Zeichen) und `CRON_SECRET` (min. 32 Zeichen). Die fehlenden Werte stehen im Log – in Coolify setzen und neu deployen. |
 | Anmeldungen werden mit „Zu viele Anfragen“ abgelehnt | Das Rate-Limiting zählt pro IP im Speicher des Containers; ein Restart setzt die Zähler zurück. Als IP gilt der letzte Eintrag in `X-Forwarded-For`, den Traefik anhängt. Steht ein weiterer Proxy oder ein CDN davor, landen alle Besucher in einem Zähler – dann muss `clientIp()` in `src/lib/rate-limit.ts` angepasst werden. |

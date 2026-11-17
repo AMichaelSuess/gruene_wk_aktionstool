@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 
-const baseUrl =
-  process.env.NEXTAUTH_URL ?? "https://aktionen.gruene-mitte.de";
+// Required in production (checked at startup in src/instrumentation.ts)
+const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3200";
 
 const tokenSchema = z.object({ token: z.string().min(1).max(128) });
 
