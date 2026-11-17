@@ -103,3 +103,13 @@ describe("CSP Header Configuration", () => {
     expect(csp).not.toContain("nonce");
   });
 });
+
+describe("HSTS", () => {
+  it("setzt Strict-Transport-Security (1 Jahr) auf allen Routen, auch /embed", async () => {
+    const headers = await nextConfig.headers!();
+    for (const route of headers) {
+      const hsts = route.headers.find((h) => h.key === "Strict-Transport-Security");
+      expect(hsts?.value).toBe("max-age=31536000; includeSubDomains");
+    }
+  });
+});
