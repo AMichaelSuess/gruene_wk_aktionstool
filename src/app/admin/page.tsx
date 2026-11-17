@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
 import { WAHLKREIS_LABEL, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
 
 interface Stats {
@@ -36,10 +35,6 @@ export default function AdminPage() {
     );
   }
 
-  function handleExport() {
-    window.location.href = "/api/admin/export-stats";
-  }
-
   const anmeldungenByWahlkreis = stats.anmeldungenByWahlkreis ?? [];
   const staendeByTeam = stats.staendeByTeam ?? [];
   const anmeldungenByTeam = stats.anmeldungenByTeam ?? [];
@@ -58,7 +53,13 @@ export default function AdminPage() {
           Gesamtübersicht
         </h1>
         <div className="flex flex-wrap gap-2">
-          <Button onClick={() => handleExport()}>Auswertung exportieren</Button>
+          {/* Plain link: the export is a file download, not a page navigation */}
+          <a
+            href="/api/admin/export-stats"
+            className="inline-flex items-center justify-center rounded-button px-4 py-2 text-base bg-primary text-white font-bold case-ui tracking-ui border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press transition-all focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
+          >
+            Auswertung exportieren
+          </a>
         </div>
       </div>
 
