@@ -56,3 +56,46 @@ export function createRateLimiter(limit: number, windowMs: number, maxKeys = 10_
     return false;
   };
 }
+
+/**
+ * Counts failures (e.g. wrong passwords) per key within a fixed window.
+ * Unlike createRateLimiter, checking does not count as a hit: callers ask
+ * `isBlocked` first and call `recordFailure` only when the attempt failed.
+ * Bounded the same way: expired entries are purged at `maxKeys`, and if the
+ * map is still full every unknown key is treated as blocked.
+ */
+export function createFailureCounter(limit: number, windowMs: number, maxKeys = 10_000) {
+  const map = new Map<string, { count: number; resetAt: number }>();
+
+  function purgeIfFull(now: number) {
+    if (map.size < maxKeys) return;
+    for (const [k, v] of map) {
+      if (now > v.resetAt) map.delete(k);
+    }
+  }
+
+  return {
+    isBlocked(key: string): boolean {
+      const now = Date.now();
+      const entry = map.get(key);
+      if (entry && now <= entry.resetAt) return entry.count >= limit;
+      if (entry) map.delete(key);
+      purgeIfFull(now);
+      return map.size >= maxKeys; // fail closed under flood
+    },
+    recordFailure(key: string): void {
+      const now = Date.now();
+      const entry = map.get(key);
+      if (entry && now <= entry.resetAt) {
+        entry.count++;
+        return;
+      }
+      purgeIfFull(now);
+      if (map.size >= maxKeys) return;
+      map.set(key, { count: 1, resetAt: now + windowMs });
+    },
+    reset(key: string): void {
+      map.delete(key);
+    },
+  };
+}
