@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { aktionSchema } from "@/lib/validators";
 import { KATEGORIE_VALUES } from "@/lib/kategorien";
 import { geocodeAddress } from "@/lib/geocoding";
+import { hatBegonnen } from "@/lib/aktion-zeit";
 import {
   TEAMS_INCLUDE,
   expertAktionWhere,
@@ -89,35 +90,10 @@ export async function GET(req: NextRequest) {
   // Filter by tageszeit client-side (based on startzeit); supports multiple values (comma-separated)
   let filtered = aktionen.map(flattenTeams);
 
-  // NEU: Aktionen ausblenden, deren Startzeit bereits erreicht wurde (nur für öffentliche Ansicht)
+  // Aktionen ausblenden, deren Startzeit bereits erreicht wurde (nur für öffentliche Ansicht)
   if (!session || isPublic) {
     const now = new Date();
-    // Nutzt die deutsche Zeitzone, um Server-Zeitverschiebungen (UTC) auszugleichen
-    const currentTime = now.toLocaleTimeString("de-DE", { 
-      timeZone: "Europe/Berlin", 
-      hour: "2-digit", 
-      minute: "2-digit" 
-    });
-    const currentDate = now.toLocaleDateString("sv-SE", { 
-      timeZone: "Europe/Berlin" 
-    }); // Format: YYYY-MM-DD
-
-    filtered = filtered.filter((a) => {
-      const aktionDate = new Date(a.datum).toLocaleDateString("sv-SE", { 
-        timeZone: "Europe/Berlin" 
-      });
-
-      // Zukünftige Tage immer anzeigen
-      if (aktionDate > currentDate) return true;
-      
-      // Am selben Tag nur anzeigen, wenn die Startzeit noch in der Zukunft liegt
-      if (aktionDate === currentDate) {
-        return a.startzeit > currentTime; 
-      }
-      
-      // Vergangene Tage ausblenden
-      return false;
-    });
+    filtered = filtered.filter((a) => !hatBegonnen(a, now));
   }
 
   if (tageszeit) {

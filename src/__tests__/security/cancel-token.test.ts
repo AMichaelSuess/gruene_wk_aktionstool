@@ -64,7 +64,7 @@ beforeEach(() => {
 const VALID_AKTION = {
   id: "aktion-1",
   titel: "Infotisch Mitte",
-  datum: new Date("2026-04-01"),
+  datum: new Date("2099-04-01"),
   startzeit: "10:00",
   endzeit: "14:00",
   adresse: "Alexanderplatz 1, Berlin",

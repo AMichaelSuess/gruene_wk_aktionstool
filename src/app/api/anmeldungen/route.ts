@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
+import { hatBegonnen } from "@/lib/aktion-zeit";
 import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { BodyTooLargeError, readJsonLimited } from "@/lib/request-body";
 import { anmeldungSchema } from "@/lib/validators";
@@ -64,7 +65,9 @@ export async function POST(req: NextRequest) {
         include: { _count: { select: { anmeldungen: true } } },
       });
 
-      if (!aktion || aktion.status === "ABGESAGT") {
+      // Started or past actions take no new signups (they would escape the
+      // 72 h cleanup, which has already run for them)
+      if (!aktion || aktion.status === "ABGESAGT" || hatBegonnen(aktion)) {
         results.push({ aktionId, error: "Aktion nicht verfügbar" });
         continue;
       }

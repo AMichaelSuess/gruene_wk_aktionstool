@@ -24,15 +24,17 @@ export async function POST(req: NextRequest) {
   }
 
   const aktionenToClean = await prisma.aktion.findMany({
+    // Actions that were already cleaned up are included too: a registration
+    // that arrived later must not stay forever.
     where: {
       anmeldungen: { some: {} },
-      statistik: null,
     },
     select: {
       id: true,
       datum: true,
       endzeit: true,
       wahlkreisId: true,
+      statistik: { select: { id: true } },
       teams: { select: { teamId: true } },
       _count: { select: { anmeldungen: true } },
     },
@@ -56,15 +58,22 @@ export async function POST(req: NextRequest) {
       await prisma.$transaction(async (tx) => {
         const count = await tx.anmeldung.count({ where: { aktionId: aktion.id } });
 
-        await tx.aktionStatistik.create({
-          data: {
-            aktionId: aktion.id,
-            anmeldungenCount: count,
-            aktionDatum: aktion.datum,
-            wahlkreisId: aktion.wahlkreisId,
-            teams: { create: aktion.teams.map(({ teamId }) => ({ teamId })) },
-          },
-        });
+        if (aktion.statistik) {
+          await tx.aktionStatistik.update({
+            where: { id: aktion.statistik.id },
+            data: { anmeldungenCount: { increment: count } },
+          });
+        } else {
+          await tx.aktionStatistik.create({
+            data: {
+              aktionId: aktion.id,
+              anmeldungenCount: count,
+              aktionDatum: aktion.datum,
+              wahlkreisId: aktion.wahlkreisId,
+              teams: { create: aktion.teams.map(({ teamId }) => ({ teamId })) },
+            },
+          });
+        }
 
         await tx.anmeldung.deleteMany({ where: { aktionId: aktion.id } });
         await tx.emailLog.deleteMany({ where: { aktionId: aktion.id } });

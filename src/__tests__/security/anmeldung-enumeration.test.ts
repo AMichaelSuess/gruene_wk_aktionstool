@@ -20,7 +20,7 @@ vi.mock("@/lib/email-templates", () => ({
 
 const AKTION = {
   titel: "Infotisch",
-  datum: new Date("2026-12-01"),
+  datum: new Date("2099-12-01"),
   startzeit: "10:00",
   endzeit: "12:00",
   adresse: "Alexanderplatz 1",
