@@ -1,5 +1,7 @@
 # Deployment-Anleitung: Hetzner Production-Server
 
+> **Hinweis:** Diese Anleitung beschreibt eine ältere Einrichtung mit systemd und Nginx. Produktion läuft inzwischen als Docker-Container auf Coolify – maßgeblich ist [`docs/deployment/coolify-deployment.md`](deployment/coolify-deployment.md). **Niemals `npx prisma db seed` auf einer Produktions-Datenbank ausführen:** Der Seed legt Demo-Accounts mit öffentlich bekannten Passwörtern an.
+
 Schritt-für-Schritt-Anleitung für das Deployment der Aktionskoordinations-Plattform auf einem Hetzner Cloud Server.
 
 ---
@@ -12,7 +14,7 @@ Schritt-für-Schritt-Anleitung für das Deployment der Aktionskoordinations-Plat
 4. [Datenbank einrichten](#4-datenbank-einrichten)
 5. [App-Benutzer und Repository](#5-app-benutzer-und-repository)
 6. [Umgebungsvariablen konfigurieren](#6-umgebungsvariablen-konfigurieren)
-7. [Datenbank migrieren und Seeds einspielen](#7-datenbank-migrieren-und-seeds-einspielen)
+7. [Datenbank migrieren und einrichten](#7-datenbank-migrieren-und-einrichten)
 8. [Anwendung bauen](#8-anwendung-bauen)
 9. [Systemd-Service einrichten](#9-systemd-service-einrichten)
 10. [Nginx Reverse-Proxy einrichten](#10-nginx-reverse-proxy-einrichten)
@@ -273,7 +275,7 @@ chmod 600 ~/app/.env
 
 ---
 
-## 7. Datenbank migrieren und Seeds einspielen
+## 7. Datenbank migrieren und einrichten
 
 > **Voraussetzung:** Das Verzeichnis `prisma/migrations/` muss im Repository enthalten sein. Darin liegt die initiale Migration, die alle Tabellen erstellt. Ohne dieses Verzeichnis tut `prisma migrate deploy` nichts.
 
@@ -284,11 +286,14 @@ cd ~/app
 # Migrations ausführen (erstellt alle Tabellen)
 npx prisma migrate deploy
 
-# Seed-Daten einspielen (Wahlkreise, Test-Teams, Demo-Accounts)
-npx prisma db seed
+# Grundeinrichtung: Wahlkreise, je ein Team und der erste Admin-Account
+# (Passwort mind. 12 Zeichen; die Variablen danach wieder aus der Shell entfernen)
+BOOTSTRAP_ADMIN_EMAIL=admin@example.org \
+BOOTSTRAP_ADMIN_PASSWORD='<langes Passwort>' \
+npm run db:bootstrap
 ```
 
-> **Wichtig:** Der Seed legt Demo-Accounts an (`admin@gruene-mitte.de` / `admin1234` und `expert@gruene-mitte.de` / `expert1234`). Diese Passwörter **müssen** nach dem Deployment geändert werden!
+> **Wichtig:** Nicht `npx prisma db seed` verwenden – der Seed ist nur für die lokale Entwicklung und legt Demo-Accounts mit bekannten Passwörtern an (`admin1234`, `expert1234`).
 
 ---
 
@@ -508,8 +513,7 @@ gunzip -c /home/gruene/backups/gruene_aktionen_YYYYMMDD_HHMMSS.sql.gz | psql -U 
 - [ ] App läuft: `systemctl status gruene-aktionen` zeigt `active (running)`
 - [ ] HTTPS erreichbar: `https://aktionen.gruene-mitte.de` öffnet die App
 - [ ] Login funktioniert
-- [ ] **Admin-Passwort geändert** (Standard: `admin1234` — sofort ändern!)
-- [ ] **Expert-Passwort geändert** (Standard: `expert1234` — sofort ändern!)
+- [ ] Admin-Account per `npm run db:bootstrap` angelegt (kein Seed, keine Demo-Accounts in der Datenbank)
 - [ ] **Kreisverbands-Konfiguration angepasst** (Org-Name, Adresse, DSB, Aufsichtsbehörde, Wahlkreise in `.env` gesetzt)
 - [ ] Datenschutzerklärung und Impressum im Browser geprüft (korrekte Org-Daten)
 - [ ] E-Mail-Versand getestet (Testregistrierung durchführen)
