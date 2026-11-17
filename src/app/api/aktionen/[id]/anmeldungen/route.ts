@@ -65,6 +65,13 @@ export async function DELETE(
     return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
   }
 
-  await prisma.anmeldung.delete({ where: { id: anmeldungId } });
+  // Scope the delete to the Aktion whose access was just checked, so a
+  // registration of another Aktion cannot be deleted through this one.
+  const result = await prisma.anmeldung.deleteMany({
+    where: { id: anmeldungId, aktionId: id },
+  });
+  if (result.count === 0) {
+    return NextResponse.json({ error: "Anmeldung nicht gefunden" }, { status: 404 });
+  }
   return NextResponse.json({ message: "Anmeldung gelöscht" });
 }

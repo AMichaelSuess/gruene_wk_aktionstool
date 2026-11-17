@@ -28,6 +28,7 @@ const mockPrisma = {
     findMany: vi.fn(),
     create: vi.fn(),
     count: vi.fn(),
+    deleteMany: vi.fn(),
   },
   user: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), count: vi.fn() },
   team: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), delete: vi.fn(), count: vi.fn() },
@@ -155,6 +156,63 @@ describe("Team-Isolation: Anmeldungen (persönliche Daten)", () => {
     const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-4" }) });
 
     expect(res.status).toBe(200);
+  });
+});
+
+describe("Team-Isolation: Anmeldung löschen", () => {
+  it("EXPERT kann KEINE Anmeldung einer fremden Aktion über die eigene Aktion löschen → 404", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+
+    // Eigene Aktion im Pfad, aber anmeldungId gehört zu einer fremden Aktion
+    mockPrisma.aktion.findUnique.mockResolvedValue({
+      id: "eigene",
+      createdById: "expert-x",
+      teams: [{ teamId: "team-a" }],
+    });
+    mockPrisma.anmeldung.deleteMany.mockResolvedValue({ count: 0 });
+
+    const { DELETE } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
+    const req = createRequest("/api/aktionen/eigene/anmeldungen?anmeldungId=fremd", { method: "DELETE" });
+    const res = await DELETE(req as any, { params: Promise.resolve({ id: "eigene" }) });
+
+    expect(res.status).toBe(404);
+    expect(mockPrisma.anmeldung.deleteMany).toHaveBeenCalledWith({
+      where: { id: "fremd", aktionId: "eigene" },
+    });
+  });
+
+  it("EXPERT kann Anmeldung der eigenen Aktion löschen", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+
+    mockPrisma.aktion.findUnique.mockResolvedValue({
+      id: "eigene",
+      createdById: "expert-x",
+      teams: [{ teamId: "team-a" }],
+    });
+    mockPrisma.anmeldung.deleteMany.mockResolvedValue({ count: 1 });
+
+    const { DELETE } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
+    const req = createRequest("/api/aktionen/eigene/anmeldungen?anmeldungId=a1", { method: "DELETE" });
+    const res = await DELETE(req as any, { params: Promise.resolve({ id: "eigene" }) });
+
+    expect(res.status).toBe(200);
+  });
+
+  it("EXPERT kann NICHT Anmeldungen einer fremden Aktion löschen → 403", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+
+    mockPrisma.aktion.findUnique.mockResolvedValue({
+      id: "aktion-2",
+      createdById: "expert-b",
+      teams: [{ teamId: "team-b" }],
+    });
+
+    const { DELETE } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
+    const req = createRequest("/api/aktionen/aktion-2/anmeldungen?anmeldungId=a1", { method: "DELETE" });
+    const res = await DELETE(req as any, { params: Promise.resolve({ id: "aktion-2" }) });
+
+    expect(res.status).toBe(403);
+    expect(mockPrisma.anmeldung.deleteMany).not.toHaveBeenCalled();
   });
 });
 
