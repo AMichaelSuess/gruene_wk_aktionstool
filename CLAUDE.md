@@ -136,26 +136,24 @@ Eine Web-App zur Koordinierung und Anmeldung von Aktiven bei Wahlkampf-Aktionen 
 - npm (lockfile version 3)
 - Lockfile: `package-lock.json` present and committed
 ## Frameworks
-- Next.js 16.1.7 - Full-stack React framework using App Router
+- Next.js 16.4.6 - Full-stack React framework using App Router
 - React 19.2.3 / react-dom 19.2.3 - UI rendering
-- NextAuth.js 5.0.0-beta.30 (`next-auth`) - Session management with JWT strategy
-- `@auth/prisma-adapter` 2.11.1 - Prisma adapter (imported but JWT strategy used, not DB sessions)
+- NextAuth.js 5.0.0-beta.32 (`next-auth`) - Session management with JWT strategy
 - Tailwind CSS 4.2.1 - Utility-first CSS via `@tailwindcss/postcss` plugin
 - PostCSS configured in `postcss.config.mjs`
 - Prisma 6.19.2 (client + CLI) - Schema-first ORM, auto-generated on `postinstall`
 - Vitest 4.1.0 - Test runner, `node` environment, no jsdom
 - Config: `vitest.config.ts`
 - `tsx` 4.21.0 - TypeScript execution for seed scripts (`prisma/seed.ts`)
-- ESLint 9 with `eslint-config-next` 16.1.7 (core-web-vitals + TypeScript presets)
+- ESLint 9 with `eslint-config-next` 16.4.6 (core-web-vitals + TypeScript presets)
 - Config: `eslint.config.mjs`
 ## Key Dependencies
-- `zod` 4.3.6 - Runtime validation and schema definition for all model inputs (`src/lib/validators.ts`)
+- `zod` 4.6.7 - Runtime validation and schema definition for all model inputs (`src/lib/validators.ts`)
 - `bcryptjs` 3.0.3 - Password hashing for credential authentication
 - `date-fns` 4.1.0 - Date formatting utilities
 - `exceljs` 4.4.0 - Excel import (parsing uploaded .xlsx files) and export (generating .xlsx reports)
-- `nodemailer` 7.0.7 - SMTP email delivery for registration confirmations, changes, reminders, and daily summaries
+- `nodemailer` 10.6.0 - SMTP email delivery for registration confirmations, changes, reminders, and daily summaries
 - `leaflet` 1.9.4 + `react-leaflet` 5.0.0 - Interactive map rendering for action locations
-- `node-cron` 4.2.1 - Cron scheduling (type definitions only; actual cron triggers are external curl commands)
 ## TypeScript Configuration
 - `strict: true` — full strict mode
 - `target: ES2017`
