@@ -101,3 +101,22 @@ describe("GET /api/aktionen: ungültige Filterwerte", () => {
     expect(where.datum.lte).toEqual(new Date("2099-01-31"));
   });
 });
+
+describe("Obergrenzen für ID-Listen", () => {
+  it("Sammel-Kategorie: höchstens 1000 Aktionen, IDs höchstens 40 Zeichen", async () => {
+    const { bulkKategorieSchema } = await import("@/lib/validators");
+    const ids = (n: number) => Array.from({ length: n }, (_, i) => `aktion-${i}`);
+    expect(bulkKategorieSchema.safeParse({ ids: ids(1000), kategorie: "FLYERN" }).success).toBe(true);
+    expect(bulkKategorieSchema.safeParse({ ids: ids(1001), kategorie: "FLYERN" }).success).toBe(false);
+    expect(bulkKategorieSchema.safeParse({ ids: ["x".repeat(41)], kategorie: "FLYERN" }).success).toBe(false);
+  });
+
+  it("Team-Listen bei Usern und Aktionen: höchstens 50 Einträge", async () => {
+    const { userSchema, userUpdateSchema } = await import("@/lib/validators");
+    const teamIds = (n: number) => Array.from({ length: n }, (_, i) => `team-${i}`);
+    const user = { name: "Test", email: "t@example.org", password: "langes-passwort-123", role: "EXPERT" };
+    expect(userSchema.safeParse({ ...user, teamIds: teamIds(50) }).success).toBe(true);
+    expect(userSchema.safeParse({ ...user, teamIds: teamIds(51) }).success).toBe(false);
+    expect(userUpdateSchema.safeParse({ id: "u1", teamIds: teamIds(51) }).success).toBe(false);
+  });
+});

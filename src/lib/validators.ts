@@ -21,6 +21,9 @@ const passwordSchema = z
 // they end up line by line in the Signal text export experts paste into chats.
 const KEINE_STEUERZEICHEN = /^[^\p{Cc}]*$/u;
 
+// Team-IDs (cuids) in Formularen; bounded so a request cannot carry huge lists
+const teamIdsSchema = z.array(z.string().max(40)).max(50, "Höchstens 50 Teams");
+
 export const loginSchema = z.object({
   email: emailSchema(),
   password: z.string().min(1, "Bitte gib dein Passwort ein"),
@@ -31,7 +34,7 @@ export const userSchema = z.object({
   email: emailSchema(),
   password: passwordSchema,
   role: z.enum(["ADMIN", "EXPERT"]),
-  teamIds: z.array(z.string()).optional().default([]),
+  teamIds: teamIdsSchema.optional().default([]),
 });
 
 export const userUpdateSchema = z.object({
@@ -41,7 +44,7 @@ export const userUpdateSchema = z.object({
   password: passwordSchema.optional(),
   role: z.enum(["ADMIN", "EXPERT"]).optional(),
   active: z.boolean().optional(),
-  teamIds: z.array(z.string()).optional(),
+  teamIds: teamIdsSchema.optional(),
 });
 
 export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
@@ -66,7 +69,7 @@ export const aktionSchema = z.object({
   ansprechpersonTelefon: z.string().min(5, "Telefonnummer erforderlich").max(50, "Telefonnummer darf höchstens 50 Zeichen lang sein"),
   maxTeilnehmer: z.number().int().positive().optional().nullable(),
   // Fehlt das Feld beim Bearbeiten, bleibt die Team-Zuordnung unveraendert
-  teamIds: z.array(z.string()).optional(),
+  teamIds: teamIdsSchema.optional(),
 }).refine(
   (data) => data.startzeit < data.endzeit,
   { message: "Endzeit muss nach der Startzeit liegen", path: ["endzeit"] }
@@ -144,7 +147,10 @@ export const excelRowSchema = z.object({
 );
 
 export const bulkKategorieSchema = z.object({
-  ids: z.array(z.string()).min(1, "Bitte wähle mindestens eine Aktion"),
+  ids: z
+    .array(z.string().max(40))
+    .min(1, "Bitte wähle mindestens eine Aktion")
+    .max(1000, "Bitte wähle höchstens 1000 Aktionen auf einmal"),
   kategorie: z.enum(KATEGORIE_VALUES, { error: "Bitte wähle eine Art der Aktion" }),
 });
 
