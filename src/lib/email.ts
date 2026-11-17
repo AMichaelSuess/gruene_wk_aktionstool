@@ -3,10 +3,17 @@ import { prisma } from "./db";
 import { htmlToText } from "./plaintext";
 import type { EmailTyp } from "@prisma/client";
 
+const smtpSecure = process.env.SMTP_SECURE === "true";
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT) || 587,
-  secure: process.env.SMTP_SECURE === "true",
+  secure: smtpSecure,
+  // Without implicit TLS (port 465), insist on STARTTLS: otherwise an attacker
+  // on the network path could strip it and read the SMTP password and every
+  // mail (cancel links, volunteer contact data) in cleartext.
+  requireTLS: !smtpSecure,
+  tls: { minVersion: "TLSv1.2" },
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,

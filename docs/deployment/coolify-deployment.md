@@ -215,7 +215,7 @@ Metadaten des Images; Secrets haben dort nichts zu suchen.
 | `AUTH_TRUST_HOST` | `true` | nötig hinter dem Reverse-Proxy |
 | `SMTP_HOST` | `smtp.example.org` | leer = es werden keine E-Mails versendet |
 | `SMTP_PORT` | `587` | |
-| `SMTP_SECURE` | `false` | `true` nur bei Port 465 |
+| `SMTP_SECURE` | `false` | `true` nur bei Port 465. Bei `false` (Port 587) ist STARTTLS Pflicht – bietet der Server es nicht an, wird nicht gesendet. |
 | `SMTP_USER` | `aktionen@<DOMAIN>` | |
 | `EMAIL_FROM` | `aktionen@<DOMAIN>` | muss zum SMTP-Konto passen |
 | `EMAIL_FROM_NAME` | `BÜNDNIS 90/DIE GRÜNEN Leipzig` | |
