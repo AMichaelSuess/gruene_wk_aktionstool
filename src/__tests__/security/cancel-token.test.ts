@@ -4,9 +4,10 @@
  * Prüft, dass:
  * - cancelToken korrekt generiert wird (64-char hex)
  * - cancelToken nicht in der API-Response erscheint
- * - Abmeldung per Token die Anmeldung löscht und weiterleitet
+ * - der Abmelde-Link (GET) nichts löscht, sondern zur Bestätigungsseite führt
+ * - erst die Bestätigung (POST) die Anmeldung löscht
  * - Abmeldung einen EmailLog-Eintrag mit typ ABMELDUNG erstellt
- * - Ungültige/fehlende Token zu Fehler-Weiterleitung führen
+ * - Ungültige/fehlende Token zu einem Fehler führen
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -142,75 +143,112 @@ describe("cancelToken-Generierung (POST /api/anmeldungen)", () => {
 
 // ─── Selbstabmeldung ────────────────────────────────────────────────────────
 
-describe("Selbstabmeldung (GET /api/anmeldungen/abmelden)", () => {
+function createAbmeldenPost(body: unknown, path = "/api/anmeldungen/abmelden") {
+  return new Request(`http://localhost:3000${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+describe("Selbstabmeldung: Link aus der E-Mail (GET) ändert nichts", () => {
+  // Mail-Scanner (z. B. Outlook Safe Links) öffnen jeden Link einer E-Mail.
+  it("Gültiger Token: leitet zur Bestätigungsseite weiter und löscht NICHTS", async () => {
+    const { GET } = await import("@/app/api/anmeldungen/abmelden/route");
+    const { prisma } = await import("@/lib/db");
+
+    const res = await GET(createAbmeldenRequest("abc123valid") as any);
+
+    expect(res.status).toBe(307);
+    const location = new URL(res.headers.get("location")!);
+    expect(location.pathname).toBe("/abmeldung/bestaetigen");
+    expect(location.searchParams.get("token")).toBe("abc123valid");
+    expect(prisma.anmeldung.delete).not.toHaveBeenCalled();
+    expect(prisma.emailLog.create).not.toHaveBeenCalled();
+  });
+
+  it("Fehlender Token: leitet zu /abmeldung?fehler=1 weiter", async () => {
+    const { GET } = await import("@/app/api/anmeldungen/abmelden/route");
+
+    const res = await GET(createAbmeldenRequest(null) as any);
+
+    expect(res.status).toBe(307);
+    const location = res.headers.get("location");
+    expect(location).toContain("/abmeldung");
+    expect(location).toContain("fehler=1");
+  });
+});
+
+describe("Selbstabmeldung: Bestätigung per Knopf (POST)", () => {
   const MOCK_ANMELDUNG = {
     id: "anm-1",
     aktionId: "aktion-1",
     vorname: "Max",
     nachname: "Muster",
     email: "max@test.de",
-    cancelToken: "abc123valid",
   };
 
-  it("Gültiger Token: löscht Anmeldung und leitet zu /abmeldung weiter", async () => {
-    const { GET } = await import("@/app/api/anmeldungen/abmelden/route");
+  it("Gültiger Token: löscht Anmeldung und legt EmailLog ABMELDUNG an", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/abmelden/route");
     const { prisma } = await import("@/lib/db");
 
     (prisma.anmeldung.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(MOCK_ANMELDUNG);
     (prisma.anmeldung.delete as ReturnType<typeof vi.fn>).mockResolvedValue(MOCK_ANMELDUNG);
     (prisma.emailLog.create as ReturnType<typeof vi.fn>).mockResolvedValue({ id: "log-1" });
 
-    const req = createAbmeldenRequest("abc123valid");
-    const res = await GET(req as any);
+    const res = await POST(createAbmeldenPost({ token: "abc123valid" }) as any);
 
-    expect(res.status).toBe(307);
-    const location = res.headers.get("location");
-    expect(location).toContain("/abmeldung");
-    expect(location).not.toContain("fehler");
-  });
-
-  it("Ungültiger Token: leitet zu /abmeldung?fehler=1 weiter", async () => {
-    const { GET } = await import("@/app/api/anmeldungen/abmelden/route");
-    const { prisma } = await import("@/lib/db");
-
-    (prisma.anmeldung.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-
-    const req = createAbmeldenRequest("invalid-token-xyz");
-    const res = await GET(req as any);
-
-    expect(res.status).toBe(307);
-    const location = res.headers.get("location");
-    expect(location).toContain("/abmeldung");
-    expect(location).toContain("fehler=1");
-  });
-
-  it("Fehlender Token: leitet zu /abmeldung?fehler=1 weiter", async () => {
-    const { GET } = await import("@/app/api/anmeldungen/abmelden/route");
-
-    const req = createAbmeldenRequest(null);
-    const res = await GET(req as any);
-
-    expect(res.status).toBe(307);
-    const location = res.headers.get("location");
-    expect(location).toContain("/abmeldung");
-    expect(location).toContain("fehler=1");
-  });
-
-  it("Erfolgreiche Abmeldung erstellt EmailLog-Eintrag mit typ ABMELDUNG", async () => {
-    const { GET } = await import("@/app/api/anmeldungen/abmelden/route");
-    const { prisma } = await import("@/lib/db");
-
-    (prisma.anmeldung.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(MOCK_ANMELDUNG);
-    (prisma.anmeldung.delete as ReturnType<typeof vi.fn>).mockResolvedValue(MOCK_ANMELDUNG);
-    (prisma.emailLog.create as ReturnType<typeof vi.fn>).mockResolvedValue({ id: "log-1" });
-
-    const req = createAbmeldenRequest("abc123valid");
-    await GET(req as any);
-
-    expect(prisma.emailLog.create).toHaveBeenCalledOnce();
+    expect(res.status).toBe(200);
+    expect(prisma.anmeldung.delete).toHaveBeenCalledWith({ where: { cancelToken: "abc123valid" } });
     const logArgs = (prisma.emailLog.create as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(logArgs.data.typ).toBe("ABMELDUNG");
     expect(logArgs.data.empfaengerEmail).toBe("max@test.de");
     expect(logArgs.data.aktionId).toBe("aktion-1");
+  });
+
+  it("Ungültiger Token → 404, nichts gelöscht", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/abmelden/route");
+    const { prisma } = await import("@/lib/db");
+
+    (prisma.anmeldung.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
+    const res = await POST(createAbmeldenPost({ token: "invalid-token-xyz" }) as any);
+
+    expect(res.status).toBe(404);
+    expect(prisma.anmeldung.delete).not.toHaveBeenCalled();
+  });
+
+  it("Fehlender Token → 400", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/abmelden/route");
+    const res = await POST(createAbmeldenPost({}) as any);
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("Selbstabmeldung: Aktions-Info für die Bestätigungsseite", () => {
+  it("liefert nur Titel, Datum und Startzeit – keine persönlichen Daten", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/abmelden/info/route");
+    const { prisma } = await import("@/lib/db");
+
+    (prisma.anmeldung.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      aktion: { titel: "Infotisch", datum: "2099-04-01T00:00:00.000Z", startzeit: "10:00" },
+    });
+
+    const res = await POST(createAbmeldenPost({ token: "abc" }, "/api/anmeldungen/abmelden/info") as any);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ titel: "Infotisch", datum: "2099-04-01T00:00:00.000Z", startzeit: "10:00" });
+
+    const args = (prisma.anmeldung.findUnique as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(args.select).toEqual({ aktion: { select: { titel: true, datum: true, startzeit: true } } });
+    expect(prisma.anmeldung.delete).not.toHaveBeenCalled();
+  });
+
+  it("Ungültiger Token → 404", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/abmelden/info/route");
+    const { prisma } = await import("@/lib/db");
+    (prisma.anmeldung.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
+    const res = await POST(createAbmeldenPost({ token: "x" }, "/api/anmeldungen/abmelden/info") as any);
+    expect(res.status).toBe(404);
   });
 });

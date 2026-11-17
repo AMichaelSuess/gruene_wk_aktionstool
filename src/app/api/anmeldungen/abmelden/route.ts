@@ -1,18 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/db";
 
 const baseUrl =
   process.env.NEXTAUTH_URL ?? "https://aktionen.gruene-mitte.de";
 
+const tokenSchema = z.object({ token: z.string().min(1).max(128) });
+
+// GET: target of the unsubscribe link in emails. Must not change anything:
+// mail link scanners (e.g. Outlook Safe Links) open every link in a mail, so
+// a deleting GET would silently unregister volunteers. It only forwards to a
+// confirmation page where a person clicks the button (POST below).
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const token = searchParams.get("token");
+  const token = new URL(req.url).searchParams.get("token");
 
   if (!token) {
     return NextResponse.redirect(new URL("/abmeldung?fehler=1", baseUrl));
   }
 
+  const target = new URL("/abmeldung/bestaetigen", baseUrl);
+  target.searchParams.set("token", token);
+  return NextResponse.redirect(target);
+}
+
+// POST: performs the unsubscribe after the person confirmed it.
+export async function POST(req: NextRequest) {
   try {
+    const parsed = tokenSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Ungültiger Abmelde-Link" }, { status: 400 });
+    }
+    const { token } = parsed.data;
+
     const anmeldung = await prisma.anmeldung.findUnique({
       where: { cancelToken: token },
       select: {
@@ -21,12 +40,11 @@ export async function GET(req: NextRequest) {
         vorname: true,
         nachname: true,
         email: true,
-        cancelToken: true,
       },
     });
 
     if (!anmeldung) {
-      return NextResponse.redirect(new URL("/abmeldung?fehler=1", baseUrl));
+      return NextResponse.json({ error: "Anmeldung nicht gefunden" }, { status: 404 });
     }
 
     await prisma.anmeldung.delete({ where: { cancelToken: token } });
@@ -41,8 +59,8 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.redirect(new URL("/abmeldung", baseUrl));
+    return NextResponse.json({ message: "Abgemeldet" });
   } catch {
-    return NextResponse.redirect(new URL("/abmeldung?fehler=1", baseUrl));
+    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }
