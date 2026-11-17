@@ -181,7 +181,8 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
             type="password"
             value={form.newPassword}
             onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
-            minLength={8}
+            minLength={12}
+            maxLength={72}
           />
 
           {error && (

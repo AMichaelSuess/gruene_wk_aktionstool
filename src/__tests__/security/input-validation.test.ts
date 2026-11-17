@@ -399,3 +399,19 @@ describe("Eingabevalidierung: Grenzen der öffentlichen Anmeldung", () => {
     expect(prisma.anmeldung.create).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("Passwort-Regeln für verwaltete Accounts", () => {
+  it("weniger als 12 Zeichen, mehr als 72 Byte → abgelehnt; 12 Zeichen → ok", async () => {
+    const { userSchema, userUpdateSchema } = await import("@/lib/validators");
+    const base = { name: "Test", email: "t@test.de", role: "EXPERT" as const };
+
+    expect(userSchema.safeParse({ ...base, password: "a".repeat(11) }).success).toBe(false);
+    expect(userSchema.safeParse({ ...base, password: "a".repeat(12) }).success).toBe(true);
+    expect(userSchema.safeParse({ ...base, password: "a".repeat(73) }).success).toBe(false);
+    // 37 Umlaute = 74 Byte: bcrypt würde den Rest ignorieren
+    expect(userSchema.safeParse({ ...base, password: "ä".repeat(37) }).success).toBe(false);
+
+    expect(userUpdateSchema.safeParse({ id: "u1", password: "kurz12345" }).success).toBe(false);
+    expect(userUpdateSchema.safeParse({ id: "u1" }).success).toBe(true);
+  });
+});

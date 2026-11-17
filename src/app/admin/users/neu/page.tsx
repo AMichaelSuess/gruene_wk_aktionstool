@@ -95,7 +95,8 @@ export default function NewUserPage() {
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             required
-            minLength={8}
+            minLength={12}
+            maxLength={72}
           />
           <Select
             label="Rolle"

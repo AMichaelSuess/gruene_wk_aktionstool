@@ -8,6 +8,15 @@ import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
 const emailSchema = (message = "Bitte gib eine gültige E-Mail-Adresse ein") =>
   z.string().trim().toLowerCase().max(254, "E-Mail-Adresse ist zu lang").email(message);
 
+// Passwords of managed accounts. bcrypt ignores everything after 72 bytes,
+// so longer passwords would only seem stronger (umlauts count as 2 bytes).
+const passwordSchema = z
+  .string()
+  .min(12, "Passwort muss mindestens 12 Zeichen lang sein")
+  .refine((pw) => new TextEncoder().encode(pw).length <= 72, {
+    message: "Passwort darf höchstens 72 Zeichen lang sein",
+  });
+
 export const loginSchema = z.object({
   email: emailSchema(),
   password: z.string().min(1, "Bitte gib dein Passwort ein"),
@@ -16,7 +25,7 @@ export const loginSchema = z.object({
 export const userSchema = z.object({
   name: z.string().min(2, "Name muss mindestens 2 Zeichen lang sein"),
   email: emailSchema(),
-  password: z.string().min(8, "Passwort muss mindestens 8 Zeichen lang sein"),
+  password: passwordSchema,
   role: z.enum(["ADMIN", "EXPERT"]),
   teamIds: z.array(z.string()).optional().default([]),
 });
@@ -25,7 +34,7 @@ export const userUpdateSchema = z.object({
   id: z.string().min(1, "ID fehlt"),
   name: z.string().min(2, "Name muss mindestens 2 Zeichen lang sein").optional(),
   email: emailSchema().optional(),
-  password: z.string().min(8, "Passwort muss mindestens 8 Zeichen lang sein").optional(),
+  password: passwordSchema.optional(),
   role: z.enum(["ADMIN", "EXPERT"]).optional(),
   active: z.boolean().optional(),
   teamIds: z.array(z.string()).optional(),
