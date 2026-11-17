@@ -14,6 +14,8 @@ const isRateLimited = createRateLimiter(10, 60 * 1000); // per minute
 
 const MAX_BODY_BYTES = 32 * 1024;
 
+class AktionVollError extends Error {}
+
 interface AktionWithCount {
   id: string;
   titel: string;
@@ -81,20 +83,37 @@ export async function POST(req: NextRequest) {
 
       try {
         const cancelToken = crypto.randomBytes(32).toString("hex");
-        await prisma.anmeldung.create({
-          data: {
-            aktionId,
-            vorname: validated.vorname,
-            nachname: validated.nachname,
-            email: validated.email,
-            telefon: validated.telefon || null,
-            signalName: validated.signalName || null,
-            cancelToken,
-          },
-        });
+        const data = {
+          aktionId,
+          vorname: validated.vorname,
+          nachname: validated.nachname,
+          email: validated.email,
+          telefon: validated.telefon || null,
+          signalName: validated.signalName || null,
+          cancelToken,
+        };
+        const maxTeilnehmer = aktion.maxTeilnehmer;
+        if (maxTeilnehmer) {
+          // The check above can pass for several parallel signups at once.
+          // A transaction-scoped advisory lock per action serializes them,
+          // so the count below sees every earlier signup. Other actions are
+          // not blocked.
+          await prisma.$transaction(async (tx) => {
+            await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${aktionId}))`;
+            const count = await tx.anmeldung.count({ where: { aktionId } });
+            if (count >= maxTeilnehmer) throw new AktionVollError();
+            await tx.anmeldung.create({ data });
+          });
+        } else {
+          await prisma.anmeldung.create({ data });
+        }
         successfulAktionen.push({ aktion, cancelToken });
         results.push({ aktionId, success: true });
       } catch (err) {
+        if (err instanceof AktionVollError) {
+          results.push({ aktionId, error: "Aktion ist bereits voll" });
+          continue;
+        }
         // Unique constraint violation
         if (err instanceof Error && err.message.includes("Unique")) {
           const existing = await prisma.anmeldung.findUnique({
