@@ -5,9 +5,14 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Link from "next/link";
 
+// Shown on every success screen. The signup response deliberately does not say
+// whether someone was already registered (otherwise anyone could look that up).
+export const BEREITS_ANGEMELDET_HINWEIS =
+  "Falls du schon angemeldet warst, bleibt deine Anmeldung einfach bestehen.";
+
 interface AnmeldeFormularProps {
   selectedIds: string[];
-  onSuccess: (bereitsAngemeldetIds?: string[]) => void;
+  onSuccess: () => void;
 }
 
 export default function AnmeldeFormular({
@@ -109,11 +114,7 @@ export default function AnmeldeFormular({
       });
 
       if (res.ok) {
-        const data = await res.json();
-        const bereitsAngemeldetIds = (data.results ?? [])
-          .filter((r: { error?: string }) => r.error === "Bereits angemeldet")
-          .map((r: { aktionId: string }) => r.aktionId);
-        onSuccess(bereitsAngemeldetIds.length > 0 ? bereitsAngemeldetIds : undefined);
+        onSuccess();
       } else {
         const data = await res.json();
         setError(data.error || "Fehler bei der Anmeldung");

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import AnmeldeFormular from "@/components/AnmeldeFormular";
+import AnmeldeFormular, { BEREITS_ANGEMELDET_HINWEIS } from "@/components/AnmeldeFormular";
 
 export default function EmbedAktionPage() {
   const params = useParams();
@@ -11,7 +11,6 @@ export default function EmbedAktionPage() {
   const [aktionTitle, setAktionTitle] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
-  const [bereitsAngemeldet, setBereitsAngemeldet] = useState(false);
 
   useEffect(() => {
     const sendHeight = () => {
@@ -60,17 +59,7 @@ export default function EmbedAktionPage() {
           Anmeldung erfolgreich!
         </h2>
         <p>Vielen Dank für deine Anmeldung. Du erhältst in Kürze eine Bestätigungs-E-Mail.</p>
-      </div>
-    );
-  }
-
-  if (bereitsAngemeldet) {
-    return (
-      <div className="p-6 rounded-card bg-white border-ui border-line shadow-ui">
-        <h2 className="font-headline text-xl font-bold case-ui mb-2">
-          Bereits angemeldet
-        </h2>
-        <p>Du bist für diese Aktion bereits registriert.</p>
+        <p className="mt-2">{BEREITS_ANGEMELDET_HINWEIS}</p>
       </div>
     );
   }
@@ -86,13 +75,7 @@ export default function EmbedAktionPage() {
 
       <AnmeldeFormular
         selectedIds={[aktionId]}
-        onSuccess={(bereitsAngemeldetIds) => {
-          if (bereitsAngemeldetIds?.includes(aktionId)) {
-            setBereitsAngemeldet(true);
-          } else {
-            setSuccess(true);
-          }
-        }}
+        onSuccess={() => setSuccess(true)}
       />
     </div>
   );

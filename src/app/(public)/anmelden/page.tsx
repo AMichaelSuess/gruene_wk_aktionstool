@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import AnmeldeFormular from "@/components/AnmeldeFormular";
+import AnmeldeFormular, { BEREITS_ANGEMELDET_HINWEIS } from "@/components/AnmeldeFormular";
 
 interface Aktion {
   id: string;
@@ -28,7 +28,6 @@ function AnmeldenPageContent() {
   const [aktionen, setAktionen] = useState<Aktion[]>([]);
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
-  const [bereitsAngemeldet, setBereitsAngemeldet] = useState<string[]>([]);
 
   const initialIds = useMemo(() => {
     const param = searchParams.get("aktionen");
@@ -60,8 +59,7 @@ function AnmeldenPageContent() {
     }
   }
 
-  function handleSuccess(ids?: string[]) {
-    setBereitsAngemeldet(ids ?? []);
+  function handleSuccess() {
     setSuccess(true);
   }
 
@@ -75,23 +73,9 @@ function AnmeldenPageContent() {
           <p className="text-ink mt-2">
             Du erhältst in Kürze eine Bestätigungs-E-Mail.
           </p>
-          {bereitsAngemeldet.length > 0 && (
-            <div className="mt-4 bg-white rounded-card border-ui border-yellow-500 p-4 text-left shadow-ui-warning">
-              <p className="font-bold text-sm text-ink mb-2">
-                Hinweis: Für folgende Aktionen warst du bereits angemeldet:
-              </p>
-              <ul className="list-disc list-inside space-y-1">
-                {bereitsAngemeldet.map((id) => (
-                  <li key={id} className="text-sm text-ink">
-                    {aktionTitles.get(id) || id}
-                  </li>
-                ))}
-              </ul>
-              <p className="font-bold text-sm text-ink mb-2">
-                Du erhältst für diese Aktionen keine Bestätigungs-E-Mail.
-              </p>
-            </div>
-          )}
+          <p className="text-ink mt-2">
+            {BEREITS_ANGEMELDET_HINWEIS}
+          </p>
           <Link
             href="/"
             className="mt-6 inline-block text-primary hover:underline font-bold"

@@ -59,9 +59,13 @@ export async function POST(req: NextRequest) {
 
     const validated = anmeldungSchema.parse(body);
 
-    // Create registrations for each action
+    // Create registrations for each action.
+    // An existing registration is answered exactly like a new one, so the
+    // response does not reveal whether an email address is already
+    // registered for an action (DSGVO: participation is political opinion).
     const results = [];
     const successfulAktionen: Array<{ aktion: AktionWithCount; cancelToken: string }> = [];
+    const existingAktionen: Array<{ aktion: AktionWithCount; cancelToken: string }> = [];
 
     for (const aktionId of validated.aktionIds) {
       // Check if action exists and is active
@@ -99,19 +103,28 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         // Unique constraint violation
         if (err instanceof Error && err.message.includes("Unique")) {
-          results.push({ aktionId, error: "Bereits angemeldet" });
+          const existing = await prisma.anmeldung.findUnique({
+            where: { aktionId_email: { aktionId, email: validated.email } },
+            select: { cancelToken: true },
+          });
+          if (existing?.cancelToken) {
+            existingAktionen.push({ aktion, cancelToken: existing.cancelToken });
+          }
+          results.push({ aktionId, success: true });
         } else {
           results.push({ aktionId, error: "Fehler bei der Anmeldung" });
         }
       }
     }
 
-    // Send confirmation email for successful registrations
+    // Send a confirmation email only if something new was created. It also
+    // lists existing registrations, so only the mailbox owner learns about them.
     if (successfulAktionen.length > 0) {
+      const confirmed = [...successfulAktionen, ...existingAktionen];
       const emailData = anmeldebestaetigungEmail(
         validated.vorname,
         validated.email,
-        successfulAktionen.map((s) => ({
+        confirmed.map((s) => ({
           titel: s.aktion.titel,
           datum: s.aktion.datum,
           startzeit: s.aktion.startzeit,
@@ -121,7 +134,7 @@ export async function POST(req: NextRequest) {
           ansprechpersonEmail: s.aktion.ansprechpersonEmail,
           ansprechpersonTelefon: s.aktion.ansprechpersonTelefon,
         })),
-        successfulAktionen.map((s) => s.cancelToken)
+        confirmed.map((s) => s.cancelToken)
       );
 
       await sendEmail({
@@ -133,7 +146,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      message: `Erfolgreich für ${successfulAktionen.length} Aktion(en) angemeldet`,
+      message: `Erfolgreich für ${successfulAktionen.length + existingAktionen.length} Aktion(en) angemeldet`,
       results,
     });
   } catch (error) {
