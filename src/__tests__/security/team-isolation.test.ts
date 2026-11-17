@@ -80,6 +80,11 @@ describe("Team-Isolation: Anmeldungen (persönliche Daten)", () => {
     const data = await res.json();
     expect(data).toHaveLength(1);
     expect(data[0].vorname).toBe("Max");
+
+    // Abmelde-Token darf nicht an den Browser gehen
+    const { select } = mockPrisma.anmeldung.findMany.mock.calls[0][0];
+    expect(select).toBeDefined();
+    expect(select).not.toHaveProperty("cancelToken");
   });
 
   it("EXPERT kann NICHT Anmeldungen eines fremden Teams abrufen → 403", async () => {

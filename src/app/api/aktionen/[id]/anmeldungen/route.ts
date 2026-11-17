@@ -28,8 +28,19 @@ export async function GET(
     return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
   }
 
+  // Explicit fields: the cancel token is a volunteer's credential and must
+  // not leave the server
   const anmeldungen = await prisma.anmeldung.findMany({
     where: { aktionId: id },
+    select: {
+      id: true,
+      vorname: true,
+      nachname: true,
+      email: true,
+      telefon: true,
+      signalName: true,
+      createdAt: true,
+    },
     orderBy: { createdAt: "desc" },
   });
 
