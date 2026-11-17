@@ -1,7 +1,9 @@
 # Multi-Stage-Build für die Aktionskoordination (Next.js + Prisma)
 # Node.js 24 LTS auf Debian slim (Prisma benötigt OpenSSL)
 
-FROM node:24-bookworm-slim AS base
+# Pinned by digest for reproducible builds; Dependabot (.github/dependabot.yml)
+# opens a pull request when a newer image with OS/security patches is out.
+FROM node:24-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54 AS base
 # openssl: Prisma-Engines; curl: Health-Check und Scheduled Tasks von Coolify
 RUN apt-get update \
   && apt-get install -y --no-install-recommends openssl ca-certificates curl \

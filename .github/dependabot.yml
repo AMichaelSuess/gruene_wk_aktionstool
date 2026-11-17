@@ -1,0 +1,23 @@
+# Update pull requests for this fork. Security updates arrive as soon as an
+# advisory is published (enable "Dependabot security updates" in the GitHub
+# repository settings); version updates are bundled weekly.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # Minor and patch updates in one pull request instead of dozens
+      minor-und-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: build
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build
