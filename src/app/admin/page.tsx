@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
+import { WAHLKREIS_LABEL, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
 
 interface Stats {
   totalAktionen: number;
@@ -94,9 +94,11 @@ export default function AdminPage() {
           <div className="space-y-3">
             {anmeldungenByWahlkreis.map((item) => (
               <div key={item.nummer} className="flex items-center gap-3">
-                <span className="text-sm font-bold text-primary w-6">
-                  {item.nummer}
-                </span>
+                {WAHLKREIS_NUMMERN_ANZEIGEN && (
+                  <span className="text-sm font-bold text-primary w-6">
+                    {item.nummer}
+                  </span>
+                )}
                 <span className="text-sm text-gray-600 w-40">{item.wahlkreis}</span>
                 <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                   <div

@@ -5,6 +5,7 @@ import { parseExcelFile, convertDatumToISO } from "@/lib/excel";
 import { excelRowSchema, type ExcelRowInput } from "@/lib/validators";
 import { geocodeAddress } from "@/lib/geocoding";
 import { normalizeTeamIds, teamsExist, UNBEKANNTES_TEAM_FEHLER } from "@/lib/aktion-teams";
+import { WAHLKREIS_LABEL, findWahlkreis, formatWahlkreis } from "@/lib/wahlkreis-label";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -23,14 +24,27 @@ export async function POST(req: NextRequest) {
     const buffer = await file.arrayBuffer();
     const rows = await parseExcelFile(buffer);
 
+    // Spalte "Wahlkreis" (Nummer oder Name) einem vorhandenen Eintrag zuordnen
+    const wahlkreise = await prisma.wahlkreis.findMany({
+      select: { id: true, nummer: true, name: true },
+      orderBy: { nummer: "asc" },
+    });
+    const rowWahlkreisIds = new Map<number, string>();
+
     // Validate each row
     const results = rows.map((row, index) => {
-      const validation = excelRowSchema.safeParse(row);
+      const wahlkreis = findWahlkreis(row.wahlkreis, wahlkreise);
+      if (wahlkreis) rowWahlkreisIds.set(index, wahlkreis.id);
+      const validation = excelRowSchema.safeParse({ ...row, wahlkreis: wahlkreis?.nummer });
       return {
         index,
         row,
         valid: validation.success,
-        errors: validation.success ? [] : validation.error.issues.map((e) => e.message),
+        errors: validation.success
+          ? []
+          : validation.error.issues.map((e) =>
+              e.path[0] === "wahlkreis" ? wahlkreisFehler(row.wahlkreis, wahlkreise) : e.message
+            ),
       };
     });
 
@@ -97,10 +111,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Keine gültigen Zeilen" }, { status: 400 });
       }
 
-      // Get wahlkreise for mapping
-      const wahlkreise = await prisma.wahlkreis.findMany();
-      const wahlkreisMap = new Map(wahlkreise.map((wk) => [wk.nummer, wk.id]));
-
       // Beim Hochladen gewaehlte Teams gelten fuer alle Zeilen ohne eigene
       // "Teams"-Angabe. Admins duerfen bewusst keins waehlen; bei Experts wird
       // ohne Auswahl das eigene Team gesetzt.
@@ -118,7 +128,7 @@ export async function POST(req: NextRequest) {
       for (const { row, index } of validRows) {
         const teamIds = rowTeamIds.get(index) ?? defaultTeamIds;
         const isoDate = convertDatumToISO(row.datum);
-        const wahlkreisId = wahlkreisMap.get(row.wahlkreis);
+        const wahlkreisId = rowWahlkreisIds.get(index);
 
         if (!wahlkreisId) continue;
 
@@ -168,4 +178,13 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Fehler beim Verarbeiten der Datei" }, { status: 500 });
   }
+}
+
+function wahlkreisFehler(
+  value: number | string | undefined,
+  wahlkreise: { nummer: number; name: string }[]
+): string {
+  if (value === undefined || String(value).trim() === "") return `${WAHLKREIS_LABEL} fehlt`;
+  const moeglich = wahlkreise.map((wk) => formatWahlkreis(wk)).join(", ");
+  return `${WAHLKREIS_LABEL} „${value}“ unbekannt (möglich: ${moeglich})`;
 }

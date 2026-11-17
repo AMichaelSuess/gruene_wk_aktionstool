@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs";
 import { parseKategorie } from "@/lib/kategorien";
-import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
+import { districtConfig } from "@/lib/district-config";
+import { WAHLKREIS_LABEL, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
 
 function kategorieEmoji(kategorie?: string): string {
   switch (kategorie) {
@@ -37,7 +38,8 @@ interface ExcelRow {
   startzeit: string;
   endzeit: string;
   adresse: string;
-  wahlkreis: number;
+  // Nummer oder Name, wird in der Upload-Route einem Wahlkreis zugeordnet
+  wahlkreis: number | string;
   kategorie: string;
   ansprechpersonName: string;
   ansprechpersonEmail: string;
@@ -129,7 +131,8 @@ export async function parseExcelFile(buffer: ArrayBuffer): Promise<ExcelRow[]> {
       } else if (key === "startzeit" || key === "endzeit") {
         partial[key] = formatTime(value);
       } else if (key === "wahlkreis") {
-        partial.wahlkreis = parseInt(String(value ?? ""), 10);
+        const text = String(value ?? "").trim();
+        partial.wahlkreis = typeof value === "number" ? value : /^\d+$/.test(text) ? Number(text) : text;
       } else if (key === "kategorie") {
         // Deutsche Labels ("Haustür", "Infostand") in Enum-Werte übersetzen.
         // Bei unbekannten Werten den Rohwert durchreichen, damit Zod eine
@@ -253,7 +256,7 @@ export async function createAktionenExcel(aktionen: AktionExport[]): Promise<Buf
     { header: "Startzeit", key: "startzeit", width: 10 },
     { header: "Endzeit", key: "endzeit", width: 10 },
     { header: "Adresse", key: "adresse", width: 40 },
-    { header: WAHLKREIS_LABEL, key: "wahlkreis", width: 10 },
+    { header: WAHLKREIS_LABEL, key: "wahlkreis", width: 25 },
     { header: "Kategorie", key: "kategorie", width: 12 },
     { header: "Teams", key: "teams", width: 30 },
     { header: "Status", key: "status", width: 12 },
@@ -319,7 +322,7 @@ export async function createAuswertungExcel(data: AuswertungData): Promise<Buffe
   // Excel erlaubt maximal 31 Zeichen pro Blattname
   const wkSheet = workbook.addWorksheet(`Anmeldungen nach ${WAHLKREIS_LABEL}`.slice(0, 31));
   wkSheet.columns = [
-    { header: "Nr.", key: "nummer", width: 6 },
+    ...(WAHLKREIS_NUMMERN_ANZEIGEN ? [{ header: "Nr.", key: "nummer", width: 6 }] : []),
     { header: WAHLKREIS_LABEL, key: "wahlkreis", width: 30 },
     { header: "Anmeldungen", key: "anmeldungen", width: 14 },
   ];
@@ -368,7 +371,7 @@ export async function createVorlageExcel(): Promise<Buffer> {
     { header: "Startzeit", key: "startzeit", width: 10 },
     { header: "Endzeit", key: "endzeit", width: 10 },
     { header: "Adresse", key: "adresse", width: 40 },
-    { header: WAHLKREIS_LABEL, key: "wahlkreis", width: 10 },
+    { header: WAHLKREIS_LABEL, key: "wahlkreis", width: WAHLKREIS_NUMMERN_ANZEIGEN ? 10 : 20 },
     { header: "Kategorie", key: "kategorie", width: 12 },
     { header: "Ansprechperson Name", key: "ansprechpersonName", width: 20 },
     { header: "Ansprechperson E-Mail", key: "ansprechpersonEmail", width: 25 },
@@ -376,6 +379,11 @@ export async function createVorlageExcel(): Promise<Buffer> {
     { header: "Max. Teilnehmer", key: "maxTeilnehmer", width: 15 },
     { header: TEAMS_SPALTE, key: "teams", width: 30 },
   ];
+
+  const beispielWahlkreis = districtConfig.wahlkreise[0];
+  sheet.getCell(1, sheet.getColumn("wahlkreis").number).note = WAHLKREIS_NUMMERN_ANZEIGEN
+    ? `Nummer oder Name, z. B. „1“ oder „${beispielWahlkreis?.name ?? ""}“.`
+    : `Name, z. B. ${districtConfig.wahlkreise.map((wk) => `„${wk.name}“`).join(", ")}.`;
 
   sheet.getCell(1, sheet.columns.length).note =
     "Optional: Namen der Teams, mit Komma getrennt (z. B. „Team Flyern, Team Ost“). " +
@@ -391,7 +399,7 @@ export async function createVorlageExcel(): Promise<Buffer> {
     startzeit: new Date(Date.UTC(1899, 11, 30, 10, 0)),
     endzeit: new Date(Date.UTC(1899, 11, 30, 13, 0)),
     adresse: "Alexanderplatz 1, 10178 Berlin",
-    wahlkreis: 1,
+    wahlkreis: WAHLKREIS_NUMMERN_ANZEIGEN ? 1 : (beispielWahlkreis?.name ?? 1),
     kategorie: "Infostand",
     ansprechpersonName: "Max Mustermann",
     ansprechpersonEmail: "max@example.com",

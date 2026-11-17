@@ -6,7 +6,7 @@ import Badge from "@/components/ui/Badge";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { kategorieLabel } from "@/lib/kategorien";
-import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
+import { WAHLKREIS_LABEL, WAHLKREIS_LABEL_SHORT, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
 
 interface Aktion {
   id: string;
@@ -106,7 +106,9 @@ export default function AdminAktionenPage() {
                   <span className="text-xs">{aktion.startzeit} – {aktion.endzeit}</span>
                 </td>
                 <td className="px-4 py-3 text-gray-700">
-                  WK {aktion.wahlkreis.nummer}
+                  {WAHLKREIS_NUMMERN_ANZEIGEN
+                    ? `${WAHLKREIS_LABEL_SHORT} ${aktion.wahlkreis.nummer}`
+                    : aktion.wahlkreis.name}
                 </td>
                 <td className="px-4 py-3 text-gray-700">{aktion.teams.length > 0 ? aktion.teams.map((t) => t.name).join(", ") : "–"}</td>
                 <td className="px-4 py-3">

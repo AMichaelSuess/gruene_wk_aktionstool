@@ -6,6 +6,7 @@ import { KATEGORIE_VALUES, kategorieLabel } from "@/lib/kategorien";
 import { format, startOfDay, endOfDay, addDays, startOfWeek, endOfWeek } from "date-fns";
 import { de } from "date-fns/locale";
 import { TEAMS_INCLUDE, expertAktionWhere } from "@/lib/aktion-teams";
+import { formatWahlkreis } from "@/lib/wahlkreis-label";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -84,7 +85,7 @@ export async function GET(req: NextRequest) {
     startzeit: a.startzeit,
     endzeit: a.endzeit,
     adresse: a.adresse,
-    wahlkreis: `WK ${a.wahlkreis.nummer} – ${a.wahlkreis.name}`,
+    wahlkreis: formatWahlkreis(a.wahlkreis),
     kategorie: kategorieLabel(a.kategorie),
     teams: a.teams.map((t) => t.team.name).join(", "),
     status: a.status,

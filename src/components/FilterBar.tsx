@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { KATEGORIEN } from "@/lib/kategorien";
-import { WAHLKREIS_LABEL_SHORT } from "@/lib/wahlkreis-label";
+import { WAHLKREIS_LABEL_SHORT, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
 import { theme } from "@/lib/theme";
 
 interface FilterState {
@@ -181,18 +181,31 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
             <div className="flex items-center gap-2 flex-wrap">
             <label className="text-xs font-bold case-ui tracking-ui text-ink shrink-0">{WAHLKREIS_LABEL_SHORT}:</label>
             <div className="flex gap-1 flex-wrap">
+              <button
+                onClick={() => onFilterChange({ ...filters, wahlkreise: [] })}
+                className={`rounded-button text-xs px-2 py-1 font-bold case-ui tracking-ui border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
+                  filters.wahlkreise.length === 0
+                    ? "bg-primary text-white border-line"
+                    : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
+                }`}
+              >
+                Alle
+              </button>
               {wahlkreise.map((wk) => (
                 <button
                   key={wk.nummer}
                   onClick={() => toggleWahlkreis(wk.nummer)}
-                  title={wk.name}
-                  className={`rounded-button w-7 h-7 text-xs font-bold border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
+                  // Nummern-Chips bleiben kompakt (lange Berliner Namen); der Name steht im Tooltip
+                  title={WAHLKREIS_NUMMERN_ANZEIGEN ? wk.name : undefined}
+                  className={`rounded-button text-xs font-bold border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
+                    WAHLKREIS_NUMMERN_ANZEIGEN ? "w-7 h-7" : "px-2 py-1 case-ui tracking-ui"
+                  } ${
                     filters.wahlkreise.includes(wk.nummer)
                       ? "bg-primary text-white border-line"
                       : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
                   }`}
                 >
-                  {wk.nummer}
+                  {WAHLKREIS_NUMMERN_ANZEIGEN ? wk.nummer : wk.name}
                 </button>
               ))}
             </div>

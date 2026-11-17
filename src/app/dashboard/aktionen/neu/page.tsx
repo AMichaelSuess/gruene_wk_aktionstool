@@ -9,7 +9,7 @@ import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import ExcelUpload from "@/components/ExcelUpload";
 import { KATEGORIEN } from "@/lib/kategorien";
-import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
+import { WAHLKREIS_LABEL, formatWahlkreis } from "@/lib/wahlkreis-label";
 import TeamAuswahl from "@/components/TeamAuswahl";
 
 interface Wahlkreis {
@@ -186,7 +186,7 @@ export default function NewAktionPage() {
               onChange={(e) => updateForm("wahlkreisId", e.target.value)}
               options={wahlkreise.map((wk) => ({
                 value: wk.id,
-                label: `${wk.nummer}: ${wk.name}`,
+                label: formatWahlkreis(wk),
               }))}
               placeholder="Bitte wählen"
             />

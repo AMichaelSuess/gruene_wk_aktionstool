@@ -236,6 +236,7 @@ Redeploy nötig** (Neubau des Images) – ein Restart reicht nicht.
 | `NEXT_PUBLIC_WAHLKREIS_LABEL` | `Stadtbezirk` | Bezeichnung der Gebietseinheit (Default „Wahlkreis“; hier „Stadtbezirk“) |
 | `NEXT_PUBLIC_WAHLKREIS_LABEL_PLURAL` | `Stadtbezirke` | |
 | `NEXT_PUBLIC_WAHLKREIS_LABEL_SHORT` | `Stadtbezirk` | |
+| `NEXT_PUBLIC_WAHLKREIS_NUMMERN` | `false` | Gebiete tragen keine Nummern: Filter, Karte, Listen und Exporte zeigen nur Namen (Default: Nummer und Name) |
 | `NEXT_PUBLIC_THEME` | `emerald` | Visuelles Theme: `brutalist` (Default) oder `emerald` (Design der OBM-Kampagne 2027) – Farben, Schrift, Formen, Logo/Wortmarke, Karten-Marker und E-Mails |
 | `ALLOWED_EMBED_DOMAIN` | `https://www.<kreisverband>.de` | Domain, die das Anmeldeformular per `<iframe>` einbinden darf; leer = keine Einbindung |
 
@@ -270,9 +271,10 @@ Laufzeit gelesen; nach einer Änderung genügt ein **Restart**.
 
 > ⚠️ **`WAHLKREISE_JSON` wird an zwei Stellen gelesen:** von der Grundeinrichtung
 > ([Abschnitt 7](#7-grundeinrichtung-bootstrap)), die daraus Stadtbezirke und Teams anlegt, und
-> **zur Laufzeit** vom Excel-Import, der die Nummer in der Spalte „Stadtbezirk“ gegen die Anzahl
-> der Einträge prüft. Fehlt die Variable, gelten die 7 Berliner Wahlkreise – Importe für die
-> Stadtbezirke 8–10 würden dann abgelehnt. Die Variable also dauerhaft gesetzt lassen.
+> **zur Laufzeit** von der Excel-Vorlage, die daraus die Beispiele in der Spalte „Stadtbezirk“
+> nimmt. Fehlt die Variable, zeigt die Vorlage die Berliner Wahlkreise. Die Variable also
+> dauerhaft gesetzt lassen. Der Import selbst ordnet Name oder Nummer den Stadtbezirken in der
+> Datenbank zu.
 
 Beispielwerte und Defaults stehen in [`.env.example`](../../.env.example), die konkreten Werte
 für Leipzig in [Abschnitt 5.5](#55-konfiguration-ob-wahl-leipzig-2027).
@@ -291,8 +293,9 @@ Die vollständige Konfiguration zum Einfügen über **Developer view**. Grundlag
 Entwicklungsumgebung; abweichend sind nur Domain, SMTP und die Secrets.
 
 Bei der OB-Wahl gibt es keine Wahlkreise. Die App verwendet stattdessen die **10 Leipziger
-Stadtbezirke** (Nummern 1–10) und bezeichnet sie in der Oberfläche durchgängig als
-„Stadtbezirk“. Intern heißen Variablen und Datenbanktabellen weiterhin `WAHLKREIS…`.
+Stadtbezirke** und bezeichnet sie in der Oberfläche durchgängig als „Stadtbezirk“. Die
+Stadtbezirke tragen keine Nummern; mit `NEXT_PUBLIC_WAHLKREIS_NUMMERN=false` zeigt die App nur
+ihre Namen (die Nummern 1–10 legen intern nur die Reihenfolge fest). Intern heißen Variablen und Datenbanktabellen weiterhin `WAHLKREIS…`.
 
 ```env
 # ── Secrets: nur Runtime, "Available at Buildtime" abwählen ──
@@ -322,6 +325,7 @@ NEXT_PUBLIC_MAP_ZOOM=12
 NEXT_PUBLIC_WAHLKREIS_LABEL=Stadtbezirk
 NEXT_PUBLIC_WAHLKREIS_LABEL_PLURAL=Stadtbezirke
 NEXT_PUBLIC_WAHLKREIS_LABEL_SHORT=Stadtbezirk
+NEXT_PUBLIC_WAHLKREIS_NUMMERN=false
 NEXT_PUBLIC_THEME=emerald
 # ALLOWED_EMBED_DOMAIN=https://gruene-leipzig.de   (nur falls Formulare eingebettet werden)
 

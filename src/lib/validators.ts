@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { getWahlkreisCount } from "@/lib/district-config";
 import { KATEGORIE_VALUES, KATEGORIEN } from "@/lib/kategorien";
 import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
 
@@ -104,7 +103,8 @@ export const excelRowSchema = z.object({
   startzeit: z.string().regex(/^\d{2}:\d{2}$/, "Startzeit im Format HH:MM"),
   endzeit: z.string().regex(/^\d{2}:\d{2}$/, "Endzeit im Format HH:MM"),
   adresse: z.string().min(1, "Adresse fehlt"),
-  wahlkreis: z.number().int().min(1).max(getWahlkreisCount(), `${WAHLKREIS_LABEL} muss zwischen 1 und ${getWahlkreisCount()} liegen`),
+  // Die Upload-Route ordnet Name oder Nummer aus der Datei vorher einem vorhandenen Eintrag zu
+  wahlkreis: z.number({ error: `${WAHLKREIS_LABEL} fehlt oder ist unbekannt` }).int().positive(),
   kategorie: z.enum(KATEGORIE_VALUES, { error: `Kategorie fehlt oder ungültig (erlaubt: ${KATEGORIEN.map((k) => k.label).join(", ")})` }),
   ansprechpersonName: z.string().min(1, "Ansprechperson Name fehlt"),
   ansprechpersonEmail: emailSchema("Ungültige E-Mail der Ansprechperson"),

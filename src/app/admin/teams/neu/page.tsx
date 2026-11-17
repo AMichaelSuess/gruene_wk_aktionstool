@@ -6,7 +6,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
-import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
+import { WAHLKREIS_LABEL, formatWahlkreis } from "@/lib/wahlkreis-label";
 
 interface Wahlkreis {
   id: string;
@@ -71,7 +71,7 @@ export default function NewTeamPage() {
             onChange={(e) => setForm({ ...form, wahlkreisId: e.target.value })}
             options={wahlkreise.map((wk) => ({
               value: wk.id,
-              label: `${wk.nummer}: ${wk.name}`,
+              label: formatWahlkreis(wk),
             }))}
             placeholder="– Bezirksweit –"
           />

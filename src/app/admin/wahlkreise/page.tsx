@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { WAHLKREIS_LABEL, WAHLKREIS_LABEL_PLURAL } from "@/lib/wahlkreis-label";
+import { WAHLKREIS_LABEL, WAHLKREIS_LABEL_PLURAL, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
 
 interface Wahlkreis {
   id: string;
@@ -43,9 +43,9 @@ export default function WahlkreisePage() {
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="font-headline font-bold text-primary text-lg case-ui tracking-ui">
-                  {WAHLKREIS_LABEL} {wk.nummer}
+                  {WAHLKREIS_LABEL} {WAHLKREIS_NUMMERN_ANZEIGEN ? wk.nummer : wk.name}
                 </h3>
-                <p className="text-sm text-gray-700 mt-1">{wk.name}</p>
+                {WAHLKREIS_NUMMERN_ANZEIGEN && <p className="text-sm text-gray-700 mt-1">{wk.name}</p>}
               </div>
               <Link
                 href={`/admin/wahlkreise/${wk.id}`}

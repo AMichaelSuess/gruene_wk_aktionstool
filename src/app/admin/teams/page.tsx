@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
-import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
+import { WAHLKREIS_LABEL, formatWahlkreisMitLabel } from "@/lib/wahlkreis-label";
 
 interface Team {
   id: string;
@@ -60,7 +60,7 @@ export default function TeamsPage() {
                 <h3 className="font-headline font-bold text-primary text-lg case-ui tracking-ui">{team.name}</h3>
                 <p className="text-sm text-gray-600 mt-1">
                   {team.wahlkreis
-                    ? `${WAHLKREIS_LABEL} ${team.wahlkreis.nummer}: ${team.wahlkreis.name}`
+                    ? formatWahlkreisMitLabel(team.wahlkreis, WAHLKREIS_LABEL)
                     : "Bezirksweit"}
                 </p>
               </div>

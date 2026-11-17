@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
-import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
+import { WAHLKREIS_LABEL, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
 
 interface WahlkreisDetail {
   id: string;
@@ -85,7 +85,8 @@ export default function EditWahlkreisPage({ params }: { params: Promise<{ id: st
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Nummer"
+            // Ohne sichtbare Nummern bestimmt sie nur die Reihenfolge in Filter und Listen
+            label={WAHLKREIS_NUMMERN_ANZEIGEN ? "Nummer" : "Position in der Reihenfolge"}
             type="number"
             value={form.nummer}
             onChange={(e) => setForm({ ...form, nummer: e.target.value })}
