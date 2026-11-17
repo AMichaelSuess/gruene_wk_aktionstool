@@ -88,6 +88,8 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
 
     (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       active: true,
+      role: "EXPERT",
+      teams: [],
     });
 
     const token: Record<string, unknown> = {
@@ -99,7 +101,7 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
 
     expect(prisma.user.findUnique).toHaveBeenCalledWith({
       where: { id: "user-1" },
-      select: { active: true },
+      select: { active: true, role: true, teams: { select: { teamId: true } } },
     });
     expect(result).not.toBeNull();
     expect(typeof (result as Record<string, unknown>).lastChecked).toBe("number");
@@ -128,6 +130,8 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
 
     (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       active: true,
+      role: "EXPERT",
+      teams: [],
     });
 
     const oldTimestamp = Date.now() - 6 * 60 * 1000; // vor 6 Minuten
@@ -183,5 +187,28 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
 
     expect(prisma.user.findUnique).toHaveBeenCalled();
     expect(result).toBeNull();
+  });
+
+  it("Test 6: Beim Re-Check werden Rolle und Teams aus der DB übernommen", async () => {
+    const jwt = await getJwtCallback();
+    const { prisma } = await import("@/lib/db");
+
+    (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      active: true,
+      role: "EXPERT",
+      teams: [{ teamId: "a" }],
+    });
+
+    const token: Record<string, unknown> = {
+      sub: "user-1",
+      role: "ADMIN",
+      teamIds: ["a", "b"],
+      lastChecked: Date.now() - 6 * 60 * 1000,
+    };
+
+    const result = (await jwt({ token })) as Record<string, unknown>;
+
+    expect(result.role).toBe("EXPERT");
+    expect(result.teamIds).toEqual(["a"]);
   });
 });
