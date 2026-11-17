@@ -61,17 +61,24 @@ export function createRateLimiter(limit: number, windowMs: number, maxKeys = 10_
  * Counts failures (e.g. wrong passwords) per key within a fixed window.
  * Unlike createRateLimiter, checking does not count as a hit: callers ask
  * `isBlocked` first and call `recordFailure` only when the attempt failed.
- * Bounded the same way: expired entries are purged at `maxKeys`, and if the
- * map is still full every unknown key is treated as blocked.
+ *
+ * Bounded at `maxKeys`: expired entries are purged first, then the oldest
+ * entry is evicted. Unknown keys are never blocked just because the map is
+ * full. Otherwise anyone able to fill it (a few hundred source IPs for the
+ * login) could lock every account out, including the admins.
  */
 export function createFailureCounter(limit: number, windowMs: number, maxKeys = 10_000) {
   const map = new Map<string, { count: number; resetAt: number }>();
 
-  function purgeIfFull(now: number) {
+  function makeRoom(now: number) {
     if (map.size < maxKeys) return;
     for (const [k, v] of map) {
       if (now > v.resetAt) map.delete(k);
     }
+    if (map.size < maxKeys) return;
+    // Map keeps insertion order: the first key is the oldest entry
+    const oldest = map.keys().next().value;
+    if (oldest !== undefined) map.delete(oldest);
   }
 
   return {
@@ -80,8 +87,7 @@ export function createFailureCounter(limit: number, windowMs: number, maxKeys = 
       const entry = map.get(key);
       if (entry && now <= entry.resetAt) return entry.count >= limit;
       if (entry) map.delete(key);
-      purgeIfFull(now);
-      return map.size >= maxKeys; // fail closed under flood
+      return false;
     },
     recordFailure(key: string): void {
       const now = Date.now();
@@ -90,8 +96,8 @@ export function createFailureCounter(limit: number, windowMs: number, maxKeys = 
         entry.count++;
         return;
       }
-      purgeIfFull(now);
-      if (map.size >= maxKeys) return;
+      if (entry) map.delete(key);
+      makeRoom(now);
       map.set(key, { count: 1, resetAt: now + windowMs });
     },
     reset(key: string): void {

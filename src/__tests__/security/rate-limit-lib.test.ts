@@ -6,7 +6,7 @@
  * - Die Map wächst nicht unbegrenzt.
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { clientIp, createRateLimiter } from "@/lib/rate-limit";
+import { clientIp, createFailureCounter, createRateLimiter } from "@/lib/rate-limit";
 
 function req(headers: Record<string, string>) {
   return new Request("http://localhost:3000/", { headers });
@@ -67,5 +67,35 @@ describe("createRateLimiter", () => {
     let blocked = 0;
     for (let i = 0; i < 20_000; i++) if (isLimited(`ip-${i}`)) blocked++;
     expect(blocked).toBe(10_000);
+  });
+});
+
+describe("createFailureCounter", () => {
+  it("sperrt nach `limit` Fehlern bis zum Ablauf des Fensters", () => {
+    vi.useFakeTimers();
+    const counter = createFailureCounter(3, 1_000, 100);
+    for (let i = 0; i < 3; i++) {
+      expect(counter.isBlocked("a")).toBe(false);
+      counter.recordFailure("a");
+    }
+    expect(counter.isBlocked("a")).toBe(true);
+    vi.advanceTimersByTime(1_001);
+    expect(counter.isBlocked("a")).toBe(false);
+  });
+
+  it("volle Map sperrt keine unbeteiligten Schlüssel (kein globaler Login-Ausfall)", () => {
+    const counter = createFailureCounter(5, 60_000, 100);
+    // Flut: 1 000 verschiedene Schlüssel mit je einem Fehler
+    for (let i = 0; i < 1_000; i++) counter.recordFailure(`flut-${i}`);
+    expect(counter.isBlocked("admin@example.org")).toBe(false);
+  });
+
+  it("bleibt bei einer Flut auf maxKeys begrenzt und verdrängt die ältesten Einträge", () => {
+    const counter = createFailureCounter(1, 60_000, 100);
+    counter.recordFailure("alt");
+    for (let i = 0; i < 100; i++) counter.recordFailure(`flut-${i}`);
+    // "alt" wurde als ältester Eintrag verdrängt, der jüngste ist noch gesperrt
+    expect(counter.isBlocked("alt")).toBe(false);
+    expect(counter.isBlocked("flut-99")).toBe(true);
   });
 });
