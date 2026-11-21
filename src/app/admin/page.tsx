@@ -52,17 +52,19 @@ export default function AdminPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-3">
-          {isAdmin ? "Gesamtübersicht" : "Statistik deiner Teams"}
-        </h1>
-        {!isAdmin && (
-          <p className="text-sm text-gray-600">
-            Aktionen deiner Teams und Aktionen, die du selbst angelegt hast.
-          </p>
-        )}
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-headline text-2xl font-bold text-primary case-ui">
+            {isAdmin ? "Gesamtübersicht" : "Statistik deiner Teams"}
+          </h1>
+          {!isAdmin && (
+            <p className="text-sm text-gray-600 mt-1">
+              Aktionen deiner Teams und Aktionen, die du selbst angelegt hast.
+            </p>
+          )}
+        </div>
         {isAdmin && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Plain link: the export is a file download, not a page navigation */}
             <a
               href="/api/admin/export-stats"
