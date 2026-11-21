@@ -17,12 +17,17 @@ export async function GET() {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
   }
 
-  // Expert*innen sehen nur aktive Mitglieder ihrer eigenen Teams, und bei jeder
-  // Person nur die gemeinsamen Teams. Bearbeiten bleibt Admins vorbehalten.
+  // Expert*innen sehen aktive Mitglieder ihrer eigenen Teams (bei jeder Person nur
+  // die gemeinsamen Teams) und alle aktiven Admins als Ansprechpersonen.
+  // Bearbeiten bleibt Admins vorbehalten.
   if (session.user.role !== "ADMIN") {
     const teamIds = session.user.teamIds ?? [];
     const members = await prisma.user.findMany({
-      where: { active: true, teams: { some: { teamId: { in: teamIds } } } },
+      where: {
+        active: true,
+        NOT: { email: { endsWith: ANONYM_DOMAIN } },
+        OR: [{ role: "ADMIN" }, { teams: { some: { teamId: { in: teamIds } } } }],
+      },
       select: {
         id: true,
         name: true,
@@ -74,6 +79,8 @@ export async function POST(req: NextRequest) {
     }
 
     const hashedPassword = await bcrypt.hash(validated.password, 12);
+    // Admins haben ueber ihre Rolle Zugriff auf alle Teams, Mitgliedschaften waeren bedeutungslos
+    const teamIds = validated.role === "ADMIN" ? [] : (validated.teamIds ?? []);
 
     const user = await prisma.user.create({
       data: {
@@ -82,7 +89,7 @@ export async function POST(req: NextRequest) {
         password: hashedPassword,
         role: validated.role,
         teams: {
-          create: (validated.teamIds ?? []).map((teamId) => ({ teamId })),
+          create: teamIds.map((teamId) => ({ teamId })),
         },
       },
       include: { teams: { include: { team: true } } },
@@ -91,7 +98,7 @@ export async function POST(req: NextRequest) {
     audit("USER_ERSTELLT", session.user.id, {
       userId: user.id,
       role: user.role,
-      teamIds: validated.teamIds ?? [],
+      teamIds,
     });
 
     const { password: _, ...sanitized } = user;
@@ -126,11 +133,19 @@ export async function PUT(req: NextRequest) {
     if (validated.active !== undefined) updateData.active = validated.active;
     if (validated.password !== undefined) updateData.password = await bcrypt.hash(validated.password, 12);
 
-    // Update teams if provided
-    if (validated.teamIds !== undefined) {
+    // Admins haben keine Team-Mitgliedschaften: Wird jemand Admin, verschwinden sie;
+    // Team-Angaben fuer bestehende Admins werden ignoriert
+    let teamIds = validated.teamIds;
+    let wirdAdmin = validated.role === "ADMIN";
+    if (validated.role === undefined && teamIds !== undefined) {
+      const current = await prisma.user.findUnique({ where: { id: validated.id }, select: { role: true } });
+      wirdAdmin = current?.role === "ADMIN";
+    }
+    if (wirdAdmin) teamIds = [];
+    if (teamIds !== undefined) {
       updateData.teams = {
         deleteMany: {},
-        create: validated.teamIds.map((teamId: string) => ({ teamId })),
+        create: teamIds.map((teamId: string) => ({ teamId })),
       };
     }
 
@@ -146,7 +161,7 @@ export async function PUT(req: NextRequest) {
       fields: Object.keys(updateData),
       role: validated.role,
       active: validated.active,
-      teamIds: validated.teamIds,
+      teamIds,
     });
 
     const { password: _, ...sanitized } = user;

@@ -1,5 +1,6 @@
 /**
  * Sicherheitstests: Benutzer*innen loeschen (DELETE /api/admin/users)
+ * und Admins ohne Team-Mitgliedschaften (POST/PUT /api/admin/users)
  *
  * Ohne angelegte Aktionen wird das Konto geloescht, sonst anonymisiert und
  * deaktiviert (DSGVO: personenbezogene Daten weg, Aktionen bleiben). Admins
@@ -7,12 +8,12 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import bcrypt from "bcryptjs";
-import { mockAuth, createRequest, ADMIN_SESSION, EXPERT_TEAM_A } from "./helpers";
+import { mockAuth, createRequest, createJsonRequest, ADMIN_SESSION, EXPERT_TEAM_A } from "./helpers";
 
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 
 const mockPrisma = {
-  user: { findUnique: vi.fn(), findMany: vi.fn(), delete: vi.fn(), update: vi.fn() },
+  user: { findUnique: vi.fn(), findMany: vi.fn(), delete: vi.fn(), update: vi.fn(), create: vi.fn() },
 };
 vi.mock("@/lib/db", () => ({ prisma: mockPrisma }));
 
@@ -87,6 +88,56 @@ describe("Benutzer*in löschen", () => {
     await GET();
     expect(mockPrisma.user.findMany.mock.calls[0][0].where).toEqual({
       NOT: { email: { endsWith: "@geloescht.invalid" } },
+    });
+  });
+});
+
+describe("Admins haben keine Team-Mitgliedschaften", () => {
+  beforeEach(async () => {
+    await mockAuth(ADMIN_SESSION);
+    mockPrisma.user.update.mockResolvedValue({ id: "user-x", password: "h", teams: [] });
+    mockPrisma.user.create.mockResolvedValue({ id: "user-x", password: "h", role: "ADMIN", teams: [] });
+  });
+
+  it("neuer Admin wird ohne Teams angelegt, auch wenn Teams mitgeschickt werden", async () => {
+    mockPrisma.user.findUnique.mockResolvedValue(null);
+    const { POST } = await import("@/app/api/admin/users/route");
+    const res = await POST(
+      createJsonRequest("/api/admin/users", {
+        name: "Neue Admin",
+        email: "neu@test.de",
+        password: "langes-passwort-123",
+        role: "ADMIN",
+        teamIds: ["team-a"],
+      }) as any
+    );
+    expect(res.status).toBe(201);
+    expect(mockPrisma.user.create.mock.calls[0][0].data.teams).toEqual({ create: [] });
+  });
+
+  it("wer zum Admin wird, verliert alle Team-Mitgliedschaften", async () => {
+    const { PUT } = await import("@/app/api/admin/users/route");
+    const res = await PUT(
+      createJsonRequest("/api/admin/users", { id: "user-x", role: "ADMIN", teamIds: ["team-a"] }, "PUT") as any
+    );
+    expect(res.status).toBe(200);
+    expect(mockPrisma.user.update.mock.calls[0][0].data.teams).toEqual({ deleteMany: {}, create: [] });
+  });
+
+  it("Team-Angaben fuer bestehende Admins werden ignoriert", async () => {
+    mockPrisma.user.findUnique.mockResolvedValue({ role: "ADMIN" });
+    const { PUT } = await import("@/app/api/admin/users/route");
+    await PUT(createJsonRequest("/api/admin/users", { id: "user-x", teamIds: ["team-a"] }, "PUT") as any);
+    expect(mockPrisma.user.update.mock.calls[0][0].data.teams).toEqual({ deleteMany: {}, create: [] });
+  });
+
+  it("Expert*innen behalten ihre Teams", async () => {
+    mockPrisma.user.findUnique.mockResolvedValue({ role: "EXPERT" });
+    const { PUT } = await import("@/app/api/admin/users/route");
+    await PUT(createJsonRequest("/api/admin/users", { id: "user-x", teamIds: ["team-a"] }, "PUT") as any);
+    expect(mockPrisma.user.update.mock.calls[0][0].data.teams).toEqual({
+      deleteMany: {},
+      create: [{ teamId: "team-a" }],
     });
   });
 });

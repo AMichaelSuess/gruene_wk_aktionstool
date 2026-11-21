@@ -82,7 +82,7 @@ export default function UsersPage() {
             Benutzer*innen
           </h1>
           {!isAdmin && (
-            <p className="text-sm text-gray-600 mt-1">Die Mitglieder deiner Teams.</p>
+            <p className="text-sm text-gray-600 mt-1">Die Mitglieder deiner Teams und die Admins.</p>
           )}
         </div>
         {isAdmin && (
@@ -121,7 +121,12 @@ export default function UsersPage() {
                   </Badge>
                 </td>
                 <td className="px-4 py-3 text-gray-700 text-sm">
-                  {user.teams.length > 0 ? user.teams.map((t) => t.name).join(", ") : "–"}
+                  {/* Admins haben ueber ihre Rolle Zugriff auf alle Teams */}
+                  {user.role === "ADMIN"
+                    ? "Alle Teams"
+                    : user.teams.length > 0
+                      ? user.teams.map((t) => t.name).join(", ")
+                      : "–"}
                 </td>
                 {isAdmin && (
                   <>

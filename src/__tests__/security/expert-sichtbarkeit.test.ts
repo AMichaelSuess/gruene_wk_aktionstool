@@ -87,13 +87,17 @@ describe("Benutzerliste (GET /api/admin/users)", () => {
     expect((await GET()).status).toBe(401);
   });
 
-  it("EXPERT sieht nur aktive Mitglieder eigener Teams, ohne Passwort-Hash", async () => {
+  it("EXPERT sieht nur aktive Mitglieder eigener Teams und Admins, ohne Passwort-Hash", async () => {
     await mockAuth(EXPERT_TEAM_A);
     const { GET } = await import("@/app/api/admin/users/route");
     expect((await GET()).status).toBe(200);
 
     const args = mockPrisma.user.findMany.mock.calls[0][0];
-    expect(args.where).toEqual({ active: true, teams: { some: { teamId: { in: ["team-a"] } } } });
+    expect(args.where).toEqual({
+      active: true,
+      NOT: { email: { endsWith: "@geloescht.invalid" } },
+      OR: [{ role: "ADMIN" }, { teams: { some: { teamId: { in: ["team-a"] } } } }],
+    });
     expect(args.select.password).toBeUndefined();
     // Bei jeder Person nur die gemeinsamen Teams
     expect(args.select.teams.where).toEqual({ teamId: { in: ["team-a"] } });
