@@ -6,15 +6,18 @@
  * ohne die Argumente fehlgeschlagener Datenbankaufrufe.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { mockAuth, EXPERT_TEAM_B, createRequest } from "./helpers";
+import { mockAuth, EXPERT_TEAM_A, EXPERT_TEAM_B, createJsonRequest, createRequest } from "./helpers";
 
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 
 const mockPrisma = {
   user: { findUnique: vi.fn() },
-  aktion: { findUnique: vi.fn() },
+  aktion: { findUnique: vi.fn(), update: vi.fn() },
+  team: { count: vi.fn() },
 };
 vi.mock("@/lib/db", () => ({ prisma: mockPrisma }));
+vi.mock("@/lib/email", () => ({ sendEmail: vi.fn() }));
+vi.mock("@/lib/geocoding", () => ({ geocodeAddress: vi.fn(async () => null) }));
 
 const compare = vi.fn();
 vi.mock("bcryptjs", () => ({ default: { compare: (...a: unknown[]) => compare(...a) } }));
@@ -118,3 +121,65 @@ describe("Serverfehler", () => {
     expect(JSON.stringify(line)).not.toContain("geheim@example.org");
   });
 });
+
+describe("Adresse der Ansprechperson", () => {
+  const BESTEHEND = {
+    id: "aktion-1",
+    titel: "Infostand",
+    datum: new Date("2099-06-01"),
+    startzeit: "10:00",
+    endzeit: "12:00",
+    adresse: "Alexanderplatz 1",
+    wahlkreisId: "wk-1",
+    kategorie: "INFOSTAND",
+    ansprechpersonName: "Lara",
+    ansprechpersonEmail: "lara@example.org",
+    ansprechpersonTelefon: "030123456",
+    maxTeilnehmer: null,
+    status: "AKTIV",
+    createdById: EXPERT_TEAM_A.user.id,
+    teams: [{ teamId: "team-a" }],
+    anmeldungen: [],
+  };
+
+  function body(ansprechpersonEmail: string) {
+    return {
+      titel: BESTEHEND.titel,
+      datum: "2099-06-01",
+      startzeit: "10:00",
+      endzeit: "12:00",
+      adresse: BESTEHEND.adresse,
+      wahlkreisId: "wk-1",
+      kategorie: "INFOSTAND",
+      ansprechpersonName: "Lara",
+      ansprechpersonEmail,
+      ansprechpersonTelefon: "030123456",
+    };
+  }
+
+  async function put(ansprechpersonEmail: string) {
+    await mockAuth(EXPERT_TEAM_A);
+    mockPrisma.aktion.findUnique.mockResolvedValue(BESTEHEND);
+    mockPrisma.aktion.update.mockResolvedValue({ ...BESTEHEND, ansprechpersonEmail });
+    const { PUT } = await import("@/app/api/aktionen/[id]/route");
+    return PUT(createJsonRequest("/api/aktionen/aktion-1", body(ansprechpersonEmail), "PUT") as any, {
+      params: Promise.resolve({ id: "aktion-1" }),
+    });
+  }
+
+  it("Aenderung wird protokolliert, ohne die Adresse", async () => {
+    const res = await put("neu@example.org");
+    expect(res.status).toBe(200);
+    const zeilen = lines(infoSpy).filter((l) => l.event === "ANSPRECHPERSON_GEAENDERT");
+    expect(zeilen).toHaveLength(1);
+    expect(zeilen[0]).toMatchObject({ actorId: EXPERT_TEAM_A.user.id, aktionId: "aktion-1" });
+    expect(JSON.stringify(zeilen[0])).not.toContain("example.org");
+  });
+
+  it("gleiche Adresse → keine Protokollzeile", async () => {
+    const res = await put("lara@example.org");
+    expect(res.status).toBe(200);
+    expect(lines(infoSpy).filter((l) => l.event === "ANSPRECHPERSON_GEAENDERT")).toHaveLength(0);
+  });
+});
+

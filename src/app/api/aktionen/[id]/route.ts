@@ -182,6 +182,13 @@ export async function PUT(
       include: { wahlkreis: true },
     });
 
+    // Diese Adresse bekommt taeglich die Kontaktdaten aller Angemeldeten.
+    // Eine Aenderung ist damit ein Weg, auf dem Daten die App verlassen:
+    // protokollieren (nur die Aktion, nie die Adresse).
+    if (validated.ansprechpersonEmail !== existing.ansprechpersonEmail) {
+      audit("ANSPRECHPERSON_GEAENDERT", session.user.id, { aktionId: id });
+    }
+
     // Send change notification to all registrants
     if (changes.length > 0 && existing.anmeldungen.length > 0) {
       for (const anmeldung of existing.anmeldungen) {

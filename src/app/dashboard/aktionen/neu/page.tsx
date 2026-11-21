@@ -233,6 +233,10 @@ export default function NewAktionPage() {
                     required
                   />
                 </div>
+                <p className="text-sm text-gray-600">
+                  An diese E-Mail-Adresse schicken wir jeden Tag eine Übersicht mit Namen und Kontaktdaten
+                  aller Angemeldeten. Bitte prüfe sie genau.
+                </p>
               </div>
             </div>
 
