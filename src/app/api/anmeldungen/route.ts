@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { hatBegonnen } from "@/lib/aktion-zeit";
@@ -150,12 +150,18 @@ export async function POST(req: NextRequest) {
         confirmed.map((s) => s.cancelToken)
       );
 
-      await sendEmail({
-        to: validated.email,
-        subject: emailData.subject,
-        html: emailData.html,
-        typ: "BESTAETIGUNG",
-      });
+      // Erst nach der Antwort senden: sonst waere eine Anmeldung, die nur schon
+      // bestehende Anmeldungen trifft (keine Mail), messbar schneller und die
+      // Antwortzeit verriete, wer schon angemeldet ist. sendEmail faengt alle
+      // Fehler selbst ab.
+      after(() =>
+        sendEmail({
+          to: validated.email,
+          subject: emailData.subject,
+          html: emailData.html,
+          typ: "BESTAETIGUNG",
+        })
+      );
     }
 
     return NextResponse.json({

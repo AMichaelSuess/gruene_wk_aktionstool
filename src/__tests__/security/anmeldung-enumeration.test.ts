@@ -105,4 +105,28 @@ describe("Öffentliche Anmeldung: keine Auskunft über bestehende Anmeldungen", 
     expect(aktionen).toHaveLength(2);
     expect(tokens[1]).toBe("alt");
   });
+
+  it("Antwort wartet nicht auf den Mailversand (Antwortzeit verraet nichts)", async () => {
+    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { sendEmail } = await import("@/lib/email");
+    const { after } = await import("next/server");
+
+    // Ein Mailserver, der nie antwortet: die Antwort muss trotzdem kommen
+    (sendEmail as ReturnType<typeof vi.fn>).mockReturnValueOnce(new Promise(() => {}));
+    mockPrisma.anmeldung.create.mockResolvedValueOnce({});
+
+    const res = await POST(signup(["aktion-1"], "10.0.0.5") as any);
+
+    expect(res.status).toBe(200);
+    expect(after).toHaveBeenCalledTimes(1);
+    expect(sendEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it("Versand laeuft ueber after(), nicht direkt im Handler", async () => {
+    const { readFileSync } = await import("fs");
+    const source = readFileSync("src/app/api/anmeldungen/route.ts", "utf8");
+    expect(source).not.toMatch(/await sendEmail\(/);
+    expect(source).toMatch(/after\(\s*\(\)\s*=>\s*\n?\s*sendEmail\(/);
+  });
 });
+
