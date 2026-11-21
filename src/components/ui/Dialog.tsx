@@ -26,7 +26,9 @@ export default function Dialog({ open, onClose, title, children }: DialogProps) 
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      className="backdrop:bg-ink/60 bg-white rounded-card border-ui border-line shadow-ui-xl p-0 max-w-lg w-full mx-4"
+      // m-auto zentriert den Dialog (Tailwinds Reset nimmt dem <dialog> sein margin: auto);
+      // die Breite laesst auf dem Handy 1rem Rand je Seite
+      className="backdrop:bg-ink/60 bg-white rounded-card border-ui border-line shadow-ui-xl p-0 m-auto w-[calc(100%-2rem)] max-w-lg"
     >
       <div className="p-6">
         <div className="flex items-center justify-between mb-4 border-b-ui border-line pb-4">
