@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { wordmarkClass } from "@/components/BrandLogo";
 import { districtConfig } from "@/lib/district-config";
 import type { HeroConfig } from "@/lib/theme";
@@ -24,8 +24,14 @@ export default function CampaignHero({ hero, nav }: { hero: HeroConfig; nav: Rea
     (_, i) => arrowTipX + arrowPeriod * (i - arrowsLeftOfPhoto),
   );
 
+  // Breite des Fotos am rechten Rand: Kopfhoehe (h-64 = 16rem) im Seitenverhaeltnis des Fotos
+  const photoWidth = photo ? `${((16 * width) / height).toFixed(3)}rem` : "0rem";
+
   return (
-    <header className="relative overflow-hidden bg-primary text-white">
+    <header
+      className="relative overflow-hidden bg-primary text-white"
+      style={{ "--hero-photo-w": photoWidth } as CSSProperties}
+    >
       {/* Die Höhe des Kopfbereichs bestimmt den Maßstab; das Foto sitzt am rechten Rand */}
       <svg
         aria-hidden="true"
@@ -58,7 +64,10 @@ export default function CampaignHero({ hero, nav }: { hero: HeroConfig; nav: Rea
       </svg>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:h-64 flex flex-col">
-        <div className="py-3 flex items-center justify-between lg:justify-start lg:gap-8">
+        {/* Auf grossen Bildschirmen endet die Zeile 2rem vor dem Foto, das Menue steht also am
+            rechten Rand der gruenen Flaeche. Das Foto haengt am Fensterrand, der Container ist
+            zentriert: abgezogen wird nur der Teil des Fotos, der in den Container hineinragt. */}
+        <div className="py-3 flex items-center justify-between gap-8 lg:mr-[max(0px,calc(var(--hero-photo-w)_+_1rem_-_max(0px,(100vw_-_80rem)_/_2)))]">
           <Link href="/">
             <span className={`font-headline font-bold text-lg ${wordmarkClass}`}>{orgShortName}</span>
             <span className="hidden sm:inline text-sm text-white/70 ml-2">Wahlkampfaktionen</span>
