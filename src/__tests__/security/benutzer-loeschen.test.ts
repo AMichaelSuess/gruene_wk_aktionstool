@@ -141,3 +141,19 @@ describe("Admins haben keine Team-Mitgliedschaften", () => {
     });
   });
 });
+
+async function put(body: unknown) {
+  const { PUT } = await import("@/app/api/admin/users/route");
+  return PUT(createJsonRequest("/api/admin/users", body, "PUT") as any);
+}
+
+describe("Passwort-Reset durch Admin", () => {
+  it("beendet alle Sitzungen der Person", async () => {
+    await mockAuth(ADMIN_SESSION);
+    mockPrisma.user.update.mockResolvedValueOnce({ id: "user-x", password: "x", teams: [] });
+    const res = await put({ id: "user-x", password: "ganz-neues-passwort" });
+    expect(res.status).toBe(200);
+    expect(mockPrisma.user.update.mock.calls[0][0].data.sessionVersion).toEqual({ increment: 1 });
+  });
+});
+

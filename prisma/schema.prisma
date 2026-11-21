@@ -42,6 +42,8 @@ model User {
   name      String
   role      Role       @default(EXPERT)
   active    Boolean    @default(true)
+  // Wird bei jedem Passwortwechsel erhoeht; Sitzungen mit aelterer Version enden
+  sessionVersion Int   @default(0)
   teams     UserTeam[]
   aktionen  Aktion[]
   createdAt DateTime   @default(now()) @db.Timestamptz(3)

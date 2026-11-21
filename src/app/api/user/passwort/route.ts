@@ -53,7 +53,12 @@ export async function POST(req: NextRequest) {
 
     failures.reset(userId);
     const hash = await bcrypt.hash(parsed.data.neuesPasswort, 12);
-    await prisma.user.update({ where: { id: userId }, data: { password: hash } });
+    // Neue Sitzungsversion: alle bestehenden Sitzungen enden, auch die aktuelle
+    // (die Konto-Seite meldet danach ab und schickt zum Login)
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hash, sessionVersion: { increment: 1 } },
+    });
     audit("PASSWORT_GEAENDERT", userId, {});
 
     return NextResponse.json({ message: "Passwort geändert" });

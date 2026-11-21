@@ -56,6 +56,13 @@ describe("Passwort ändern", () => {
     expect(await bcrypt.compare(NEU, args.data.password)).toBe(true);
   });
 
+  it("beendet mit dem Passwortwechsel alle bestehenden Sitzungen (neue sessionVersion)", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+    const res = await post({ aktuellesPasswort: AKTUELL, neuesPasswort: NEU });
+    expect(res.status).toBe(200);
+    expect(mockPrisma.user.update.mock.calls[0][0].data.sessionVersion).toEqual({ increment: 1 });
+  });
+
   it("lehnt ein falsches aktuelles Passwort ab", async () => {
     await mockAuth(EXPERT_TEAM_A);
     const res = await post({ aktuellesPasswort: "falsch-falsch-falsch", neuesPasswort: NEU });

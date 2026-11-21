@@ -19,6 +19,7 @@ export interface AuthorizedUser {
   name: string;
   role: string;
   teamIds: string[];
+  sessionVersion: number;
 }
 
 /**
@@ -75,5 +76,6 @@ export async function authorizeCredentials(
     name: user.name,
     role: user.role,
     teamIds: user.teams.map((t) => t.teamId),
+    sessionVersion: user.sessionVersion,
   };
 }

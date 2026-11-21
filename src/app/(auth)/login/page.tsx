@@ -1,12 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import BrandLogo from "@/components/BrandLogo";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+
+// Nach einem Passwortwechsel kommt man abgemeldet hierher (alle Sitzungen enden)
+function PasswortGeaendertHinweis() {
+  const searchParams = useSearchParams();
+  if (!searchParams.has("passwortGeaendert")) return null;
+  return (
+    <p className="mb-4 text-sm font-bold text-success">
+      Dein Passwort wurde geändert. Bitte melde dich mit dem neuen Passwort an.
+    </p>
+  );
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -55,6 +66,10 @@ export default function LoginPage() {
           <h2 className="font-headline text-xl font-bold text-primary case-ui mb-6">
             Anmelden
           </h2>
+
+          <Suspense fallback={null}>
+            <PasswortGeaendertHinweis />
+          </Suspense>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input

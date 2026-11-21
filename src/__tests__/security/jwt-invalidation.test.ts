@@ -89,11 +89,14 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
     (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       active: true,
       role: "EXPERT",
+      sessionVersion: 0,
       teams: [],
     });
 
     const token: Record<string, unknown> = {
       sub: "user-1",
+      loginAt: Date.now(),
+      sessionVersion: 0,
       // lastChecked absichtlich nicht gesetzt (Legacy-Token)
     };
 
@@ -101,7 +104,13 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
 
     expect(prisma.user.findUnique).toHaveBeenCalledWith({
       where: { id: "user-1" },
-      select: { active: true, role: true, name: true, teams: { select: { teamId: true } } },
+      select: {
+        active: true,
+        role: true,
+        name: true,
+        sessionVersion: true,
+        teams: { select: { teamId: true } },
+      },
     });
     expect(result).not.toBeNull();
     expect(typeof (result as Record<string, unknown>).lastChecked).toBe("number");
@@ -114,6 +123,8 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
     const recentTimestamp = Date.now() - 2 * 60 * 1000; // vor 2 Minuten
     const token: Record<string, unknown> = {
       sub: "user-1",
+      loginAt: Date.now(),
+      sessionVersion: 0,
       lastChecked: recentTimestamp,
     };
 
@@ -131,12 +142,15 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
     (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       active: true,
       role: "EXPERT",
+      sessionVersion: 0,
       teams: [],
     });
 
     const oldTimestamp = Date.now() - 6 * 60 * 1000; // vor 6 Minuten
     const token: Record<string, unknown> = {
       sub: "user-1",
+      loginAt: Date.now(),
+      sessionVersion: 0,
       lastChecked: oldTimestamp,
     };
 
@@ -162,6 +176,8 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
     const oldTimestamp = Date.now() - 6 * 60 * 1000;
     const token: Record<string, unknown> = {
       sub: "user-1",
+      loginAt: Date.now(),
+      sessionVersion: 0,
       lastChecked: oldTimestamp,
     };
 
@@ -180,6 +196,8 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
     const oldTimestamp = Date.now() - 6 * 60 * 1000;
     const token: Record<string, unknown> = {
       sub: "user-1",
+      loginAt: Date.now(),
+      sessionVersion: 0,
       lastChecked: oldTimestamp,
     };
 
@@ -196,11 +214,14 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
     (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       active: true,
       role: "EXPERT",
+      sessionVersion: 0,
       teams: [{ teamId: "a" }],
     });
 
     const token: Record<string, unknown> = {
       sub: "user-1",
+      loginAt: Date.now(),
+      sessionVersion: 0,
       role: "ADMIN",
       teamIds: ["a", "b"],
       lastChecked: Date.now() - 6 * 60 * 1000,
@@ -210,5 +231,75 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
 
     expect(result.role).toBe("EXPERT");
     expect(result.teamIds).toEqual(["a"]);
+  });
+});
+
+describe("JWT-Callback: Passwortwechsel und Hoechstdauer (F-3)", () => {
+  const OLD = Date.now() - 6 * 60 * 1000;
+
+  it("Login setzt sessionVersion und loginAt im Token", async () => {
+    const jwt = await getJwtCallback();
+    const result = (await jwt({
+      token: { sub: "user-1" },
+      user: { id: "user-1", role: "EXPERT", teamIds: [], sessionVersion: 3 },
+    })) as Record<string, unknown>;
+
+    expect(result.sessionVersion).toBe(3);
+    expect(typeof result.loginAt).toBe("number");
+  });
+
+  it("Passwort seit dem Login geaendert (andere sessionVersion) → Session endet", async () => {
+    const jwt = await getJwtCallback();
+    const { prisma } = await import("@/lib/db");
+    (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      active: true,
+      role: "EXPERT",
+      sessionVersion: 1,
+      teams: [],
+    });
+
+    const result = await jwt({
+      token: { sub: "user-1", loginAt: Date.now(), sessionVersion: 0, lastChecked: OLD },
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("Token aus der Zeit vor sessionVersion → Session endet", async () => {
+    const jwt = await getJwtCallback();
+    const { prisma } = await import("@/lib/db");
+    (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      active: true,
+      role: "EXPERT",
+      sessionVersion: 0,
+      teams: [],
+    });
+
+    const result = await jwt({ token: { sub: "user-1", loginAt: Date.now(), lastChecked: OLD } });
+
+    expect(result).toBeNull();
+  });
+
+  it("Login vor mehr als 7 Tagen → Session endet, auch ohne DB-Check", async () => {
+    const jwt = await getJwtCallback();
+    const { prisma } = await import("@/lib/db");
+
+    const result = await jwt({
+      token: {
+        sub: "user-1",
+        sessionVersion: 0,
+        loginAt: Date.now() - 8 * 24 * 60 * 60 * 1000,
+        lastChecked: Date.now(),
+      },
+    });
+
+    expect(result).toBeNull();
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+  });
+
+  it("Token ohne loginAt (vor der Hoechstdauer ausgestellt) → Session endet", async () => {
+    const jwt = await getJwtCallback();
+    const result = await jwt({ token: { sub: "user-1", sessionVersion: 0, lastChecked: Date.now() } });
+    expect(result).toBeNull();
   });
 });

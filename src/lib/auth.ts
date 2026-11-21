@@ -3,6 +3,10 @@ import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./db";
 import { authorizeCredentials } from "./credentials";
 
+// Hoechstdauer einer Sitzung ab dem Login. Auth.js verlaengert das Cookie bei
+// jeder Nutzung, ohne diese Grenze liefe eine Sitzung unbegrenzt.
+export const MAX_SESSION_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
@@ -26,20 +30,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.role = user.role;
         token.teamIds = user.teamIds;
+        token.sessionVersion = user.sessionVersion;
+        token.loginAt = Date.now();
         token.lastChecked = Date.now();
       }
 
+      // Feste Obergrenze, unabhaengig davon, wie oft die Sitzung genutzt wird
+      if (Date.now() - ((token.loginAt as number | undefined) ?? 0) > MAX_SESSION_AGE_MS) {
+        return null;
+      }
+
       // Alle 5 Minuten User-Status, Rolle und Teams aus DB prüfen (SEC-04),
-      // damit Herabstufungen und Team-Entzug auch laufende Sessions erreichen
+      // damit Herabstufungen, Team-Entzug und Passwortwechsel auch laufende
+      // Sessions erreichen
       // trigger "update": die Person hat ihr Konto geaendert (z. B. den Namen), sofort neu laden
       const CHECK_INTERVAL = 5 * 60 * 1000; // 5 Minuten
-      if (trigger === "update" || Date.now() - ((token.lastChecked as number) ?? 0) > CHECK_INTERVAL) {
+      if (trigger === "update" || Date.now() - ((token.lastChecked as number | undefined) ?? 0) > CHECK_INTERVAL) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.sub! },
-          select: { active: true, role: true, name: true, teams: { select: { teamId: true } } },
+          select: {
+            active: true,
+            role: true,
+            name: true,
+            sessionVersion: true,
+            teams: { select: { teamId: true } },
+          },
         });
-        if (!dbUser || !dbUser.active) {
-          return null; // Session invalidiert — deaktivierter oder gelöschter Nutzer
+        // Session invalidiert: deaktivierter oder geloeschter Nutzer, oder das
+        // Passwort wurde seit dem Login geaendert
+        if (!dbUser || !dbUser.active || dbUser.sessionVersion !== token.sessionVersion) {
+          return null;
         }
         token.role = dbUser.role;
         token.name = dbUser.name;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
@@ -93,8 +93,10 @@ export default function KontoPage() {
       return;
     }
 
+    // Der Passwortwechsel beendet alle Sitzungen, auch diese: neu anmelden
     setForm(leeresPasswortFormular);
     setSuccess(true);
+    await signOut({ callbackUrl: "/login?passwortGeaendert=1" });
   }
 
   if (loading) {
@@ -171,7 +173,7 @@ export default function KontoPage() {
           {error && <p className="text-sm font-bold text-danger">{error}</p>}
           {success && (
             <p className="text-sm font-bold text-success">
-              Dein Passwort wurde geändert. Beim nächsten Login gilt das neue Passwort.
+              Dein Passwort wurde geändert. Du wirst jetzt abgemeldet und kannst dich mit dem neuen Passwort wieder anmelden.
             </p>
           )}
 

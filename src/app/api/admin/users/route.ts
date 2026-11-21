@@ -131,7 +131,11 @@ export async function PUT(req: NextRequest) {
     if (validated.email !== undefined) updateData.email = validated.email;
     if (validated.role !== undefined) updateData.role = validated.role;
     if (validated.active !== undefined) updateData.active = validated.active;
-    if (validated.password !== undefined) updateData.password = await bcrypt.hash(validated.password, 12);
+    if (validated.password !== undefined) {
+      updateData.password = await bcrypt.hash(validated.password, 12);
+      // Neues Passwort beendet alle Sitzungen der Person (z. B. nach einem Verdacht)
+      updateData.sessionVersion = { increment: 1 };
+    }
 
     // Admins haben keine Team-Mitgliedschaften: Wird jemand Admin, verschwinden sie;
     // Team-Angaben fuer bestehende Admins werden ignoriert
@@ -223,6 +227,7 @@ export async function DELETE(req: NextRequest) {
         password,
         role: "EXPERT",
         active: false,
+        sessionVersion: { increment: 1 },
         teams: { deleteMany: {} },
       },
     });
