@@ -114,19 +114,7 @@ export default function AdminPage() {
                   </span>
                 )}
                 <span className="text-sm text-gray-600 w-40">{item.wahlkreis}</span>
-                <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
-                  <div
-                    className="bg-success h-full rounded-full flex items-center justify-end px-2"
-                    style={{
-                      width: `${Math.max(
-                        (item.count / maxAnmeldungenWK) * 100,
-                        item.count > 0 ? 10 : 0
-                      )}%`,
-                    }}
-                  >
-                    <span className="text-xs text-white font-bold">{item.count}</span>
-                  </div>
-                </div>
+                <StatBar count={item.count} max={maxAnmeldungenWK} fillClass="bg-success" inkClass="text-white" />
               </div>
             ))}
           </div>
@@ -142,19 +130,7 @@ export default function AdminPage() {
                 <span className="text-sm text-gray-600 w-40 shrink-0 truncate">
                   {item.team}
                 </span>
-                <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
-                  <div
-                    className="bg-highlight h-full rounded-full flex items-center justify-end px-2"
-                    style={{
-                      width: `${Math.max(
-                        (item.count / maxStaendeTeam) * 100,
-                        item.count > 0 ? 10 : 0
-                      )}%`,
-                    }}
-                  >
-                    <span className="text-xs text-highlight-ink font-bold">{item.count}</span>
-                  </div>
-                </div>
+                <StatBar count={item.count} max={maxStaendeTeam} fillClass="bg-highlight" inkClass="text-highlight-ink" />
               </div>
             ))}
           </div>
@@ -170,19 +146,7 @@ export default function AdminPage() {
                 <span className="text-sm text-gray-600 w-40 shrink-0 truncate">
                   {item.team}
                 </span>
-                <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
-                  <div
-                    className="bg-info h-full rounded-full flex items-center justify-end px-2"
-                    style={{
-                      width: `${Math.max(
-                        (item.count / maxAnmeldungenTeam) * 100,
-                        item.count > 0 ? 10 : 0
-                      )}%`,
-                    }}
-                  >
-                    <span className="text-xs text-white font-bold">{item.count}</span>
-                  </div>
-                </div>
+                <StatBar count={item.count} max={maxAnmeldungenTeam} fillClass="bg-info" inkClass="text-white" />
               </div>
             ))}
           </div>
@@ -204,21 +168,7 @@ export default function AdminPage() {
                   <span className="text-sm font-bold text-primary w-16 shrink-0">
                     KW {String(item.kw).padStart(2, "0")}
                   </span>
-                  <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
-                    <div
-                      className="bg-primary h-full rounded-full flex items-center justify-end px-2"
-                      style={{
-                        width: `${Math.max(
-                          (item.staende / maxStaendeKW) * 100,
-                          item.staende > 0 ? 10 : 0
-                        )}%`,
-                      }}
-                    >
-                      <span className="text-xs text-white font-bold">
-                        {item.staende}
-                      </span>
-                    </div>
-                  </div>
+                  <StatBar count={item.staende} max={maxStaendeKW} fillClass="bg-primary" inkClass="text-white" />
                 </div>
               ))
             )}
@@ -241,27 +191,42 @@ export default function AdminPage() {
                   <span className="text-sm font-bold text-primary w-16 shrink-0">
                     KW {String(item.kw).padStart(2, "0")}
                   </span>
-                  <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
-                    <div
-                      className="bg-success h-full rounded-full flex items-center justify-end px-2"
-                      style={{
-                        width: `${Math.max(
-                          (item.anmeldungen / maxAnmeldungenKW) * 100,
-                          item.anmeldungen > 0 ? 10 : 0
-                        )}%`,
-                      }}
-                    >
-                      <span className="text-xs text-white font-bold">
-                        {item.anmeldungen}
-                      </span>
-                    </div>
-                  </div>
+                  <StatBar count={item.anmeldungen} max={maxAnmeldungenKW} fillClass="bg-success" inkClass="text-white" />
                 </div>
               ))
             )}
           </div>
         </Card>
       </div>
+    </div>
+  );
+}
+
+function StatBar({
+  count,
+  max,
+  fillClass,
+  inkClass,
+}: {
+  count: number;
+  max: number;
+  fillClass: string;
+  inkClass: string;
+}) {
+  return (
+    <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+      {count > 0 ? (
+        <div
+          className={`${fillClass} h-full rounded-full flex items-center justify-end px-2`}
+          style={{ width: `${Math.max((count / max) * 100, 10)}%` }}
+        >
+          <span className={`text-xs ${inkClass} font-bold`}>{count}</span>
+        </div>
+      ) : (
+        <div className="h-full flex items-center px-2">
+          <span className="text-xs text-gray-500 font-bold">0</span>
+        </div>
+      )}
     </div>
   );
 }
