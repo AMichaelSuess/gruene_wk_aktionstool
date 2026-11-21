@@ -68,17 +68,17 @@ describe("Login-Protokoll", () => {
     expect(emailPseudonym("a@example.org")).not.toBe(emailPseudonym("b@example.org"));
   });
 
-  it("der 5. Fehlversuch für eine Adresse meldet die Sperre genau einmal", async () => {
+  it("der 5. Fehlversuch für eine Adresse von einer IP meldet die Sperre genau einmal", async () => {
     const { authorizeCredentials } = await import("@/lib/credentials");
     for (let i = 0; i < 7; i++) {
-      await authorizeCredentials({ email: "opfer@example.org", password: "falsch" }, loginRequest(`10.2.0.${i}`));
+      await authorizeCredentials({ email: "opfer@example.org", password: "falsch" }, loginRequest("10.2.0.1"));
     }
 
     const all = lines(infoSpy);
     expect(all.filter((l) => l.event === "LOGIN_FEHLGESCHLAGEN")).toHaveLength(5);
     const sperren = all.filter((l) => l.event === "LOGIN_GESPERRT");
     expect(sperren).toHaveLength(1);
-    expect(sperren[0].gesperrt).toEqual(["email"]);
+    expect(sperren[0].gesperrt).toEqual(["email+ip"]);
   });
 });
 

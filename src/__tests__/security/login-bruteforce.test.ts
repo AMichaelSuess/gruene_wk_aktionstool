@@ -49,17 +49,34 @@ describe("Login: Begrenzung von Fehlversuchen", () => {
     expect(user).toEqual({ id: "u1", email: USER.email, name: "Expert", role: "EXPERT", teamIds: ["t1"] });
   });
 
-  it("nach 5 Fehlversuchen für eine E-Mail wird nicht mehr geprüft, auch nicht das richtige Passwort", async () => {
+  it("nach 5 Fehlversuchen für eine E-Mail von einer IP wird von dort nicht mehr geprüft, auch nicht das richtige Passwort", async () => {
     const { authorizeCredentials } = await import("@/lib/credentials");
 
     for (let i = 0; i < 5; i++) {
-      // wechselnde IPs: die Sperre hängt an der E-Mail
-      expect(await authorizeCredentials({ email: USER.email, password: "falsch" }, req(`10.0.1.${i}`))).toBeNull();
+      expect(await authorizeCredentials({ email: USER.email, password: "falsch" }, req("10.0.1.1"))).toBeNull();
     }
     compare.mockClear();
 
-    const result = await authorizeCredentials({ email: "Expert@Example.org ", password: "richtig" }, req("10.0.2.1"));
+    const result = await authorizeCredentials({ email: "Expert@Example.org ", password: "richtig" }, req("10.0.1.1"));
     expect(result).toBeNull();
+    expect(compare).not.toHaveBeenCalled();
+  });
+
+  it("Fehlversuche von fremder IP sperren die Person nicht aus (Login von eigener IP geht)", async () => {
+    const { authorizeCredentials } = await import("@/lib/credentials");
+    for (let i = 0; i < 5; i++) {
+      await authorizeCredentials({ email: USER.email, password: "falsch" }, req("10.0.2.66"));
+    }
+    expect(await authorizeCredentials({ email: USER.email, password: "richtig" }, req("10.0.2.1"))).not.toBeNull();
+  });
+
+  it("nach 50 Fehlversuchen für eine E-Mail von vielen IPs wird das Konto überall gesperrt", async () => {
+    const { authorizeCredentials } = await import("@/lib/credentials");
+    for (let i = 0; i < 50; i++) {
+      await authorizeCredentials({ email: USER.email, password: "falsch" }, req(`10.1.${Math.floor(i / 4)}.${i % 4}`));
+    }
+    compare.mockClear();
+    expect(await authorizeCredentials({ email: USER.email, password: "richtig" }, req("10.2.0.1"))).toBeNull();
     expect(compare).not.toHaveBeenCalled();
   });
 

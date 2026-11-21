@@ -5,7 +5,11 @@ import { audit, emailPseudonym } from "./audit";
 
 // Online guessing limits (in memory, reset on deploy/restart)
 const FAILURE_WINDOW = 15 * 60 * 1000; // 15 minutes
-const emailFailures = createFailureCounter(5, FAILURE_WINDOW);
+// Per account and source: someone guessing from one place is stopped after 5
+// tries, but cannot lock the owner out, who logs in from another address.
+const pairFailures = createFailureCounter(5, FAILURE_WINDOW);
+// Per account from anywhere: backstop against guessing spread over many IPs
+const emailFailures = createFailureCounter(50, FAILURE_WINDOW);
 const ipFailures = createFailureCounter(20, FAILURE_WINDOW);
 
 // bcrypt hash (cost 12) of a random throwaway string. Compared against when
@@ -38,8 +42,9 @@ export async function authorizeCredentials(
 
   const emailKey = email.trim().toLowerCase();
   const ipKey = request ? clientIp(request) : "unknown";
+  const pairKey = `${emailKey}|${ipKey}`;
 
-  if (emailFailures.isBlocked(emailKey) || ipFailures.isBlocked(ipKey)) {
+  if (pairFailures.isBlocked(pairKey) || emailFailures.isBlocked(emailKey) || ipFailures.isBlocked(ipKey)) {
     return null;
   }
 
@@ -53,12 +58,14 @@ export async function authorizeCredentials(
   const passwordMatch = await bcrypt.compare(password, usable ? user.password : DUMMY_HASH);
 
   if (!usable || !passwordMatch) {
+    pairFailures.recordFailure(pairKey);
     emailFailures.recordFailure(emailKey);
     ipFailures.recordFailure(ipKey);
     const emailHash = emailPseudonym(emailKey);
     audit("LOGIN_FEHLGESCHLAGEN", null, { ip: ipKey, emailHash });
     // Attempts are not counted while blocked, so this fires once per window
     const gesperrt = [
+      ...(pairFailures.isBlocked(pairKey) ? ["email+ip"] : []),
       ...(emailFailures.isBlocked(emailKey) ? ["email"] : []),
       ...(ipFailures.isBlocked(ipKey) ? ["ip"] : []),
     ];
@@ -68,6 +75,7 @@ export async function authorizeCredentials(
     return null;
   }
 
+  pairFailures.reset(pairKey);
   emailFailures.reset(emailKey);
 
   return {
