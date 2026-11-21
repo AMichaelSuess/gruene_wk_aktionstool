@@ -3,6 +3,7 @@
  *
  * Prüft, dass EXPERT-Benutzer keinen Zugriff auf Admin-Endpunkte haben.
  * Nur ADMIN-Benutzer dürfen Benutzer, Teams und Statistiken verwalten.
+ * Lesend (auf eigene Teams beschraenkt) siehe expert-sichtbarkeit.test.ts.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mockAuth, createRequest, createJsonRequest, EXPERT_TEAM_A } from "./helpers";
@@ -34,13 +35,9 @@ beforeEach(async () => {
   await mockAuth(EXPERT_TEAM_A); // Angemeldet als EXPERT
 });
 
+// GET /api/admin/users und GET /api/admin/stats sind fuer EXPERT erlaubt, aber auf
+// die eigenen Teams eingeschraenkt: siehe expert-sichtbarkeit.test.ts
 describe("EXPERT darf nicht auf Admin-Benutzerverwaltung zugreifen", () => {
-  it("GET /api/admin/users → 401 für EXPERT", async () => {
-    const { GET } = await import("@/app/api/admin/users/route");
-    const res = await GET();
-    expect(res.status).toBe(401);
-  });
-
   it("POST /api/admin/users → 401 für EXPERT", async () => {
     const { POST } = await import("@/app/api/admin/users/route");
     const req = createJsonRequest("/api/admin/users", {
@@ -86,14 +83,6 @@ describe("EXPERT darf nicht auf Admin-Teamverwaltung zugreifen", () => {
     const { DELETE } = await import("@/app/api/admin/teams/route");
     const req = createRequest("/api/admin/teams?id=team-1", { method: "DELETE" });
     const res = await DELETE(req as any);
-    expect(res.status).toBe(401);
-  });
-});
-
-describe("EXPERT darf nicht auf Admin-Statistiken zugreifen", () => {
-  it("GET /api/admin/stats → 401 für EXPERT", async () => {
-    const { GET } = await import("@/app/api/admin/stats/route");
-    const res = await GET();
     expect(res.status).toBe(401);
   });
 });

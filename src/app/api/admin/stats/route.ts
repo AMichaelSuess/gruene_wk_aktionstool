@@ -2,12 +2,24 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getISOWeek, getISOWeekYear } from "date-fns";
+import type { Prisma } from "@prisma/client";
+import { expertAktionWhere } from "@/lib/aktion-teams";
 
+// Admins sehen alles; Expert*innen nur ihre Teams und selbst angelegte Aktionen
 export async function GET() {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
   }
+
+  const isAdmin = session.user.role === "ADMIN";
+  const teamIds = session.user.teamIds ?? [];
+  const aktionWhere: Prisma.AktionWhereInput = isAdmin ? {} : expertAktionWhere(session.user);
+  // Archivierte Aktionen kennen nur ihre Teams, nicht wer sie angelegt hat
+  const statistikWhere: Prisma.AktionStatistikWhereInput = isAdmin
+    ? {}
+    : { teams: { some: { teamId: { in: teamIds } } } };
+  const teamWhere: Prisma.TeamWhereInput = isAdmin ? {} : { id: { in: teamIds } };
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -29,28 +41,31 @@ export async function GET() {
     liveAktionenForKW,
     archivedForKW,
   ] = await Promise.all([
-    prisma.aktion.count(),
-    prisma.aktion.count({ where: { status: { in: ["AKTIV", "GEAENDERT"] } } }),
-    prisma.aktion.count({ where: { status: "ABGESAGT" } }),
-    prisma.anmeldung.count(),
-    prisma.team.count(),
-    prisma.user.count(),
+    prisma.aktion.count({ where: aktionWhere }),
+    prisma.aktion.count({ where: { ...aktionWhere, status: { in: ["AKTIV", "GEAENDERT"] } } }),
+    prisma.aktion.count({ where: { ...aktionWhere, status: "ABGESAGT" } }),
+    prisma.anmeldung.count({ where: { aktion: aktionWhere } }),
+    prisma.team.count({ where: teamWhere }),
+    prisma.user.count({ where: isAdmin ? {} : { teams: { some: { teamId: { in: teamIds } } } } }),
     prisma.wahlkreis.findMany({
       include: {
         aktionen: {
+          where: aktionWhere,
           include: { _count: { select: { anmeldungen: true } } },
         },
       },
       orderBy: { nummer: "asc" },
     }),
-    prisma.aktionStatistik.aggregate({ _sum: { anmeldungenCount: true } }),
+    prisma.aktionStatistik.aggregate({ where: statistikWhere, _sum: { anmeldungenCount: true } }),
     prisma.aktionStatistik.groupBy({
       by: ["wahlkreisId"],
+      where: statistikWhere,
       _sum: { anmeldungenCount: true },
     }),
-    prisma.aktion.count({ where: { datum: { lt: today } } }),
-    prisma.aktion.count({ where: { datum: { gte: today } } }),
+    prisma.aktion.count({ where: { ...aktionWhere, datum: { lt: today } } }),
+    prisma.aktion.count({ where: { ...aktionWhere, datum: { gte: today } } }),
     prisma.team.findMany({
+      where: teamWhere,
       select: {
         id: true,
         name: true,
@@ -63,12 +78,15 @@ export async function GET() {
     }),
     // Eine archivierte Aktion zaehlt fuer jedes ihrer Teams
     prisma.aktionStatistikTeam.findMany({
+      where: isAdmin ? {} : { teamId: { in: teamIds } },
       select: { teamId: true, statistik: { select: { anmeldungenCount: true } } },
     }),
     prisma.aktion.findMany({
+      where: aktionWhere,
       select: { datum: true, anmeldungen: { select: { id: true } } },
     }),
     prisma.aktionStatistik.findMany({
+      where: statistikWhere,
       select: { aktionDatum: true, anmeldungenCount: true },
     }),
   ]);

@@ -12,7 +12,7 @@ vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 
 const mockPrisma = {
   anmeldung: { findMany: vi.fn() },
-  user: { update: vi.fn(), delete: vi.fn() },
+  user: { update: vi.fn(), delete: vi.fn(), findUnique: vi.fn() },
 };
 vi.mock("@/lib/db", () => ({ prisma: mockPrisma }));
 vi.mock("@/lib/excel", () => ({
@@ -112,6 +112,7 @@ describe("Audit-Protokoll", () => {
 
   it("Account löschen → Zeile USER_GELOESCHT", async () => {
     await mockAuth(ADMIN_SESSION);
+    mockPrisma.user.findUnique.mockResolvedValue({ id: "user-9", _count: { aktionen: 0 } });
     mockPrisma.user.delete.mockResolvedValue({});
 
     const { DELETE } = await import("@/app/api/admin/users/route");

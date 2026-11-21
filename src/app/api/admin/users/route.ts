@@ -4,15 +4,44 @@ import { prisma } from "@/lib/db";
 import { audit, logServerError } from "@/lib/audit";
 import { userSchema, userUpdateSchema } from "@/lib/validators";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
+
+// Anonymisierte Konten (geloeschte Personen, die noch Aktionen angelegt haben).
+// .invalid ist als Top-Level-Domain reserviert, dorthin geht nie eine E-Mail.
+const ANONYM_DOMAIN = "@geloescht.invalid";
+const ANONYM_NAME = "Gelöschte*r Benutzer*in";
 
 export async function GET() {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
   }
 
+  // Expert*innen sehen nur aktive Mitglieder ihrer eigenen Teams, und bei jeder
+  // Person nur die gemeinsamen Teams. Bearbeiten bleibt Admins vorbehalten.
+  if (session.user.role !== "ADMIN") {
+    const teamIds = session.user.teamIds ?? [];
+    const members = await prisma.user.findMany({
+      where: { active: true, teams: { some: { teamId: { in: teamIds } } } },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        active: true,
+        teams: {
+          where: { teamId: { in: teamIds } },
+          select: { team: { select: { id: true, name: true } } },
+        },
+      },
+      orderBy: { name: "asc" },
+    });
+    return NextResponse.json(members.map((u) => ({ ...u, teams: u.teams.map((ut) => ut.team) })));
+  }
+
   const users = await prisma.user.findMany({
-    include: { teams: { include: { team: true } } },
+    where: { NOT: { email: { endsWith: ANONYM_DOMAIN } } },
+    include: { teams: { include: { team: true } }, _count: { select: { aktionen: true } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -131,6 +160,12 @@ export async function PUT(req: NextRequest) {
   }
 }
 
+/**
+ * DELETE: Person loeschen. Ohne angelegte Aktionen wird das Konto wirklich
+ * geloescht. Hat sie Aktionen angelegt, verweisen diese auf sie; dann werden
+ * Name, E-Mail und Passwort unkenntlich gemacht, Teams entfernt und das Konto
+ * deaktiviert (DSGVO: personenbezogene Daten weg, Aktionen bleiben).
+ */
 export async function DELETE(req: NextRequest) {
   const session = await auth();
   if (!session || session.user.role !== "ADMIN") {
@@ -144,7 +179,42 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "ID fehlt" }, { status: 400 });
   }
 
-  await prisma.user.delete({ where: { id } });
-  audit("USER_GELOESCHT", session.user.id, { userId: id });
-  return NextResponse.json({ message: "Benutzer gelöscht" });
+  if (id === session.user.id) {
+    return NextResponse.json({ error: "Du kannst dich nicht selbst löschen." }, { status: 400 });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, _count: { select: { aktionen: true } } },
+    });
+    if (!user) {
+      return NextResponse.json({ error: "Benutzer*in nicht gefunden" }, { status: 404 });
+    }
+
+    if (user._count.aktionen === 0) {
+      await prisma.user.delete({ where: { id } });
+      audit("USER_GELOESCHT", session.user.id, { userId: id, anonymisiert: false });
+      return NextResponse.json({ anonymisiert: false });
+    }
+
+    // Unbrauchbares Passwort: Hash eines Zufallswerts, den niemand kennt
+    const password = await bcrypt.hash(randomBytes(32).toString("hex"), 12);
+    await prisma.user.update({
+      where: { id },
+      data: {
+        name: ANONYM_NAME,
+        email: `${id}${ANONYM_DOMAIN}`,
+        password,
+        role: "EXPERT",
+        active: false,
+        teams: { deleteMany: {} },
+      },
+    });
+    audit("USER_GELOESCHT", session.user.id, { userId: id, anonymisiert: true });
+    return NextResponse.json({ anonymisiert: true });
+  } catch (error) {
+    logServerError("DELETE /api/admin/users", error);
+    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
+  }
 }

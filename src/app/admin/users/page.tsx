@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
+import Dialog from "@/components/ui/Dialog";
 
 interface Team {
   id: string;
@@ -17,11 +19,19 @@ interface User {
   role: string;
   active: boolean;
   teams: Team[];
+  // Nur fuer Admins: Anzahl selbst angelegter Aktionen (entscheidet Loeschen vs. Anonymisieren)
+  _count?: { aktionen: number };
 }
 
 export default function UsersPage() {
+  // Expert*innen sehen hier nur die Mitglieder ihrer Teams, ohne Bearbeiten
+  const { data: session } = useSession();
+  const isAdmin = session?.user.role === "ADMIN";
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/users")
@@ -41,20 +51,48 @@ export default function UsersPage() {
     setUsers(users.map((u) => (u.id === user.id ? { ...u, active: !u.active } : u)));
   }
 
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const id = deleteTarget.id;
+    setDeleting(true);
+    setDeleteError("");
+    const res = await fetch(`/api/admin/users?id=${id}`, { method: "DELETE" });
+    setDeleting(false);
+    setDeleteTarget(null);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setDeleteError(data.error || "Die Person konnte nicht gelöscht werden.");
+      return;
+    }
+    // Anonymisierte Konten erscheinen nicht mehr in der Liste
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+  }
+
   if (loading) {
     return <div className="text-gray-500">Lade Benutzer*innen...</div>;
   }
 
+  const anzahlAktionen = deleteTarget?._count?.aktionen ?? 0;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-headline text-2xl font-bold text-primary case-ui">
-          Benutzer*innen
-        </h1>
-        <Link href="/admin/users/neu">
-          <Button>Neue*r Benutzer*in</Button>
-        </Link>
+        <div>
+          <h1 className="font-headline text-2xl font-bold text-primary case-ui">
+            Benutzer*innen
+          </h1>
+          {!isAdmin && (
+            <p className="text-sm text-gray-600 mt-1">Die Mitglieder deiner Teams.</p>
+          )}
+        </div>
+        {isAdmin && (
+          <Link href="/admin/users/neu">
+            <Button>Neue*r Benutzer*in</Button>
+          </Link>
+        )}
       </div>
+
+      {deleteError && <p className="mb-4 text-sm font-bold text-danger">{deleteError}</p>}
 
       <div className="rounded-card border-ui border-line overflow-hidden shadow-ui">
         <table className="w-full">
@@ -64,8 +102,12 @@ export default function UsersPage() {
               <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">E-Mail</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Rolle</th>
               <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Teams</th>
-              <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Status</th>
-              <th className="text-right px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Aktionen</th>
+              {isAdmin && (
+                <>
+                  <th className="text-left px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Status</th>
+                  <th className="text-right px-4 py-3 text-sm font-bold text-ink case-ui tracking-ui">Aktionen</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y-ui divide-line">
@@ -81,30 +123,68 @@ export default function UsersPage() {
                 <td className="px-4 py-3 text-gray-700 text-sm">
                   {user.teams.length > 0 ? user.teams.map((t) => t.name).join(", ") : "–"}
                 </td>
-                <td className="px-4 py-3">
-                  <Badge variant={user.active ? "success" : "danger"}>
-                    {user.active ? "Aktiv" : "Inaktiv"}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3 text-right flex gap-3 justify-end">
-                  <Link
-                    href={`/admin/users/${user.id}`}
-                    className="text-sm text-primary font-bold hover:underline"
-                  >
-                    Bearbeiten
-                  </Link>
-                  <button
-                    onClick={() => toggleActive(user)}
-                    className="text-sm text-gray-500 font-bold hover:underline"
-                  >
-                    {user.active ? "Deaktivieren" : "Aktivieren"}
-                  </button>
-                </td>
+                {isAdmin && (
+                  <>
+                    <td className="px-4 py-3">
+                      <Badge variant={user.active ? "success" : "danger"}>
+                        {user.active ? "Aktiv" : "Inaktiv"}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-2 justify-end">
+                        <Link href={`/admin/users/${user.id}`}>
+                          <Button variant="outline" size="sm">Bearbeiten</Button>
+                        </Link>
+                        <Button variant="outline" size="sm" onClick={() => toggleActive(user)}>
+                          {user.active ? "Deaktivieren" : "Aktivieren"}
+                        </Button>
+                        {user.id !== session?.user.id && (
+                          <Button variant="danger" size="sm" onClick={() => setDeleteTarget(user)}>
+                            Löschen
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      <Dialog
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        title="Benutzer*in löschen"
+      >
+        {anzahlAktionen === 0 ? (
+          <p className="mb-6 text-gray-700">
+            &bdquo;{deleteTarget?.name}&ldquo; wird endgültig gelöscht. Das kann nicht rückgängig
+            gemacht werden.
+          </p>
+        ) : (
+          <p className="mb-6 text-gray-700">
+            &bdquo;{deleteTarget?.name}&ldquo; hat {anzahlAktionen}{" "}
+            {anzahlAktionen === 1 ? "Aktion angelegt. Diese bleibt" : "Aktionen angelegt. Diese bleiben"}{" "}
+            erhalten. Name,
+            E-Mail-Adresse und Passwort werden gelöscht, die Person wird aus allen Teams entfernt
+            und kann sich nicht mehr anmelden. Das kann nicht rückgängig gemacht werden.
+          </p>
+        )}
+        <p className="mb-6 text-sm text-gray-600">
+          Ist die Person bei Aktionen als Ansprechperson eingetragen, bleiben diese Kontaktdaten
+          stehen. Bitte bei den Aktionen selbst ändern.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
+            Abbrechen
+          </Button>
+          <Button variant="danger" onClick={confirmDelete} disabled={deleting}>
+            {deleting ? "Wird gelöscht..." : "Endgültig löschen"}
+          </Button>
+        </div>
+      </Dialog>
     </div>
   );
 }

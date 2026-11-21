@@ -1,6 +1,10 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
+// Admin-Seiten, die auch Expert*innen sehen duerfen (Daten dort auf die eigenen
+// Teams eingeschraenkt; die APIs pruefen das selbst)
+const EXPERT_ADMIN_PAGES = ["/admin", "/admin/users"];
+
 export default auth((req) => {
   const { pathname } = req.nextUrl;
 
@@ -9,7 +13,7 @@ export default auth((req) => {
     if (!req.auth) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
-    if (req.auth.user.role !== "ADMIN") {
+    if (req.auth.user.role !== "ADMIN" && !EXPERT_ADMIN_PAGES.includes(pathname)) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
   }

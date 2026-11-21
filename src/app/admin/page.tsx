@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import { WAHLKREIS_LABEL, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
 
@@ -18,6 +19,9 @@ interface Stats {
 }
 
 export default function AdminPage() {
+  // Expert*innen bekommen dieselbe Seite, die API liefert nur ihre Teams
+  const { data: session } = useSession();
+  const isAdmin = session?.user.role === "ADMIN";
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
@@ -50,17 +54,24 @@ export default function AdminPage() {
     <div>
       <div className="mb-6">
         <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-3">
-          Gesamtübersicht
+          {isAdmin ? "Gesamtübersicht" : "Statistik deiner Teams"}
         </h1>
-        <div className="flex flex-wrap gap-2">
-          {/* Plain link: the export is a file download, not a page navigation */}
-          <a
-            href="/api/admin/export-stats"
-            className="inline-flex items-center justify-center rounded-button px-4 py-2 text-base bg-primary text-white font-bold case-ui tracking-ui border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press transition-all focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
-          >
-            Auswertung exportieren
-          </a>
-        </div>
+        {!isAdmin && (
+          <p className="text-sm text-gray-600">
+            Aktionen deiner Teams und Aktionen, die du selbst angelegt hast.
+          </p>
+        )}
+        {isAdmin && (
+          <div className="flex flex-wrap gap-2">
+            {/* Plain link: the export is a file download, not a page navigation */}
+            <a
+              href="/api/admin/export-stats"
+              className="inline-flex items-center justify-center rounded-button px-4 py-2 text-base bg-primary text-white font-bold case-ui tracking-ui border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press transition-all focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
+            >
+              Auswertung exportieren
+            </a>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
