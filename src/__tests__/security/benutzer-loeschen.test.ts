@@ -147,6 +147,29 @@ async function put(body: unknown) {
   return PUT(createJsonRequest("/api/admin/users", body, "PUT") as any);
 }
 
+describe("Admin-Konten: kein Selbstaussperren", () => {
+  it("Admin kann sich nicht selbst die Admin-Rolle entziehen", async () => {
+    await mockAuth(ADMIN_SESSION);
+    const res = await put({ id: ADMIN_SESSION.user.id, role: "EXPERT" });
+    expect(res.status).toBe(400);
+    expect(mockPrisma.user.update).not.toHaveBeenCalled();
+  });
+
+  it("Admin kann sich nicht selbst deaktivieren", async () => {
+    await mockAuth(ADMIN_SESSION);
+    const res = await put({ id: ADMIN_SESSION.user.id, active: false });
+    expect(res.status).toBe(400);
+    expect(mockPrisma.user.update).not.toHaveBeenCalled();
+  });
+
+  it("eigenen Namen aendern bleibt moeglich", async () => {
+    await mockAuth(ADMIN_SESSION);
+    mockPrisma.user.update.mockResolvedValueOnce({ id: ADMIN_SESSION.user.id, password: "x", teams: [] });
+    const res = await put({ id: ADMIN_SESSION.user.id, name: "Neuer Name", role: "ADMIN", active: true });
+    expect(res.status).toBe(200);
+  });
+});
+
 describe("Passwort-Reset durch Admin", () => {
   it("beendet alle Sitzungen der Person", async () => {
     await mockAuth(ADMIN_SESSION);

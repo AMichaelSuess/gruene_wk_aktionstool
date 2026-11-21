@@ -125,6 +125,16 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const validated = userUpdateSchema.parse(body);
 
+    // Sich selbst die Admin-Rolle entziehen oder deaktivieren wuerde im Zweifel
+    // den letzten Admin aussperren. Da die handelnde Person selbst aktiver Admin
+    // ist, bleibt so immer mindestens ein Admin uebrig.
+    if (validated.id === session.user.id && (validated.role === "EXPERT" || validated.active === false)) {
+      return NextResponse.json(
+        { error: "Du kannst dir die Admin-Rolle nicht selbst entziehen und dich nicht selbst deaktivieren." },
+        { status: 400 }
+      );
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
     if (validated.name !== undefined) updateData.name = validated.name;
