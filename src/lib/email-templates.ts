@@ -395,7 +395,7 @@ export function tagesUebersichtEmail(
     ${neueAnmeldungenHtml && abmeldungenHtml ? '<hr class="section-divider" />' : ""}
     ${abmeldungenHtml}
     <hr class="section-divider" />
-    <p><a href="${baseUrl}/dashboard" class="cta-button" style="${ctaStyle}">Zum Dashboard →</a></p>
+    <p><a href="${baseUrl}/dashboard" class="cta-button" style="${ctaStyle}">Zum internen Bereich →</a></p>
   `;
 
   return { subject, html: baseLayout(content) };

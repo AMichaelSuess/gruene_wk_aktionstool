@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { auth } from "@/lib/auth";
 import { districtConfig } from "@/lib/district-config";
 import PublicHeader from "./PublicHeader";
+import LogoutLink from "./LogoutLink";
 
 export default async function PublicLayout({ children }: { children: ReactNode }) {
   const session = await auth();
@@ -18,7 +19,9 @@ export default async function PublicLayout({ children }: { children: ReactNode }
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
             <p className="font-bold case-ui tracking-ui">{districtConfig.orgFullName}</p>
             <div className="flex gap-4">
-              {!session && (
+              {session ? (
+                <LogoutLink />
+              ) : (
                 <Link href="/login" className="hover:text-white transition-colors case-ui tracking-ui font-bold">
                   Login
                 </Link>
