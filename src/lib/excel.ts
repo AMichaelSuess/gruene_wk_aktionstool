@@ -19,6 +19,10 @@ function kategorieEmoji(kategorie?: string): string {
   }
 }
 
+// One entry per line: collapse line breaks and other whitespace in
+// values (older records may still contain them), so no one can add lines.
+const einzeilig = (s: string | null | undefined) => (s ?? "").replace(/[\s\p{Cc}]+/gu, " ").trim();
+
 export function formatSignalInfo(
   datumMitTag: string,
   startzeit: string,
@@ -29,7 +33,7 @@ export function formatSignalInfo(
   kategorie?: string
 ): string {
   const emoji = kategorieEmoji(kategorie);
-  return `📆 ${datumMitTag}: ${startzeit}-${endzeit} Uhr ${emoji} ${titel} 📍${adresse} 👋 mit ${ansprechpersonName}`;
+  return `📆 ${datumMitTag}: ${startzeit}-${endzeit} Uhr ${emoji} ${einzeilig(titel)} 📍${einzeilig(adresse)} 👋 mit ${einzeilig(ansprechpersonName)}`;
 }
 
 interface ExcelRow {
@@ -217,9 +221,6 @@ export async function createAnmeldungenExcel(anmeldungen: AnmeldungExport[]): Pr
   return Buffer.from(await workbook.xlsx.writeBuffer());
 }
 
-// One registration per line: collapse line breaks and other whitespace in
-// values (older records may still contain them), so no one can add lines.
-const einzeilig = (s: string | null | undefined) => (s ?? "").replace(/[\s\p{Cc}]+/gu, " ").trim();
 
 export function createAnmeldungenTxt(anmeldungen: AnmeldungExport[]): string {
   return anmeldungen

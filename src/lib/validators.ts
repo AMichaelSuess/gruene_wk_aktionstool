@@ -21,6 +21,15 @@ const passwordSchema = z
 // they end up line by line in the Signal text export experts paste into chats.
 const KEINE_STEUERZEICHEN = /^[^\p{Cc}]*$/u;
 
+// Einzeiliger Freitext (Namen, Titel, Adressen) mit Laengengrenze
+const einzeilig = (label: string, min: number, max: number, minMessage = `${label} muss mindestens ${min} Zeichen lang sein`) =>
+  z
+    .string()
+    .trim()
+    .min(min, minMessage)
+    .max(max, `${label} darf höchstens ${max} Zeichen lang sein`)
+    .regex(KEINE_STEUERZEICHEN, `${label} darf keine Zeilenumbrüche enthalten`);
+
 // Team-IDs (cuids) in Formularen; bounded so a request cannot carry huge lists
 const teamIdsSchema = z.array(z.string().max(40)).max(50, "Höchstens 50 Teams");
 
@@ -30,7 +39,7 @@ export const loginSchema = z.object({
 });
 
 export const userSchema = z.object({
-  name: z.string().min(2, "Name muss mindestens 2 Zeichen lang sein"),
+  name: einzeilig("Name", 2, 100),
   email: emailSchema(),
   password: passwordSchema,
   role: z.enum(["ADMIN", "EXPERT"]),
@@ -39,7 +48,7 @@ export const userSchema = z.object({
 
 export const userUpdateSchema = z.object({
   id: z.string().min(1, "ID fehlt"),
-  name: z.string().min(2, "Name muss mindestens 2 Zeichen lang sein").optional(),
+  name: einzeilig("Name", 2, 100).optional(),
   email: emailSchema().optional(),
   password: passwordSchema.optional(),
   role: z.enum(["ADMIN", "EXPERT"]).optional(),
@@ -71,23 +80,23 @@ export const passwortAendernSchema = z
   });
 
 export const teamSchema = z.object({
-  name: z.string().min(2, "Teamname muss mindestens 2 Zeichen lang sein"),
+  name: einzeilig("Teamname", 2, 100),
   wahlkreisId: z.string().optional().nullable(),
 });
 
 export const aktionSchema = z.object({
-  titel: z.string().min(3, "Titel muss mindestens 3 Zeichen lang sein").max(200, "Titel darf höchstens 200 Zeichen lang sein"),
+  titel: einzeilig("Titel", 3, 200),
   datum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Datum im Format JJJJ-MM-TT"),
   startzeit: z.string().regex(/^\d{2}:\d{2}$/, "Startzeit im Format HH:MM"),
   endzeit: z.string().regex(/^\d{2}:\d{2}$/, "Endzeit im Format HH:MM"),
-  adresse: z.string().min(5, "Adresse muss mindestens 5 Zeichen lang sein").max(300, "Adresse darf höchstens 300 Zeichen lang sein"),
+  adresse: einzeilig("Adresse", 5, 300),
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
   wahlkreisId: z.string().min(1, `Bitte ${WAHLKREIS_LABEL} auswählen`),
   kategorie: z.enum(KATEGORIE_VALUES, { error: "Bitte wähle eine Art der Aktion" }),
-  ansprechpersonName: z.string().min(2, "Name der Ansprechperson erforderlich").max(100, "Name der Ansprechperson darf höchstens 100 Zeichen lang sein"),
+  ansprechpersonName: einzeilig("Name der Ansprechperson", 2, 100, "Name der Ansprechperson erforderlich"),
   ansprechpersonEmail: emailSchema(),
-  ansprechpersonTelefon: z.string().min(5, "Telefonnummer erforderlich").max(50, "Telefonnummer darf höchstens 50 Zeichen lang sein"),
+  ansprechpersonTelefon: einzeilig("Telefonnummer", 5, 50, "Telefonnummer erforderlich"),
   maxTeilnehmer: z.number().int().positive().optional().nullable(),
   // Fehlt das Feld beim Bearbeiten, bleibt die Team-Zuordnung unveraendert
   teamIds: teamIdsSchema.optional(),
@@ -148,20 +157,20 @@ export const anmeldungSchema = z.object({
 );
 
 export const excelRowSchema = z.object({
-  titel: z.string().min(1, "Titel fehlt").max(200, "Titel darf höchstens 200 Zeichen lang sein"),
+  titel: einzeilig("Titel", 1, 200, "Titel fehlt"),
   datum: z.string().min(1, "Datum fehlt"),
   startzeit: z.string().regex(/^\d{2}:\d{2}$/, "Startzeit im Format HH:MM"),
   endzeit: z.string().regex(/^\d{2}:\d{2}$/, "Endzeit im Format HH:MM"),
-  adresse: z.string().min(1, "Adresse fehlt").max(300, "Adresse darf höchstens 300 Zeichen lang sein"),
+  adresse: einzeilig("Adresse", 1, 300, "Adresse fehlt"),
   // Die Upload-Route ordnet Name oder Nummer aus der Datei vorher einem vorhandenen Eintrag zu
   wahlkreis: z.number({ error: `${WAHLKREIS_LABEL} fehlt oder ist unbekannt` }).int().positive(),
   kategorie: z.enum(KATEGORIE_VALUES, { error: `Kategorie fehlt oder ungültig (erlaubt: ${KATEGORIEN.map((k) => k.label).join(", ")})` }),
-  ansprechpersonName: z.string().min(1, "Ansprechperson Name fehlt").max(100, "Name der Ansprechperson darf höchstens 100 Zeichen lang sein"),
+  ansprechpersonName: einzeilig("Name der Ansprechperson", 1, 100, "Ansprechperson Name fehlt"),
   ansprechpersonEmail: emailSchema("Ungültige E-Mail der Ansprechperson"),
-  ansprechpersonTelefon: z.string().min(1, "Telefon der Ansprechperson fehlt").max(50, "Telefonnummer darf höchstens 50 Zeichen lang sein"),
+  ansprechpersonTelefon: einzeilig("Telefonnummer", 1, 50, "Telefon der Ansprechperson fehlt"),
   maxTeilnehmer: z.number().int().positive().optional().nullable(),
   // Team-Namen aus der optionalen Spalte "Teams"; leer = Auswahl beim Hochladen
-  teams: z.array(z.string()).optional(),
+  teams: z.array(z.string().max(100)).max(50, "Höchstens 50 Teams").optional(),
 }).refine(
   (data) => data.startzeit < data.endzeit,
   { message: "Endzeit muss nach der Startzeit liegen", path: ["endzeit"] }
@@ -177,7 +186,7 @@ export const bulkKategorieSchema = z.object({
 
 export const wahlkreisUpdateSchema = z.object({
   id: z.string().min(1, "ID fehlt"),
-  name: z.string().min(2, "Name muss mindestens 2 Zeichen lang sein"),
+  name: einzeilig("Name", 2, 100),
   nummer: z.number().int().positive("Nummer muss eine positive ganze Zahl sein"),
 });
 
