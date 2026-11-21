@@ -16,7 +16,7 @@ export default function SelectionBar({ selectedIds, aktionTitles }: SelectionBar
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 bg-bar border-t-ui-thick border-line shadow-ui-up z-50 transition-transform duration-300 ${
+      className={`fixed bottom-0 left-0 right-0 bg-bar focus-bar border-t-ui-thick border-line shadow-ui-up z-50 transition-transform duration-300 ${
         selectedIds.length > 0 ? "translate-y-0" : "translate-y-full"
       }`}
       aria-hidden={selectedIds.length === 0}

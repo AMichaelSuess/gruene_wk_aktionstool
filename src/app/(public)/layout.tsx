@@ -14,7 +14,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
 
       <main className="flex-1">{children}</main>
 
-      <footer className="bg-chrome text-white/70 text-sm border-t-ui-thick border-line">
+      <footer className="bg-chrome text-white/70 focus-chrome text-sm border-t-ui-thick border-line">
         <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
             <p className="font-bold case-ui tracking-ui">{districtConfig.orgFullName}</p>

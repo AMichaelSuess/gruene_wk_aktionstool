@@ -29,7 +29,7 @@ export default function CampaignHero({ hero, nav }: { hero: HeroConfig; nav: Rea
 
   return (
     <header
-      className="relative overflow-hidden bg-primary text-white"
+      className="relative overflow-hidden bg-primary text-white focus-chrome"
       style={{ "--hero-photo-w": photoWidth } as CSSProperties}
     >
       {/* Die Höhe des Kopfbereichs bestimmt den Maßstab; das Foto sitzt am rechten Rand */}

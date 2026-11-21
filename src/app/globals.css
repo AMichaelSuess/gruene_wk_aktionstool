@@ -100,6 +100,8 @@
   --t-line: #000000;
   --t-line-strong: #000000;
   --t-focus: #000000;
+  --t-focus-chrome: #000000;   /* focus outline on header/footer (focus-chrome) */
+  --t-focus-bar: #000000;      /* focus outline on the selection bar (focus-bar) */
   --t-focus-offset: 0;
   --t-canvas: #FFFFFF;
   --t-muted: #F5F1E9;
@@ -114,6 +116,7 @@
   --t-font-sans: "DM Sans", Arial, Helvetica, sans-serif;
   --t-font-headline: "GrueneType Neue", "Barlow Condensed", "Arial Narrow", sans-serif;
   --t-headline-stretch: normal;
+  --t-body-stretch: normal;
   --t-case: uppercase;
   --t-tracking: 0.025em;
   --t-heading-tracking: 0.02em;
@@ -150,7 +153,7 @@
   --t-accent: #C8DA20;         /* Gelbgrün */
   --t-cta: #FFD2E8;            /* Rosa */
   --t-cta-ink: #002D2D;
-  --t-cta-hover: #F6BBD8;
+  --t-cta-hover: #C8DA20;      /* Gelbgrün, like the campaign website */
   --t-bar: #002D2D;            /* dark bar so the pink CTA stands out */
   --t-bar-ink: #FFFFFF;
 
@@ -158,6 +161,8 @@
   --t-line: #C9D7D6;
   --t-line-strong: #5C7A7C;    /* ≥ 3:1 against white for form controls */
   --t-focus: #003C40;
+  --t-focus-chrome: #C8DA20;   /* emerald outline would vanish on dark emerald */
+  --t-focus-bar: #C8DA20;
   --t-focus-offset: 2px;
   --t-canvas: #F5F8F7;
   --t-muted: #E8F0EF;
@@ -171,10 +176,11 @@
 
   --t-font-sans: "Archivo", Arial, Helvetica, sans-serif;
   --t-font-headline: "Archivo", "Arial Black", Arial, sans-serif;
-  --t-headline-stretch: 125%;
+  --t-headline-stretch: 115%;
+  --t-body-stretch: 112%;
   --t-case: none;
   --t-tracking: 0;
-  --t-heading-tracking: 0;
+  --t-heading-tracking: -0.01em;
 
   --t-border: 1px;
   --t-border-thick: 0;
@@ -233,6 +239,14 @@
     border-top-width: 0;
     border-bottom-width: var(--t-border);
   }
+}
+/* Focus outline color on dark surfaces; set on the surface, inherited by
+   everything inside it (header/footer: focus-chrome, selection bar: focus-bar) */
+@utility focus-chrome {
+  --t-focus: var(--t-focus-chrome);
+}
+@utility focus-bar {
+  --t-focus: var(--t-focus-bar);
 }
 @utility press-sm {
   translate: var(--t-press-sm) var(--t-press-sm);
@@ -302,6 +316,7 @@ body {
   background: var(--t-canvas);
   color: var(--t-ink);
   font-family: var(--font-sans);
+  font-stretch: var(--t-body-stretch);
   line-height: 1.6;
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -317,9 +332,11 @@ h1, h2, h3, h4, h5, h6 {
   font-stretch: var(--t-headline-stretch);
 }
 
-/* Campaign design: H1 in the black cut, H2 bold */
-:root[data-theme="emerald"] h1 {
+/* Campaign design: every headline (headings, wordmark, CTA labels) in the
+   black cut with slightly tightened spacing, as on the campaign website */
+:root[data-theme="emerald"] :is(h1, h2, h3, h4, h5, h6, .font-headline) {
   font-weight: 900;
+  letter-spacing: var(--t-heading-tracking);
 }
 
 /* Focus style — hard outline in the theme's focus color */

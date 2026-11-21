@@ -13,8 +13,8 @@ The campaign look is calm and confident: deep emerald surfaces, a fresh yellow-g
 | Emerald backgrounds, dark emerald website menu | Campaign hero on the start page, dark emerald header on all other pages and footer (`chrome`), emerald buttons (`primary`) |
 | Website header: arrows in the lighter emerald on emerald, photo with yellow-green arrows | Campaign hero on the start page, with optional photo |
 | Yellow-green on emerald | Lime wordmark, lime active nav link |
-| Pink pill button with ▶ ("Mehr erfahren") | Pink pill "Jetzt anmelden" on the dark selection bar (`cta`) |
-| Wide grotesque "Obviously" | Archivo at 125 % width for headings |
+| Pink pill button, Gelbgrün on hover | Pink pill "Jetzt anmelden" on the dark selection bar (`cta`), Gelbgrün on hover |
+| Wide grotesque "Obviously" (website: Archivo) | Archivo as on the campaign website: 115 % width and weight 900 for headings, 112 % for body text |
 | Sentence case, no hard frames | No uppercase, 1 px light borders, rounded corners, soft shadows |
 
 ---
@@ -26,11 +26,11 @@ Values are the official hex codes from the campaign manual (page "Farbwerte").
 | Brief name | Value | Brief usage | Tokens |
 |---|---|---|---|
 | Weiß | `#FFFFFF` | Text on photos and dark backgrounds, background | `white`, card surfaces |
-| Gelbgrün | `#C8DA20` | Arrow element, backgrounds | `accent`, `warning`, `highlight` |
+| Gelbgrün | `#C8DA20` | Arrow element, backgrounds | `accent`, `warning`, `highlight`, `cta-hover`, `focus-chrome`, `focus-bar` |
 | Emerald | `#003C40` | Backgrounds | `primary`, `focus` |
 | Emerald, lighter | `#004C50` | Arrow element on emerald | `primary-hover`, `success` |
 | Emerald, darker | `#002D2D` | Text, website menu | `chrome`, `ink`, `bar`, `cta-ink`, `highlight-ink` |
-| Rosa | `#FFD2E8` | Text, backgrounds | `cta` (hover `#F6BBD8`) |
+| Rosa | `#FFD2E8` | Text, backgrounds | `cta` (hover Gelbgrün `#C8DA20`, as on the website) |
 
 Additions that are not in the brief:
 
@@ -53,16 +53,15 @@ Additions that are not in the brief:
 
 ## 3. Typography
 
-The campaign typeface is **Obviously** (OH no Type Co, commercial): Regular for body text, Black for H1, Bold for H2. Until a web license is available, the theme uses **Archivo** (SIL Open Font License), a variable font with weight 100–900 and width 62–125 %. It is self-hosted in `public/fonts/` with its license in `Archivo-OFL.txt`.
+The campaign typeface is **Obviously** (OH no Type Co, commercial): Regular for body text, Black for H1, Bold for H2. The campaign website uses **Archivo** instead (SIL Open Font License), a variable font with weight 100–900 and width 62–125 %, and the app follows the website. It is self-hosted in `public/fonts/` with its license in `Archivo-OFL.txt`.
 
 | Role | Setting |
 |---|---|
-| H1 | Archivo, width 125 %, weight 900 |
-| H2–H6, `font-headline` | Archivo, width 125 %, weight 700 |
-| Body | Archivo, normal width (100 %), 400/700 |
+| H1–H6, `font-headline` (wordmark, hero title, CTA label) | Archivo, width 115 %, weight 900, letter spacing −0.01em |
+| Body | Archivo, width 112 % (`--t-body-stretch`), 400/700 |
 | Labels, buttons, badges | Sentence case (`case-ui` = `none`), no letter spacing |
 
-Body text stays at normal width on purpose: the wide cut is harder to read in long text, especially for older volunteers. To follow the brief more strictly, set `font-stretch` on `body` under `[data-theme="emerald"]`.
+The widths are the website's values. Body text is slightly wide like on the website, but not at the headline width: the wide cut is harder to read in long text, especially for older volunteers.
 
 To switch to Obviously later, add its `@font-face` rules and put `"Obviously"` first in `--t-font-headline` (and `--t-font-sans` if wanted).
 
@@ -72,7 +71,7 @@ To switch to Obviously later, add its `@font-face` rules and put `"Obviously"` f
 
 - **Borders:** `border-ui` = 1 px in `line` (light) or `line-strong` (controls). No thick rules (`*-ui-thick` = 0). Badges have no border.
 - **Radius:** cards 1rem, inputs 0.5rem, buttons and badges fully rounded (pill).
-- **Focus:** 3 px emerald outline with a 2 px offset.
+- **Focus:** 3 px emerald outline with a 2 px offset. On the dark header, footer, campaign hero and selection bar the outline is Gelbgrün (`focus-chrome`, `focus-bar`), as on the website; emerald would be invisible there.
 
 ---
 
@@ -97,7 +96,7 @@ A selected action card gets a 2 px emerald ring on top of its 1 px border (`shad
 
 ## 7. Open points
 
-- Obviously web font (agency: zitronengrau). The manual names it as an Adobe Font; Adobe Fonts serves web fonts from its own CDN, which conflicts with self-hosting fonts for DSGVO reasons, so a separate web license would be needed.
+- Obviously web font: low priority, because the campaign website uses Archivo as well. The manual names it as an Adobe Font; Adobe Fonts serves web fonts from its own CDN, which conflicts with self-hosting fonts for DSGVO reasons, so a separate web license would be needed.
 - Whether the KV Leipzig logo should appear in the header instead of the wordmark.
 - Campaign photo in full resolution, ideally cut out (agency: zitronengrau): sharper on high-density screens, and with a cut-out the Gelbgrün arrows could be drawn in the lattice, which would work for any photo.
 - Native browser checkboxes and the date picker are only partly themed (color via `accent-primary`).

@@ -66,7 +66,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-canvas">
       {/* Feste Hoehe h-16, damit die Seitenleiste darunter exakt andocken kann */}
-      <header className="bg-chrome text-white sticky top-0 z-50 h-16 border-b-ui-thick border-line">
+      <header className="bg-chrome text-white focus-chrome sticky top-0 z-50 h-16 border-b-ui-thick border-line">
         <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button

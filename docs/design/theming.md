@@ -48,12 +48,14 @@ Components                           bg-primary, border-ui, rounded-card, shadow
 | `primary-hover` | `--t-primary-hover` | Hover of primary fills | `#006644` | `#004C50` |
 | `chrome` | `--t-chrome` | Header and footer background | `#005538` | `#002D2D` |
 | `accent` | `--t-accent` | Highlight text on chrome (active nav, wordmark) | `#FFF17A` | `#C8DA20` |
-| `cta` / `cta-ink` / `cta-hover` | `--t-cta*` | Main public call to action ("Jetzt anmelden") | `#005538` / `#FFF` / `#006644` | `#FFD2E8` / `#002D2D` / `#F6BBD8` |
+| `cta` / `cta-ink` / `cta-hover` | `--t-cta*` | Main public call to action ("Jetzt anmelden") | `#005538` / `#FFF` / `#006644` | `#FFD2E8` / `#002D2D` / `#C8DA20` |
 | `bar` / `bar-ink` | `--t-bar*` | Sticky selection bar on the public page | `#FFF` / `#000` | `#002D2D` / `#FFF` |
 | `ink` | `--t-ink` | Body text, dark fills | `#000000` | `#002D2D` |
 | `line` | `--t-line` | Container borders and dividers | `#000000` | `#C9D7D6` |
 | `line-strong` | `--t-line-strong` | Borders of form controls and clickable chips (≥ 3:1 against white) | `#000000` | `#5C7A7C` |
 | `focus` | `--t-focus` | Focus outline | `#000000` | `#003C40` |
+| — (`focus-chrome`) | `--t-focus-chrome` | Focus outline inside header, footer and campaign hero | `#000000` | `#C8DA20` |
+| — (`focus-bar`) | `--t-focus-bar` | Focus outline inside the selection bar | `#000000` | `#C8DA20` |
 | `canvas` | `--t-canvas` | Page background | `#FFFFFF` | `#F5F8F7` |
 | `muted` | `--t-muted` | Table headers, subtle fills | `#F5F1E9` | `#E8F0EF` |
 | `warning` | `--t-warning` | "Geändert" badge | `#FFF17A` | `#C8DA20` |
@@ -71,12 +73,13 @@ Use them with any color utility: `bg-primary`, `text-ink`, `border-line-strong`,
 | Token | Variable | brutalist | emerald |
 |---|---|---|---|
 | `font-sans` (body) | `--t-font-sans` | DM Sans | Archivo |
-| `font-headline` | `--t-font-headline` | GrueneType Neue | Archivo, 125 % width |
+| `font-sans` width | `--t-body-stretch` | normal | `112%` |
+| `font-headline` | `--t-font-headline` | GrueneType Neue | Archivo, 115 % width, weight 900 |
 | `case-ui` | `--t-case` | `uppercase` | `none` |
 | `tracking-ui` | `--t-tracking` | `0.025em` | `0` |
-| — (h1–h6) | `--t-heading-tracking`, `--t-headline-stretch` | `0.02em`, normal | `0`, `125%` |
+| — (h1–h6) | `--t-heading-tracking`, `--t-headline-stretch` | `0.02em`, normal | `-0.01em`, `115%` |
 
-`h1`–`h6` get the headline font, `--t-case` and `--t-heading-tracking` from a global rule. That rule is unlayered, so it beats Tailwind utilities on headings.
+`h1`–`h6` get the headline font, `--t-case` and `--t-heading-tracking` from a global rule. That rule is unlayered, so it beats Tailwind utilities on headings. In emerald a second unlayered rule sets weight 900 and the heading tracking on `h1`–`h6` and on every `.font-headline` element, so `font-bold` there has no effect.
 
 ### 2.3 Shape
 
@@ -118,6 +121,7 @@ The press utilities exist so the brutalist "push the button down" effect can be 
 4. **Check both themes.** Build or run with `NEXT_PUBLIC_THEME=emerald` before considering UI work done.
 5. **Contrast.** Light accents (`accent`, `warning`, `highlight`, `cta` in emerald) are backgrounds or text on dark surfaces only, never text on white. Text on them uses `ink`, `cta-ink` or `highlight-ink`.
 6. **Target audience.** Many volunteers are older and less tech-savvy. Keep labels clear, controls large (`min-h-[44px]` for touch targets) and focus outlines visible.
+7. **Dark surfaces set their focus color.** Put `focus-chrome` on any `bg-chrome` header or footer (and on the campaign hero), `focus-bar` on the selection bar. The default focus color would be invisible there in emerald.
 
 ### Component patterns
 

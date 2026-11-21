@@ -21,7 +21,7 @@ export default function PublicHeader({ session }: { session: Session | null }) {
   }
 
   return (
-    <header className="bg-chrome text-white sticky top-0 z-50 border-b-ui-thick border-line">
+    <header className="bg-chrome text-white focus-chrome sticky top-0 z-50 border-b-ui-thick border-line">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <BrandLogo variant="onDark" size={36} />
