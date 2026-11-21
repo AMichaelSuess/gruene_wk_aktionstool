@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { createAktionenExcel, createAktionenTxt } from "@/lib/excel";
 import { KATEGORIE_VALUES, kategorieLabel } from "@/lib/kategorien";
-import { format, startOfDay, endOfDay, addDays, startOfWeek, endOfWeek } from "date-fns";
+import { format, startOfDay, endOfDay, addDays, subDays, startOfWeek, endOfWeek, max } from "date-fns";
 import { de } from "date-fns/locale";
 import { TEAMS_INCLUDE, expertAktionWhere } from "@/lib/aktion-teams";
 import { formatWahlkreis } from "@/lib/wahlkreis-label";
@@ -21,6 +21,8 @@ export async function GET(req: NextRequest) {
   const dateFilter = searchParams.get("dateFilter");
   const activeOnly = searchParams.get("activeOnly") === "true";
   const kategorie = searchParams.get("kategorie");
+  const hidePast = searchParams.get("hidePast") === "true";
+  const nurEigene = searchParams.get("nurEigene") === "true";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {};
@@ -28,8 +30,16 @@ export async function GET(req: NextRequest) {
   if (session.user.role === "EXPERT") {
     // Team-Isolation: nur Aktionen der eigenen Teams oder selbst erstellte
     Object.assign(where, expertAktionWhere(session.user));
+    // Team-Filter nur fuer eigene Teams; fremde teamIds werden ignoriert
+    if (teamId && session.user.teamIds?.includes(teamId)) {
+      where.teams = { some: { teamId } };
+    }
   } else if (teamId) {
     where.teams = { some: { teamId } };
+  }
+
+  if (nurEigene) {
+    where.createdById = session.user.id;
   }
 
   // Datums-Filter auf Prisma anwenden
@@ -51,6 +61,12 @@ export async function GET(req: NextRequest) {
       gte: startOfWeek(now, { weekStartsOn: 1 }),
       lte: endOfWeek(now, { weekStartsOn: 1 }),
     };
+  }
+
+  // Vergangene ausblenden (aelter als 1 Tag), wie in der Dashboard-Liste
+  if (hidePast) {
+    const cutoff = startOfDay(subDays(now, 1));
+    where.datum = { ...(where.datum || {}), gte: where.datum?.gte ? max([where.datum.gte, cutoff]) : cutoff };
   }
 
   // Status-Filter auf Prisma anwenden
@@ -84,6 +100,8 @@ export async function GET(req: NextRequest) {
     teamId,
     dateFilter,
     kategorie,
+    hidePast,
+    nurEigene,
     count: aktionen.length,
   });
 

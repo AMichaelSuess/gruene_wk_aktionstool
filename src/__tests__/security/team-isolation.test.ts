@@ -418,6 +418,55 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
     const callArgs = mockPrisma.aktion.findMany.mock.calls[0][0];
     expect(callArgs.where.teams).toEqual({ some: { teamId: "team-b" } });
   });
+
+  it("EXPERT kann nach eigenem Team filtern, ohne die Team-Isolation zu verlieren", async () => {
+    await mockAuth(EXPERT_TEAM_A);
+
+    mockPrisma.aktion.findMany.mockResolvedValue([]);
+
+    const { GET } = await import("@/app/api/export-aktionen/route");
+    const req = createRequest("/api/export-aktionen?format=txt&teamId=team-a");
+    const res = await GET(req as any);
+
+    expect(res.status).toBe(200);
+
+    const callArgs = mockPrisma.aktion.findMany.mock.calls[0][0];
+    expect(callArgs.where.teams).toEqual({ some: { teamId: "team-a" } });
+    expect(callArgs.where.OR).toEqual([{ teams: { some: { teamId: { in: ["team-a"] } } } }, { createdById: "expert-a" }]);
+  });
+
+  it("nurEigene beschraenkt den Export auf selbst angelegte Aktionen", async () => {
+    await mockAuth(ADMIN_SESSION);
+
+    mockPrisma.aktion.findMany.mockResolvedValue([]);
+
+    const { GET } = await import("@/app/api/export-aktionen/route");
+    const req = createRequest("/api/export-aktionen?format=txt&nurEigene=true");
+    const res = await GET(req as any);
+
+    expect(res.status).toBe(200);
+
+    const callArgs = mockPrisma.aktion.findMany.mock.calls[0][0];
+    expect(callArgs.where.createdById).toBe(ADMIN_SESSION.user.id);
+  });
+
+  it("hidePast laesst Aktionen aelter als einen Tag weg", async () => {
+    await mockAuth(ADMIN_SESSION);
+
+    mockPrisma.aktion.findMany.mockResolvedValue([]);
+
+    const { GET } = await import("@/app/api/export-aktionen/route");
+    const req = createRequest("/api/export-aktionen?format=txt&hidePast=true");
+    const res = await GET(req as any);
+
+    expect(res.status).toBe(200);
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 1);
+    cutoff.setHours(0, 0, 0, 0);
+    const callArgs = mockPrisma.aktion.findMany.mock.calls[0][0];
+    expect(callArgs.where.datum.gte).toEqual(cutoff);
+  });
 });
 
 describe("PII-Schutz: Oeffentlicher Aktionszugriff", () => {

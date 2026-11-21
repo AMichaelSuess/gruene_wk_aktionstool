@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Dialog from "@/components/ui/Dialog";
@@ -23,18 +24,33 @@ interface Aktion {
   teams: { id: string; name: string }[];
   _count: { anmeldungen: number };
   maxTeilnehmer: number | null;
+  createdById: string;
+}
+
+interface TeamOption {
+  id: string;
+  name: string;
 }
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
+  const isAdmin = session?.user.role === "ADMIN";
+  const userId = session?.user.id;
+
   const [aktionen, setAktionen] = useState<Aktion[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelId, setCancelId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Aktion | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   // Filter States
   const [dateFilter, setDateFilter] = useState<"alle" | "heute" | "morgen" | "woche">("alle");
   const [activeOnly, setActiveOnly] = useState(false);
   const [hidePast, setHidePast] = useState(true);
   const [kategorieFilter, setKategorieFilter] = useState<string[]>([]);
+  const [teamFilter, setTeamFilter] = useState("");
+  const [nurEigene, setNurEigene] = useState(false);
+  const [teams, setTeams] = useState<TeamOption[]>([]);
 
   // Mehrfachauswahl fuer die Bulk-Umkategorisierung
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -52,6 +68,17 @@ export default function DashboardPage() {
       });
   }, []);
 
+  // Teams fuer den Team-Filter: Admins alle Teams, Expert*innen ihre eigenen
+  useEffect(() => {
+    if (!session) return;
+    fetch(isAdmin ? "/api/admin/teams" : "/api/user/teams")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: TeamOption[]) => setTeams(data.map((t) => ({ id: t.id, name: t.name }))));
+  }, [session, isAdmin]);
+
+  // Expert*innen mit nur einem Team brauchen keinen Team-Filter
+  const showTeamFilter = isAdmin ? teams.length > 0 : teams.length > 1;
+
   function handleCancel(id: string) {
     setCancelId(id);
   }
@@ -66,10 +93,34 @@ export default function DashboardPage() {
     }
   }
 
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const id = deleteTarget.id;
+    setDeleteTarget(null);
+    setDeleteError("");
+    const res = await fetch(`/api/admin/aktionen/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setAktionen((prev) => prev.filter((a) => a.id !== id));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    } else {
+      setDeleteError("Die Aktion konnte nicht gelöscht werden.");
+    }
+  }
+
   // Aktionen filtern
   const filteredAktionen = aktionen.filter((a) => {
     // Status Filter
     if (activeOnly && a.status === "ABGESAGT") return false;
+
+    // Team Filter
+    if (teamFilter && !a.teams.some((t) => t.id === teamFilter)) return false;
+
+    // Nur selbst angelegte
+    if (nurEigene && a.createdById !== userId) return false;
 
     // Vergangene ausblenden (älter als 1 Tag)
     if (hidePast) {
@@ -96,7 +147,10 @@ export default function DashboardPage() {
   const exportParams = new URLSearchParams();
   if (dateFilter !== "alle") exportParams.set("dateFilter", dateFilter);
   if (activeOnly) exportParams.set("activeOnly", "true");
+  if (hidePast) exportParams.set("hidePast", "true");
   if (kategorieFilter.length > 0) exportParams.set("kategorie", kategorieFilter.join(","));
+  if (teamFilter) exportParams.set("teamId", teamFilter);
+  if (nurEigene) exportParams.set("nurEigene", "true");
   const exportQuery = exportParams.toString() ? `&${exportParams.toString()}` : "";
 
   function toggleKategorieFilter(value: string) {
@@ -157,7 +211,7 @@ export default function DashboardPage() {
     <div className={selectedIds.size > 0 ? "pb-40 sm:pb-28" : ""}>
       <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="font-headline text-2xl font-bold text-primary case-ui">
-          Meine Aktionen
+          Aktionen
         </h1>
         <div className="flex flex-wrap items-center gap-2">
           {filteredAktionen.length > 0 && (
@@ -249,7 +303,36 @@ export default function DashboardPage() {
             Vergangene ausblenden (älter als 1 Tag)
           </label>
         </div>
+        <div className="flex flex-wrap items-center gap-4 border-l-ui border-gray-300 pl-6">
+          {showTeamFilter && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold case-ui">Team:</span>
+              <div className="w-48">
+                <Select
+                  aria-label="Team"
+                  value={teamFilter}
+                  onChange={(e) => setTeamFilter(e.target.value)}
+                  options={teams.map((t) => ({ value: t.id, label: t.name }))}
+                  placeholder="Alle Teams"
+                />
+              </div>
+            </div>
+          )}
+          <label className="flex items-center gap-2 text-sm font-bold case-ui cursor-pointer">
+            <input
+              type="checkbox"
+              checked={nurEigene}
+              onChange={(e) => setNurEigene(e.target.checked)}
+              className="w-4 h-4 accent-primary cursor-pointer"
+            />
+            Nur von mir angelegte
+          </label>
+        </div>
       </div>
+
+      {deleteError && (
+        <p className="mb-4 text-sm font-bold text-danger">{deleteError}</p>
+      )}
 
       {filteredAktionen.length === 0 ? (
         <div className="bg-white rounded-card border-ui border-line shadow-ui p-8 text-center text-gray-500">
@@ -328,7 +411,7 @@ export default function DashboardPage() {
                   </Link>
                   <div className="flex gap-2 w-full sm:w-auto self-start items-center">
                     <Link href={`/dashboard/aktionen/${aktion.id}`} className="flex-1 sm:flex-none self-start">
-                      <Button variant="secondary" size="sm" className="w-full sm:w-auto">
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
                         Bearbeiten
                       </Button>
                     </Link>
@@ -340,6 +423,16 @@ export default function DashboardPage() {
                         onClick={() => handleCancel(aktion.id)}
                       >
                         Absagen
+                      </Button>
+                    )}
+                    {isAdmin && (
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        className="flex-none self-start"
+                        onClick={() => setDeleteTarget(aktion)}
+                      >
+                        Löschen
                       </Button>
                     )}
                   </div>
@@ -417,6 +510,29 @@ export default function DashboardPage() {
           </Button>
           <Button variant="danger" onClick={confirmCancel}>
             Absagen
+          </Button>
+        </div>
+      </Dialog>
+
+      <Dialog
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        title="Aktion endgültig löschen"
+      >
+        <p className="mb-6 text-gray-700">
+          &bdquo;{deleteTarget?.titel}&ldquo; wird endgültig gelöscht
+          {deleteTarget && deleteTarget._count.anmeldungen > 0
+            ? `, zusammen mit ${deleteTarget._count.anmeldungen} Anmeldung${deleteTarget._count.anmeldungen !== 1 ? "en" : ""}`
+            : ""}
+          . Es werden <strong>keine</strong> E-Mails verschickt. Das kann nicht rückgängig gemacht
+          werden. Wenn die Angemeldeten benachrichtigt werden sollen, sage die Aktion stattdessen ab.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
+            Abbrechen
+          </Button>
+          <Button variant="danger" onClick={confirmDelete}>
+            Endgültig löschen
           </Button>
         </div>
       </Dialog>
