@@ -116,7 +116,7 @@ export default function NewAktionPage() {
           className={`rounded-button px-4 py-2 font-bold text-sm case-ui tracking-ui border-ui border-line transition-all ${
             tab === "manual"
               ? "bg-primary text-white shadow-ui-sm"
-              : "bg-white text-ink shadow-ui hover:shadow-ui-sm hover:press-sm"
+              : "bg-white text-ink shadow-ui hover:shadow-ui-sm hover:press-sm hover:bg-hover"
           }`}
         >
           Manuell anlegen
@@ -126,7 +126,7 @@ export default function NewAktionPage() {
           className={`rounded-button px-4 py-2 font-bold text-sm case-ui tracking-ui border-ui border-line transition-all ${
             tab === "excel"
               ? "bg-primary text-white shadow-ui-sm"
-              : "bg-white text-ink shadow-ui hover:shadow-ui-sm hover:press-sm"
+              : "bg-white text-ink shadow-ui hover:shadow-ui-sm hover:press-sm hover:bg-hover"
           }`}
         >
           Excel-Import

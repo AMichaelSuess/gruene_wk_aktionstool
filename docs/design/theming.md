@@ -50,6 +50,9 @@ Components                           bg-primary, border-ui, rounded-card, shadow
 | `accent` | `--t-accent` | Highlight text on chrome (active nav, wordmark) | `#FFF17A` | `#C8DA20` |
 | `cta` / `cta-ink` / `cta-hover` | `--t-cta*` | Main public call to action ("Jetzt anmelden") | `#005538` / `#FFF` / `#006644` | `#FFD2E8` / `#002D2D` / `#C8DA20` |
 | `bar` / `bar-ink` | `--t-bar*` | Sticky selection bar on the public page | `#FFF` / `#000` | `#002D2D` / `#FFF` |
+| `hover` | `--t-hover` | Hover fill of white or transparent clickables (secondary, outline, action, ghost buttons, nav items) | `#FFFFFF` (unchanged) | `#C8DA20` |
+| `hover-primary` / `hover-primary-ink` | `--t-hover-primary*` | Hover fill and text of primary buttons | `#005538` / `#FFF` (unchanged) | `#C8DA20` / `#002D2D` |
+| `hover-danger` | `--t-hover-danger` | Hover fill of danger buttons | `#E6007E` (unchanged) | `#8A003C` |
 | `ink` | `--t-ink` | Body text, dark fills | `#000000` | `#002D2D` |
 | `line` | `--t-line` | Container borders and dividers | `#000000` | `#C9D7D6` |
 | `line-strong` | `--t-line-strong` | Borders of form controls and clickable chips (≥ 3:1 against white) | `#000000` | `#5C7A7C` |
@@ -109,6 +112,8 @@ Use them with any color utility: `bg-primary`, `text-ink`, `border-line-strong`,
 
 The press utilities exist so the brutalist "push the button down" effect can be switched off per theme. Always pair `hover:shadow-ui-sm` with `hover:press-sm` and `active:shadow-none` with `active:press`.
 
+Themes without the press effect need another clear hover signal, so every clickable also gets a hover fill: `hover:bg-hover` on white or transparent elements, `hover:bg-hover-primary hover:text-hover-primary-ink` on primary fills, `hover:bg-hover-danger` on danger fills (on `<button>` with `enabled:` in front, so disabled buttons stay unchanged). In brutalist the fills equal the resting colors; in emerald they turn Gelbgrün like the campaign website's buttons. Clickable cards get `hover:border-line-strong`.
+
 ---
 
 ## 3. Writing UI
@@ -136,12 +141,12 @@ disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:pr
 
 | Variant | Classes |
 |---|---|
-| `primary` | `bg-primary text-white border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press` |
-| `secondary` | `bg-white text-ink border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press` |
-| `danger` | `bg-danger text-white border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press` |
-| `outline` | `bg-white text-primary border-ui border-primary shadow-ui-brand hover:shadow-ui-brand-sm hover:press-sm active:shadow-none active:press` |
-| `action` | `bg-white text-ink border-ui border-line hover:border-primary hover:text-primary` |
-| `ghost` | `bg-transparent text-primary border-ui border-transparent hover:border-line hover:shadow-ui` |
+| `primary` | `bg-primary text-white border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm enabled:hover:bg-hover-primary enabled:hover:text-hover-primary-ink active:shadow-none active:press` |
+| `secondary` | `bg-white text-ink border-ui border-line-strong shadow-ui hover:shadow-ui-sm hover:press-sm enabled:hover:bg-hover active:shadow-none active:press` |
+| `danger` | `bg-danger text-white border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm enabled:hover:bg-hover-danger active:shadow-none active:press` |
+| `outline` | `bg-white text-primary border-ui border-primary shadow-ui-brand hover:shadow-ui-brand-sm hover:press-sm enabled:hover:bg-hover active:shadow-none active:press` |
+| `action` | `bg-white text-ink border-ui border-line hover:border-primary hover:text-primary enabled:hover:bg-hover` |
+| `ghost` | `bg-transparent text-primary border-ui border-transparent hover:border-line hover:shadow-ui enabled:hover:bg-hover` |
 
 Sizes: `sm` `px-3 py-1.5 text-sm` · `md` `px-4 py-2 text-base` · `lg` `px-6 py-3 text-lg`
 
@@ -154,7 +159,7 @@ border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-
 **Card:** `bg-white rounded-card border-ui border-line p-4 md:p-6`
 **Card title:** `font-headline font-bold text-lg case-ui tracking-ui text-primary`
 **Elevated card:** add `shadow-ui-lg` (or `shadow-ui-brand-lg` on public confirmation pages)
-**Clickable card:** `shadow-ui hover:shadow-ui-sm hover:press-sm transition-all`; selected: `border-primary shadow-ui-selected`
+**Clickable card:** `shadow-ui hover:border-line-strong hover:shadow-ui-sm hover:press-sm transition-all`; selected: `border-primary shadow-ui-selected`
 
 **Input / Select:**
 ```

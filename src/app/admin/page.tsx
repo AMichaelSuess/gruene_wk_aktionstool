@@ -68,7 +68,7 @@ export default function AdminPage() {
             {/* Plain link: the export is a file download, not a page navigation */}
             <a
               href="/api/admin/export-stats"
-              className="inline-flex items-center justify-center rounded-button px-4 py-2 text-base bg-primary text-white font-bold case-ui tracking-ui border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press transition-all focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
+              className="inline-flex items-center justify-center rounded-button px-4 py-2 text-base bg-primary text-white font-bold case-ui tracking-ui border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm hover:bg-hover-primary hover:text-hover-primary-ink active:shadow-none active:press transition-all focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
             >
               Auswertung exportieren
             </a>

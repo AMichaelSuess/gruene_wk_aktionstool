@@ -74,13 +74,13 @@ function BestaetigenContent() {
               <button
                 onClick={handleSend}
                 disabled={status === "sending"}
-                className="rounded-button bg-primary text-white font-bold px-6 py-3 border-ui border-line shadow-ui hover:shadow-none hover:press transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="rounded-button bg-primary text-white font-bold px-6 py-3 border-ui border-line shadow-ui hover:shadow-none hover:press enabled:hover:bg-hover-primary enabled:hover:text-hover-primary-ink transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {status === "sending" ? "Wird gesendet …" : "E-Mail senden"}
               </button>
               <Link
                 href="/"
-                className="rounded-button bg-white text-ink font-bold px-6 py-3 border-ui border-line shadow-ui hover:shadow-none hover:press transition-all inline-block"
+                className="rounded-button bg-white text-ink font-bold px-6 py-3 border-ui border-line shadow-ui hover:shadow-none hover:press hover:bg-hover transition-all inline-block"
               >
                 Abbrechen
               </Link>

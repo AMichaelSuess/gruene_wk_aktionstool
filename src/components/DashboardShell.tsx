@@ -48,7 +48,7 @@ function isActive(item: NavItem, pathname: string) {
 
 const itemClass =
   "flex items-center gap-3 rounded-button px-3 py-2 text-sm font-bold case-ui tracking-ui transition-colors border-ui mb-1";
-const idleItemClass = "text-ink border-transparent hover:border-line hover:shadow-ui-sm";
+const idleItemClass = "text-ink border-transparent hover:border-line hover:shadow-ui-sm hover:bg-hover";
 
 /**
  * Gemeinsames Layout des internen Bereichs (Dashboard und Verwaltung).

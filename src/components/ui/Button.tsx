@@ -13,17 +13,17 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-primary text-white border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press",
+    "bg-primary text-white border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm enabled:hover:bg-hover-primary enabled:hover:text-hover-primary-ink active:shadow-none active:press",
   secondary:
-    "bg-white text-ink border-ui border-line-strong shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press",
+    "bg-white text-ink border-ui border-line-strong shadow-ui hover:shadow-ui-sm hover:press-sm enabled:hover:bg-hover active:shadow-none active:press",
   danger:
-    "bg-danger text-white border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press",
+    "bg-danger text-white border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm enabled:hover:bg-hover-danger active:shadow-none active:press",
   ghost:
-    "bg-transparent text-primary border-ui border-transparent hover:border-line hover:shadow-ui",
+    "bg-transparent text-primary border-ui border-transparent hover:border-line hover:shadow-ui enabled:hover:bg-hover",
   action:
-    "bg-white text-ink border-ui border-line hover:border-primary hover:text-primary",
+    "bg-white text-ink border-ui border-line hover:border-primary hover:text-primary enabled:hover:bg-hover",
   outline:
-    "bg-white text-primary border-ui border-primary shadow-ui-brand hover:shadow-ui-brand-sm hover:press-sm active:shadow-none active:press",
+    "bg-white text-primary border-ui border-primary shadow-ui-brand hover:shadow-ui-brand-sm hover:press-sm enabled:hover:bg-hover active:shadow-none active:press",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

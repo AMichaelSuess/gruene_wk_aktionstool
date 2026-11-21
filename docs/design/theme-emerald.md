@@ -77,7 +77,7 @@ To switch to Obviously later, add its `@font-face` rules and put `"Obviously"` f
 
 ## 5. Elevation and interaction
 
-Soft, emerald-tinted shadows (`rgb(0 45 45 / …)`) replace the hard offsets. Elements do not move on hover (`press*` = 0). Hover feedback comes from color changes and a slightly smaller shadow.
+Soft, emerald-tinted shadows (`rgb(0 45 45 / …)`) replace the hard offsets. Elements do not move on hover (`press*` = 0), so hover has to be visible in color: buttons and sidebar items fill Gelbgrün with dark emerald text, as on the campaign website (`hover`, `hover-primary`), danger buttons turn a darker raspberry (`#8A003C`), clickable cards get the stronger `line-strong` border. Filter chips keep their dark emerald hover fill.
 
 A selected action card gets a 2 px emerald ring on top of its 1 px border (`shadow-ui-selected`), so the selection is as obvious as in the brutalist theme.
 

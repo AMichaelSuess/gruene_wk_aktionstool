@@ -23,6 +23,12 @@
   --color-bar: var(--t-bar);                     /* sticky selection bar */
   --color-bar-ink: var(--t-bar-ink);
 
+  /* Hover fills of clickable elements */
+  --color-hover: var(--t-hover);                 /* white/transparent buttons, nav items */
+  --color-hover-primary: var(--t-hover-primary); /* primary buttons */
+  --color-hover-primary-ink: var(--t-hover-primary-ink);
+  --color-hover-danger: var(--t-hover-danger);   /* danger buttons */
+
   /* Ink and lines */
   --color-ink: var(--t-ink);                     /* body text, dark fills */
   --color-line: var(--t-line);                   /* container borders */
@@ -95,6 +101,11 @@
   --t-cta-hover: #006644;
   --t-bar: #FFFFFF;
   --t-bar-ink: #000000;
+  /* Hover fills equal the resting colors: brutalist signals hover with the press effect */
+  --t-hover: #FFFFFF;
+  --t-hover-primary: #005538;
+  --t-hover-primary-ink: #FFFFFF;
+  --t-hover-danger: #E6007E;
 
   --t-ink: #000000;
   --t-line: #000000;
@@ -156,6 +167,12 @@
   --t-cta-hover: #C8DA20;      /* Gelbgrün, like the campaign website */
   --t-bar: #002D2D;            /* dark bar so the pink CTA stands out */
   --t-bar-ink: #FFFFFF;
+  /* Elements do not move on hover, so they change color: Gelbgrün like the
+     website's buttons, a darker raspberry for danger */
+  --t-hover: #C8DA20;
+  --t-hover-primary: #C8DA20;
+  --t-hover-primary-ink: #002D2D;
+  --t-hover-danger: #8A003C;
 
   --t-ink: #002D2D;
   --t-line: #C9D7D6;

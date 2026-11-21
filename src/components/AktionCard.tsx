@@ -36,7 +36,7 @@ export default function AktionCard({ aktion, selected, onToggle }: AktionCardPro
       className={`bg-white rounded-card border-ui transition-all cursor-pointer ${
         selected
           ? "border-primary shadow-ui-selected"
-          : "border-line shadow-ui hover:shadow-ui-sm hover:press-sm"
+          : "border-line shadow-ui hover:border-line-strong hover:shadow-ui-sm hover:press-sm"
       } ${isFull ? "opacity-60 cursor-not-allowed" : ""}`}
       onClick={() => !isFull && onToggle(aktion.id)}
     >
