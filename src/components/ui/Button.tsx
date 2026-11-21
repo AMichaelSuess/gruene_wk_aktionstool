@@ -15,7 +15,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary:
     "bg-primary text-white border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press",
   secondary:
-    "bg-white text-ink border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press",
+    "bg-white text-ink border-ui border-line-strong shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press",
   danger:
     "bg-danger text-white border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press",
   ghost:
