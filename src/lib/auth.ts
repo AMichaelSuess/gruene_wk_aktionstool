@@ -22,7 +22,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.role = user.role;
         token.teamIds = user.teamIds;
@@ -31,16 +31,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // Alle 5 Minuten User-Status, Rolle und Teams aus DB prüfen (SEC-04),
       // damit Herabstufungen und Team-Entzug auch laufende Sessions erreichen
+      // trigger "update": die Person hat ihr Konto geaendert (z. B. den Namen), sofort neu laden
       const CHECK_INTERVAL = 5 * 60 * 1000; // 5 Minuten
-      if (Date.now() - ((token.lastChecked as number) ?? 0) > CHECK_INTERVAL) {
+      if (trigger === "update" || Date.now() - ((token.lastChecked as number) ?? 0) > CHECK_INTERVAL) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.sub! },
-          select: { active: true, role: true, teams: { select: { teamId: true } } },
+          select: { active: true, role: true, name: true, teams: { select: { teamId: true } } },
         });
         if (!dbUser || !dbUser.active) {
           return null; // Session invalidiert — deaktivierter oder gelöschter Nutzer
         }
         token.role = dbUser.role;
+        token.name = dbUser.name;
         token.teamIds = dbUser.teams.map((t) => t.teamId);
         token.lastChecked = Date.now();
       }

@@ -49,6 +49,27 @@ export const userUpdateSchema = z.object({
 
 export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
 
+// Eigenen Namen aendern (alle eingeloggten Rollen)
+export const kontoSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Name muss mindestens 2 Zeichen lang sein")
+    .max(100, "Name darf höchstens 100 Zeichen lang sein")
+    .regex(KEINE_STEUERZEICHEN, "Name darf keine Zeilenumbrüche enthalten"),
+});
+
+// Eigenes Passwort aendern (alle eingeloggten Rollen)
+export const passwortAendernSchema = z
+  .object({
+    aktuellesPasswort: z.string().min(1, "Bitte gib dein aktuelles Passwort ein").max(200),
+    neuesPasswort: passwordSchema,
+  })
+  .refine((d) => d.aktuellesPasswort !== d.neuesPasswort, {
+    message: "Das neue Passwort muss sich vom aktuellen unterscheiden",
+    path: ["neuesPasswort"],
+  });
+
 export const teamSchema = z.object({
   name: z.string().min(2, "Teamname muss mindestens 2 Zeichen lang sein"),
   wahlkreisId: z.string().optional().nullable(),

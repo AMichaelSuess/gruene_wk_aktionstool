@@ -101,7 +101,7 @@ describe("JWT-Callback: lastChecked und User-Deaktivierung (SEC-04)", () => {
 
     expect(prisma.user.findUnique).toHaveBeenCalledWith({
       where: { id: "user-1" },
-      select: { active: true, role: true, teams: { select: { teamId: true } } },
+      select: { active: true, role: true, name: true, teams: { select: { teamId: true } } },
     });
     expect(result).not.toBeNull();
     expect(typeof (result as Record<string, unknown>).lastChecked).toBe("number");
