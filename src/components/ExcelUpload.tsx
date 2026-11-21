@@ -102,6 +102,9 @@ export default function ExcelUpload({
     });
 
     if (res.ok) {
+      // Hinweis, wenn nicht alle Aktionen einen Kartenpunkt bekommen haben
+      const data = await res.json().catch(() => null);
+      if (data?.ohneKoordinaten > 0) alert(data.message);
       router.push("/dashboard");
     } else {
       // Begruendung vom Server anzeigen (z. B. unbekanntes Team), falls vorhanden

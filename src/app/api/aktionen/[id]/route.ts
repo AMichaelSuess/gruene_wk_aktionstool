@@ -107,7 +107,9 @@ export async function PUT(
 
     let latitude = validated.latitude;
     let longitude = validated.longitude;
-    if (validated.adresse !== existing.adresse && (!latitude || !longitude)) {
+    // Neue Adresse, oder noch kein Kartenpunkt (z. B. aus einem grossen Import)
+    const ohnePunkt = existing.latitude == null || existing.longitude == null;
+    if ((validated.adresse !== existing.adresse || ohnePunkt) && (!latitude || !longitude)) {
       const geo = await geocodeAddress(validated.adresse);
       if (geo) {
         latitude = geo.latitude;

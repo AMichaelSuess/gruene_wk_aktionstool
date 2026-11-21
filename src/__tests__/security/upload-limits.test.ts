@@ -12,7 +12,7 @@ vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
     wahlkreis: { findMany: vi.fn(async () => []) },
-    team: { findMany: vi.fn(async () => []) },
+    team: { findMany: vi.fn(async () => []), count: vi.fn(async () => 1) },
     aktion: { findFirst: vi.fn(), create: vi.fn() },
   },
 }));
@@ -109,6 +109,45 @@ describe("POST /api/upload: Grenzen", () => {
     const res = await POST(upload(await xlsxBuffer()) as any);
     expect(res.status).toBe(200);
     expect(parseSpy).toHaveBeenCalledOnce();
+  });
+
+  it("Import sucht höchstens 100 verschiedene Adressen (Geocoding-Warteschlange bleibt frei)", async () => {
+    const { POST } = await import("@/app/api/upload/route");
+    const { prisma } = await import("@/lib/db");
+    const { geocodeAddress } = await import("@/lib/geocoding");
+    (prisma.wahlkreis.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([{ id: "wk-1", nummer: 1, name: "Mitte" }]);
+    (prisma.aktion.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    (prisma.aktion.create as ReturnType<typeof vi.fn>).mockResolvedValue({});
+    (geocodeAddress as ReturnType<typeof vi.fn>).mockResolvedValue({ latitude: 52.5, longitude: 13.4, displayName: "" });
+
+    parseSpy.mockReturnValue(
+      Promise.resolve(
+        Array.from({ length: 150 }, (_, i) => ({
+          titel: `Aktion ${i}`,
+          datum: "01.06.2099",
+          startzeit: "10:00",
+          endzeit: "12:00",
+          adresse: `Teststraße ${i}`,
+          wahlkreis: 1,
+          kategorie: "INFOSTAND",
+          ansprechpersonName: "Lara",
+          ansprechpersonEmail: "lara@example.org",
+          ansprechpersonTelefon: "030123456",
+        }))
+      )
+    );
+
+    const req = upload(await xlsxBuffer());
+    const form = await req.formData();
+    form.append("import", "true");
+    const res = await POST(new Request("http://localhost:3000/api/upload", { method: "POST", body: form }) as any);
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.created).toBe(150);
+    expect(geocodeAddress).toHaveBeenCalledTimes(100);
+    expect(body.ohneKoordinaten).toBe(50);
+    expect(body.message).toContain("Kartenpunkt");
   });
 });
 

@@ -11,6 +11,10 @@ import { audit, logServerError } from "@/lib/audit";
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
 const MAX_UNCOMPRESSED_BYTES = 100 * 1024 * 1024; // 100 MB unpacked
 const MAX_ROWS = 2000;
+// Geocoding ist auf 1 Anfrage/s gedrosselt und die Warteschlange ist fuer alle
+// gemeinsam. Ohne Grenze wuerde ein grosser Import das Anlegen und Bearbeiten
+// von Aktionen fuer alle anderen bis zu ~35 Minuten aufhalten.
+const MAX_GEOCODED_ADDRESSES = 100;
 const DATEI_ZU_GROSS = "Datei zu groß (höchstens 5 MB)";
 
 export async function POST(req: NextRequest) {
@@ -158,6 +162,7 @@ export async function POST(req: NextRequest) {
 
       const created = [];
       const geoCache = new Map<string, Awaited<ReturnType<typeof geocodeAddress>>>();
+      let ohneKoordinaten = 0;
 
       for (const { row, index } of validRows) {
         const teamIds = rowTeamIds.get(index) ?? defaultTeamIds;
@@ -169,9 +174,14 @@ export async function POST(req: NextRequest) {
         // Geocode
         let latitude: number | null = null;
         let longitude: number | null = null;
-        // Same address only once per import (geocoding is throttled to 1/s)
+        // Same address only once per import (geocoding is throttled to 1/s);
+        // beyond the limit, Aktionen are saved without a map point
         if (!geoCache.has(row.adresse)) {
-          geoCache.set(row.adresse, await geocodeAddress(row.adresse));
+          if (geoCache.size < MAX_GEOCODED_ADDRESSES) {
+            geoCache.set(row.adresse, await geocodeAddress(row.adresse));
+          } else {
+            ohneKoordinaten++;
+          }
         }
         const geo = geoCache.get(row.adresse);
         if (geo) {
@@ -207,13 +217,19 @@ export async function POST(req: NextRequest) {
       audit("AKTIONEN_IMPORTIERT", session.user.id, {
         count: created.length,
         zeilen: rows.length,
+        ohneKoordinaten,
         teamIds: defaultTeamIds,
       });
 
+      const hinweis =
+        ohneKoordinaten > 0
+          ? ` ${ohneKoordinaten} Aktion(en) haben noch keinen Kartenpunkt, weil höchstens ${MAX_GEOCODED_ADDRESSES} verschiedene Adressen pro Import gesucht werden. Er wird ergänzt, sobald die Aktion bearbeitet und gespeichert wird.`
+          : "";
       return NextResponse.json({
-        message: `${created.length} Aktion(en) importiert`,
+        message: `${created.length} Aktion(en) importiert.${hinweis}`,
         created: created.length,
         total: rows.length,
+        ohneKoordinaten,
       });
     }
 
