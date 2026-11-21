@@ -64,19 +64,13 @@ export default function TeamsPage() {
                     : "Bezirksweit"}
                 </p>
               </div>
-              <div className="flex gap-3">
-                <Link
-                  href={`/admin/teams/${team.id}`}
-                  className="text-sm text-primary font-bold hover:underline"
-                >
-                  Bearbeiten
+              <div className="flex flex-wrap justify-end gap-2">
+                <Link href={`/admin/teams/${team.id}`}>
+                  <Button variant="outline" size="sm">Bearbeiten</Button>
                 </Link>
-                <button
-                  onClick={() => handleDelete(team.id)}
-                  className="text-sm text-danger font-bold hover:underline"
-                >
+                <Button variant="danger" size="sm" onClick={() => handleDelete(team.id)}>
                   Löschen
-                </button>
+                </Button>
               </div>
             </div>
             <div className="flex gap-4 mt-3 text-sm text-gray-700 border-t-ui border-line pt-3">

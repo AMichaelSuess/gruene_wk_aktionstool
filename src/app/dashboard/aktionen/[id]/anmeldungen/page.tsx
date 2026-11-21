@@ -95,12 +95,9 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
                 <div className="text-sm text-gray-600 break-all">{a.email}</div>
                 {a.telefon && <div className="text-sm text-gray-600">{a.telefon}</div>}
                 {a.signalName && <div className="text-sm text-gray-600">Signal: {a.signalName}</div>}
-                <button
-                  onClick={() => handleDelete(a.id)}
-                  className="text-sm text-red-500 hover:underline mt-1"
-                >
+                <Button variant="danger" size="sm" className="mt-2" onClick={() => handleDelete(a.id)}>
                   Löschen
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -126,12 +123,9 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
                     <td className="py-2 text-gray-600">{a.telefon || "–"}</td>
                     <td className="py-2 text-gray-600">{a.signalName || "–"}</td>
                     <td className="py-2 text-right">
-                      <button
-                        onClick={() => handleDelete(a.id)}
-                        className="text-sm text-red-500 hover:underline"
-                      >
+                      <Button variant="danger" size="sm" onClick={() => handleDelete(a.id)}>
                         Löschen
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Button from "@/components/ui/Button";
 import { WAHLKREIS_LABEL, WAHLKREIS_LABEL_PLURAL, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
 
 interface Wahlkreis {
@@ -47,11 +48,8 @@ export default function WahlkreisePage() {
                 </h3>
                 {WAHLKREIS_NUMMERN_ANZEIGEN && <p className="text-sm text-gray-700 mt-1">{wk.name}</p>}
               </div>
-              <Link
-                href={`/admin/wahlkreise/${wk.id}`}
-                className="text-sm text-primary font-bold hover:underline"
-              >
-                Bearbeiten
+              <Link href={`/admin/wahlkreise/${wk.id}`}>
+                <Button variant="outline" size="sm">Bearbeiten</Button>
               </Link>
             </div>
             <div className="flex gap-4 mt-3 text-sm text-gray-700 border-t-ui border-line pt-3">
