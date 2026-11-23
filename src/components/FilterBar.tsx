@@ -138,7 +138,7 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
                     kategorien: [],
                   })
                 }
-                className="text-xs font-bold case-ui tracking-ui text-ink underline lg:ml-auto hover:text-primary focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus hidden lg:block"
+                className="text-xs font-bold case-ui tracking-ui text-ink underline underline-offset-2 cursor-pointer lg:ml-auto hover:text-primary hover:decoration-2 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus hidden lg:block"
               >
                 Filter zurücksetzen
               </button>
@@ -223,7 +223,7 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
                     kategorien: [],
                   })
                 }
-                className="text-xs font-bold case-ui tracking-ui text-ink underline ml-auto hover:text-primary focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus lg:hidden"
+                className="text-xs font-bold case-ui tracking-ui text-ink underline underline-offset-2 cursor-pointer ml-auto hover:text-primary hover:decoration-2 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus lg:hidden"
               >
                 Filter zurücksetzen
               </button>
