@@ -59,13 +59,13 @@ export async function GET() {
     }),
     // Eine archivierte Aktion zaehlt fuer jedes ihrer Teams
     prisma.aktionStatistikTeam.findMany({
-      select: { teamId: true, statistik: { select: { anmeldungenCount: true } } },
+      select: { teamId: true, statistik: { select: { anmeldungenCount: true, aktionId: true } } },
     }),
     prisma.aktion.findMany({
       select: { datum: true, anmeldungen: { select: { id: true } } },
     }),
     prisma.aktionStatistik.findMany({
-      select: { aktionDatum: true, anmeldungenCount: true },
+      select: { aktionDatum: true, anmeldungenCount: true, aktionId: true },
     }),
   ]);
 
@@ -85,7 +85,8 @@ export async function GET() {
   const archivedTeamMap = new Map<string, { staende: number; anmeldungen: number }>();
   for (const r of archivedByTeam) {
     const entry = archivedTeamMap.get(r.teamId) ?? { staende: 0, anmeldungen: 0 };
-    entry.staende += 1;
+    // Gibt es die Aktion noch, zaehlt sie schon als Stand ueber die Live-Daten
+    if (r.statistik.aktionId === null) entry.staende += 1;
     entry.anmeldungen += r.statistik.anmeldungenCount;
     archivedTeamMap.set(r.teamId, entry);
   }
@@ -126,7 +127,7 @@ export async function GET() {
     const year = getISOWeekYear(s.aktionDatum);
     const key = `${year}-${String(kw).padStart(2, "0")}`;
     const existing = kwMap.get(key) ?? { kw, year, staende: 0, anmeldungen: 0 };
-    existing.staende += 1;
+    if (s.aktionId === null) existing.staende += 1;
     existing.anmeldungen += s.anmeldungenCount;
     kwMap.set(key, existing);
   }
