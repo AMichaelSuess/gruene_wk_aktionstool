@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
+import Dialog from "@/components/ui/Dialog";
 import { WAHLKREIS_LABEL, formatWahlkreisMitLabel } from "@/lib/wahlkreis-label";
 import { toast } from "@/components/ui/Toaster";
 
@@ -16,6 +17,7 @@ interface Team {
 export default function TeamsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<Team | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/teams")
@@ -26,12 +28,14 @@ export default function TeamsPage() {
       });
   }, []);
 
-  async function handleDelete(id: string) {
-    if (!confirm("Team wirklich löschen?")) return;
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const { id, name } = deleteTarget;
+    setDeleteTarget(null);
     const res = await fetch(`/api/admin/teams?id=${id}`, { method: "DELETE" });
     if (res.ok) {
       setTeams((prev) => prev.filter((t) => t.id !== id));
-      toast.success("Das Team wurde gelöscht.");
+      toast.success(`„${name}“ wurde gelöscht.`);
     } else {
       const data = await res.json().catch(() => ({}));
       toast.error(data.error || "Das Team konnte nicht gelöscht werden.");
@@ -70,7 +74,7 @@ export default function TeamsPage() {
                 <Link href={`/admin/teams/${team.id}`}>
                   <Button variant="outline" size="sm">Bearbeiten</Button>
                 </Link>
-                <Button variant="danger" size="sm" onClick={() => handleDelete(team.id)}>
+                <Button variant="danger" size="sm" onClick={() => setDeleteTarget(team)}>
                   Löschen
                 </Button>
               </div>
@@ -82,6 +86,50 @@ export default function TeamsPage() {
           </div>
         ))}
       </div>
+
+      <Dialog
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        title="Team löschen"
+      >
+        {deleteTarget && (deleteTarget._count.members > 0 || deleteTarget._count.aktionen > 0) ? (
+          // Die API lehnt das Loeschen dann ab; besser gleich erklaeren als einen Fehler zeigen
+          <>
+            <p className="mb-6 text-gray-700">
+              &bdquo;{deleteTarget.name}&ldquo; kann noch nicht gelöscht werden, weil das Team noch{" "}
+              {[
+                deleteTarget._count.members > 0 &&
+                  `${deleteTarget._count.members} Mitglied${deleteTarget._count.members !== 1 ? "er" : ""}`,
+                deleteTarget._count.aktionen > 0 &&
+                  `${deleteTarget._count.aktionen} Aktion${deleteTarget._count.aktionen !== 1 ? "en" : ""}`,
+              ]
+                .filter(Boolean)
+                .join(" und ")}{" "}
+              hat. Bitte entferne sie zuerst aus dem Team.
+            </p>
+            <div className="flex justify-end">
+              <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
+                Schließen
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="mb-6 text-gray-700">
+              &bdquo;{deleteTarget?.name}&ldquo; wird endgültig gelöscht. Das kann nicht rückgängig
+              gemacht werden.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
+                Abbrechen
+              </Button>
+              <Button variant="danger" onClick={confirmDelete}>
+                Team löschen
+              </Button>
+            </div>
+          </>
+        )}
+      </Dialog>
     </div>
   );
 }

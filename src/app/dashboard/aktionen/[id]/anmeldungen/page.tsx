@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import Button from "@/components/ui/Button";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
+import Dialog from "@/components/ui/Dialog";
 import { toast } from "@/components/ui/Toaster";
 
 interface Anmeldung {
@@ -26,6 +27,7 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
   const [anmeldungen, setAnmeldungen] = useState<Anmeldung[]>([]);
   const [aktion, setAktion] = useState<Aktion | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<Anmeldung | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -38,8 +40,10 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
     });
   }, [id]);
 
-  async function handleDelete(anmeldungId: string) {
-    if (!confirm("Anmeldung wirklich löschen?")) return;
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const anmeldungId = deleteTarget.id;
+    setDeleteTarget(null);
     const res = await fetch(`/api/aktionen/${id}/anmeldungen?anmeldungId=${anmeldungId}`, {
       method: "DELETE",
     });
@@ -97,7 +101,7 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
                 <div className="text-sm text-gray-600 break-all">{a.email}</div>
                 {a.telefon && <div className="text-sm text-gray-600">{a.telefon}</div>}
                 {a.signalName && <div className="text-sm text-gray-600">Signal: {a.signalName}</div>}
-                <Button variant="danger" size="sm" className="mt-2" onClick={() => handleDelete(a.id)}>
+                <Button variant="danger" size="sm" className="mt-2" onClick={() => setDeleteTarget(a)}>
                   Löschen
                 </Button>
               </div>
@@ -125,7 +129,7 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
                     <td className="py-2 text-gray-600">{a.telefon || "–"}</td>
                     <td className="py-2 text-gray-600">{a.signalName || "–"}</td>
                     <td className="py-2 text-right">
-                      <Button variant="danger" size="sm" onClick={() => handleDelete(a.id)}>
+                      <Button variant="danger" size="sm" onClick={() => setDeleteTarget(a)}>
                         Löschen
                       </Button>
                     </td>
@@ -136,6 +140,25 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
           </div>
         </Card>
       )}
+
+      <Dialog
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        title="Anmeldung löschen"
+      >
+        <p className="mb-6 text-gray-700">
+          Die Anmeldung von &bdquo;{deleteTarget?.vorname} {deleteTarget?.nachname}&ldquo; wird
+          endgültig gelöscht. Die Person wird darüber nicht per E-Mail benachrichtigt.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
+            Abbrechen
+          </Button>
+          <Button variant="danger" onClick={confirmDelete}>
+            Anmeldung löschen
+          </Button>
+        </div>
+      </Dialog>
     </div>
   );
 }
