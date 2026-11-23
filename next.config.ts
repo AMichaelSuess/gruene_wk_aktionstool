@@ -29,6 +29,8 @@ const sharedHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // E2E tests build into their own folder, so they don't disturb a running dev server
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   // No "X-Powered-By: Next.js": it only helps attackers pick exploits
   poweredByHeader: false,
   headers: async () => [

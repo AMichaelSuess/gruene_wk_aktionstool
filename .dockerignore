@@ -1,6 +1,11 @@
 # Abhängigkeiten und Build-Ausgaben
 node_modules
 .next
+.next-e2e
+e2e
+playwright.config.ts
+test-results
+playwright-report
 dist
 coverage
 *.tsbuildinfo

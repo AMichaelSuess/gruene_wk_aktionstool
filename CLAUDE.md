@@ -17,6 +17,7 @@ npm run dev -- -p 3200                        # Start Next.js dev server (VS Cod
 npm run build                                 # Production build
 npm run lint                                  # ESLint
 npm test                                      # Run all tests (vitest)
+npm run e2e                                   # End-to-end tests (Playwright, own DB and port 3300)
 npx prisma migrate dev --name <n>             # Create migration
 npx prisma migrate reset                      # Reset DB + reseed
 npx prisma studio --port 3201                 # DB browser
@@ -98,7 +99,10 @@ Role checks happen at the API route level. Experts can only access their own tea
 
 ## Tests
 
-Tests live in `src/__tests__/security/` and focus on auth protection, role authorization, data sanitization, input validation, team isolation, rate limiting, and cron auth. Test environment uses `node` (not jsdom) — see `vitest.config.ts`.
+Two layers:
+
+- **Vitest** (`src/__tests__/`, `npm test`, runs in the Docker build): unit tests and route handler tests with mocked `auth()` and Prisma — auth protection, role authorization, data sanitization, input validation, team isolation, rate limiting, cron auth. Environment `node` (no jsdom), see `vitest.config.ts`. `src/__tests__/routing/route-links.test.ts` checks that every path in the code (`fetch`, `href`, `router.push`, email links) resolves to a page, API route or file in `public/`.
+- **Playwright** (`e2e/`, `npm run e2e`, local only): the main flows in a browser against a production build. `e2e/prepare-db.ts` resets the database `<name>_e2e` (from `DATABASE_URL`, refuses any other name), runs the seed and adds the actions from `e2e/fixtures.ts`. The build goes to `.next-e2e` and runs on port 3300, so a dev server on 3200 is unaffected. Mail goes to a local sink that drops it (logged as `FEHLER` in `EmailLog`). A test fails on any browser console error; expected ones are allowed per test via `erlaubteFehler`. `E2E_SKIP_BUILD=1` reuses the last build.
 
 ## Environment Variables
 
