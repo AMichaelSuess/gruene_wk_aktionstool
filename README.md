@@ -1,383 +1,102 @@
-# Aktionskoordination - Wahlkampf-Koordinationsplattform
+# Aktionskoordination
 
-Ermöglicht die Verwaltung von Wahlkampfaktionen, Freiwilligen-Anmeldungen, Excel-Import/Export und automatische E-Mail-Benachrichtigungen. Die Plattform ist vollständig über Umgebungsvariablen konfigurierbar und kann von beliebigen Kreisverbänden eingesetzt werden — ohne Code-Änderungen.
+Web-App zur Koordination von Wahlkampf-Aktionen für Kreisverbände von BÜNDNIS 90/DIE GRÜNEN. Freiwillige finden Aktionen auf einer öffentlichen Seite mit Karte und melden sich ohne Konto an. Expert*innen planen Aktionen ihrer Teams im internen Bereich, Admins verwalten Teams, Benutzer*innen und Wahlkreise.
 
-## Tech-Stack
-
-- **Framework:** Next.js 16 (App Router)
-- **Sprache:** TypeScript
-- **Datenbank:** PostgreSQL + Prisma ORM
-- **Auth:** NextAuth.js v5 (Credentials Provider, JWT)
-- **Styling:** Tailwind CSS v4 (Corporate Design Grüne)
-- **Karten:** Leaflet + React-Leaflet (OpenStreetMap)
-- **E-Mail:** Nodemailer (SMTP)
-- **Excel:** ExcelJS
+> **Fork von [maassfm/gruene_wk_aktionstool](https://github.com/maassfm/gruene_wk_aktionstool)**, dem Aktionstool von BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte. Der Fork wird unter anderem für die OBM-Wahl Leipzig 2027 eingesetzt. Allgemeine Fehlerbehebungen und Funktionen werden als Pull Request an das Original zurückgegeben.
 
 ## Funktionen
 
-- **Öffentliche Aktionsübersicht** mit Karte, Filtern (Wahlkreis, Datum, Tageszeit) und Sammelanmeldung
-- **Freiwilligen-Registrierung** mit DSGVO-konformer Einwilligung und Honeypot-Spamschutz
-- **Abmeldung** — Freiwillige können sich über einen Link in der Bestätigungs-E-Mail abmelden
-- **Expert-Dashboard** zur Verwaltung von Team-Aktionen (CRUD, Status-Änderungen)
-- **Excel-Upload** mit Validierung, Vorschau und automatischem Geocoding
-- **Excel-Vorlage** zum Download als Importvorlage
-- **Admin-Bereich** für Benutzer-, Team- und Wahlkreis-Verwaltung mit Statistik-Dashboard
-- **E-Mail-System** via SMTP (Bestätigung, Änderung, Absage, tägliche Übersicht)
-- **Export** als Excel oder Signal-Textformat
-- **Iframe-Einbettung** einzelner Anmeldeformulare auf externen Websites via `/embed/actions/[id]`
-- **Cron-Jobs:** Tägliche Übersichts-E-Mail, Erinnerungs-E-Mails an Angemeldete (Abend vor der Aktion) und automatische Löschung von Anmeldedaten nach 72 Stunden
+- **Öffentliche Aktionsübersicht** mit Karte, Filtern (Wahlkreis, Datum, Tageszeit) und Sammelanmeldung für mehrere Aktionen
+- **Anmeldung ohne Konto**, DSGVO-konform, mit Honeypot und Rate-Limiting; Abmeldung über den Link in der Bestätigungs-E-Mail
+- **„Meine Aktionen“**: Freiwillige lassen sich ihre Anmeldungen per E-Mail schicken
+- **Interner Bereich** für Expert*innen und Admins: Aktionen anlegen, ändern, absagen, filtern und exportieren (Excel, Signal-Text)
+- **Excel-Import** mit Vorlage, Vorschau, Validierung und Geocoding
+- **Teams und Wahlkreise**: Eine Aktion kann mehreren Teams gehören (z. B. Themen- und Ortsteam); Expert*innen sehen Aktionen, Anmeldungen und Statistik ihrer Teams
+- **E-Mails** an Freiwillige (Bestätigung, Änderung, Absage, Erinnerung am Vorabend) und eine tägliche Übersicht an Ansprechpersonen
+- **Datensparsamkeit**: Anmeldedaten werden 72 Stunden nach der Aktion gelöscht, Statistik bleibt anonym erhalten
+- **Iframe-Einbettung** einzelner Anmeldeformulare auf der Website des Kreisverbands
 
----
+## Unterschiede zum Original
 
-## Lokale Entwicklung mit DDEV
+**Funktionen**
+- Aktionen können mehreren Teams gehören; Admins können Aktionen jedem oder keinem Team zuordnen
+- Eine gemeinsame Aktionsliste mit Filtern (werden gemerkt), Export und Löschen; Absagen (mit E-Mail an die Angemeldeten) ist vom Löschen getrennt
+- Expert*innen sehen Statistik und Mitglieder ihrer Teams; alle können Name und Passwort selbst ändern
+- Kategorien „Flyern“, „Infostand“ und „Plakatieren“ statt „Straße“
+- E-Mails mit Textteil und antippbaren Telefonnummern
+- Bestätigungsdialoge vor dem Löschen, Rückmeldungen als Toasts
 
-### Voraussetzungen
+**Anpassbar ohne Code-Änderung**
+- Zwei Themes per `NEXT_PUBLIC_THEME`: `brutalist` (Grüne CI, Standard) und `emerald` (Leipziger OBM-Kampagne)
+- Bezeichnung der Gebiete („Stadtbezirk“ statt „Wahlkreis“), Gebiete ohne Nummern, Kartenausschnitt, Geocoding-Stadt
+- Kontaktformular der Datenschutzbeauftragten statt E-Mail und Telefon
 
-- [DDEV](https://ddev.readthedocs.io/en/stable/) (v1.23+)
-- [Docker](https://docs.docker.com/get-docker/) oder [OrbStack](https://orbstack.dev/) (macOS)
+**Sicherheit und Datenschutz** – drei Sicherheitsprüfungen im November 2026 ([Berichte](docs/assessments/security/)), die Befunde sind behoben:
+- Login-Sperre nach Fehlversuchen, Rate-Limits und Größengrenzen für alle öffentlichen Endpunkte
+- Prüfung der Herkunft bei ändernden API-Anfragen, HSTS, strengere Content-Security-Policy
+- Passwörter mit mindestens 12 Zeichen; eine Passwortänderung beendet alle Sitzungen
+- Öffentliche Aktionsdaten ohne Kontaktdaten der Ansprechpersonen; Team-Trennung für Expert*innen verschärft
+- Das Anmeldeformular verrät nicht, ob eine Adresse schon angemeldet ist; Abmelden erfordert einen Klick
+- Audit-Log für Exporte, Kontoänderungen, Löschungen und fehlgeschlagene Logins; E-Mail-Logs werden nach 7 Tagen gelöscht
 
-### 1. Repository klonen
+**Betrieb und Qualität**
+- Docker-Image für [Coolify](docs/deployment/coolify-deployment.md) mit Health-Endpunkt
+- Bootstrap-Skript für neue Produktionsdatenbanken (statt Seed mit Demo-Konten)
+- Pflichtkonfiguration wird beim Start geprüft
+- Playwright-End-to-End-Tests zusätzlich zu den Vitest-Tests; die Tests laufen im Docker-Build
+- REST-artige API-Pfade auf Englisch (`/api/actions`, `/api/signups`, …), aktuelle Abhängigkeiten, Dependabot
 
-```bash
-git clone <repository-url>
-cd grn_actions
-```
+## Für andere Kreisverbände
 
-### 2. DDEV-Projekt konfigurieren
+Name, Adressen, Datenschutzangaben, Wahlkreise, Kartenausschnitt und Theme werden über Umgebungsvariablen gesetzt – der Code bleibt unverändert. Ohne Angaben gelten die Werte von Berlin-Mitte.
 
-```bash
-ddev config --project-type=generic --docroot=. --webserver-type=nginx-fpm
-```
+- Alle Variablen: [docs/configuration.md](docs/configuration.md) und [`.env.example`](.env.example)
+- Deployment: [docs/deployment/coolify-deployment.md](docs/deployment/coolify-deployment.md) (enthält eine vollständige Beispielkonfiguration für Leipzig)
 
-Alternativ die mitgelieferte Konfiguration verwenden — die Datei `.ddev/config.yaml` sollte bereits vorhanden sein (siehe unten). Falls nicht, erstelle sie:
+## Lokale Entwicklung
 
-```yaml
-# .ddev/config.yaml
-name: gruene-aktionen
-type: generic
-docroot: ""
-php_version: ""
-webserver_type: generic
-database:
-  type: postgres
-  version: "16"
-nodejs_version: "22"
-web_extra_exposed_ports:
-  - name: nextjs
-    container_port: 3000
-    http_port: 3000
-    https_port: 3001
-hooks:
-  post-start:
-    - exec: "npm install"
-    - exec: "npx prisma generate"
-```
-
-### 3. DDEV starten
+Voraussetzungen: Node.js 24 (siehe `.nvmrc`) und PostgreSQL.
 
 ```bash
-ddev start
+nvm use
+npm install
+cp .env.example .env          # DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL anpassen
+npx prisma migrate dev        # Datenbank anlegen
+npx prisma db seed            # Testdaten und Testkonten einspielen
+npm run dev -- -p 3200        # http://localhost:3200 (muss zu NEXTAUTH_URL passen)
 ```
 
-DDEV startet automatisch einen PostgreSQL-Container und installiert Node.js 22.
+Ohne `SMTP_USER`/`SMTP_PASSWORD` werden keine E-Mails verschickt.
 
-### 4. Umgebungsvariablen konfigurieren
+| Rolle  | E-Mail                 | Passwort   |
+|--------|------------------------|------------|
+| Admin  | admin@gruene-mitte.de  | admin1234  |
+| Expert | expert@gruene-mitte.de | expert1234 |
+
+Diese Testkonten legt nur der Seed an. **Den Seed nie auf einer Produktionsdatenbank ausführen** – dafür gibt es `npm run db:bootstrap`.
+
+Weitere Befehle:
 
 ```bash
-cp .env.example .env
+npm test                      # Vitest
+npm run e2e                   # Playwright (eigene Datenbank, Port 3300)
+npm run lint
+npx prisma migrate reset      # Datenbank zurücksetzen und neu befüllen
+npx prisma studio             # Datenbank-Browser
 ```
 
-Die `.env`-Datei mit der DDEV-Datenbank-URL anpassen:
+## Dokumentation
 
-```env
-DATABASE_URL=postgresql://db:db@db:5432/db
-NEXTAUTH_SECRET=ein-zufaelliger-string-mindestens-32-zeichen
-NEXTAUTH_URL=https://gruene-aktionen.ddev.site:3001
-AUTH_TRUST_HOST=true
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=
-SMTP_PASSWORD=
-EMAIL_FROM=noreply@localhost
-EMAIL_FROM_NAME="Kreisvorstand B90/GRÜNE Berlin-Mitte"
-CRON_SECRET=ein-geheimer-cron-token
-```
+- [Umgebungsvariablen](docs/configuration.md)
+- [Deployment auf Coolify](docs/deployment/coolify-deployment.md)
+- [Iframe-Einbettung](docs/embedding.md)
+- [Theming](docs/design/theming.md) mit den Themes [brutalist](docs/design/theme-brutalist.md) und [emerald](docs/design/theme-emerald.md)
+- [Anleitung für Wahlkampf-Expert*innen](docs/anleitung-wahlkampfexperten.md)
+- [Sicherheitsprüfungen](docs/assessments/security/)
+- [Architektur und Konventionen für Entwickler*innen](CLAUDE.md)
 
-> **Hinweis:** In DDEV ist der PostgreSQL-Host `db`, Benutzer `db`, Passwort `db`, Datenbank `db`. `AUTH_TRUST_HOST=true` ist für DDEV/Proxy-Setups nötig. Für lokale Entwicklung ohne E-Mail-Versand können `SMTP_USER` und `SMTP_PASSWORD` leer bleiben — E-Mails werden dann übersprungen.
+## Lizenz und Herkunft
 
-### 5. Datenbank-Migration und Seed
+Ursprünglich entwickelt von Florian Maaß für BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte ([maassfm/gruene_wk_aktionstool](https://github.com/maassfm/gruene_wk_aktionstool)). Dieser Fork wird von Michael Süß weiterentwickelt.
 
-```bash
-ddev exec npx prisma migrate dev --name init
-ddev exec npx prisma db seed
-```
-
-### 6. Entwicklungsserver starten
-
-```bash
-ddev exec npm run dev
-```
-
-Die App ist erreichbar unter:
-
-- **https://gruene-aktionen.ddev.site:3001** (HTTPS via DDEV-Router)
-- **http://localhost:3000** (direkt, wenn Port 3000 exposed)
-
-### Test-Zugangsdaten
-
-| Rolle  | E-Mail                     | Passwort     |
-|--------|----------------------------|--------------|
-| Admin  | admin@gruene-mitte.de      | admin1234    |
-| Expert | expert@gruene-mitte.de     | expert1234   |
-
-### Nützliche DDEV-Befehle
-
-```bash
-# DDEV-Status prüfen
-ddev status
-
-# In den Container wechseln
-ddev ssh
-
-# Prisma Studio (DB-Browser)
-ddev exec npx prisma studio
-
-# Linting
-ddev exec npm run lint
-
-# Tests ausführen
-ddev exec npm test
-
-# Production-Build testen
-ddev exec npm run build
-
-# Datenbank zurücksetzen
-ddev exec npx prisma migrate reset
-
-# PostgreSQL-CLI
-ddev psql
-
-# DDEV stoppen
-ddev stop
-
-# DDEV komplett entfernen (inkl. Datenbank)
-ddev delete -O
-```
-
----
-
-## Production-Deployment
-
-Die ausführliche Deployment-Anleitung (Hetzner Cloud, Nginx, SSL, Cron-Jobs, Backups) befindet sich in:
-
-**[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**
-
----
-
-## Umgebungsvariablen
-
-### Infrastruktur
-
-| Variable          | Beschreibung                                  | Beispiel                                       |
-|-------------------|-----------------------------------------------|-------------------------------------------------|
-| `DATABASE_URL`    | PostgreSQL-Verbindungsstring                  | `postgresql://user:pass@localhost:5432/dbname`  |
-| `NEXTAUTH_SECRET` | Geheimer Schlüssel für JWT-Signierung         | `openssl rand -base64 32`                       |
-| `NEXTAUTH_URL`    | Öffentliche URL der App                       | `https://aktionen.gruene-mitte.de`              |
-| `AUTH_TRUST_HOST` | Trust Proxy Headers (für Reverse-Proxy/DDEV)  | `true`                                          |
-| `SMTP_HOST`       | SMTP-Server für E-Mail-Versand                | `smtp.example.com`                              |
-| `SMTP_PORT`       | SMTP-Port                                     | `587`                                           |
-| `SMTP_SECURE`     | TLS direkt ab Verbindungsaufbau (Port 465)    | `false`                                         |
-| `SMTP_USER`       | SMTP-Benutzername                             | `user@example.com`                              |
-| `SMTP_PASSWORD`   | SMTP-Passwort                                 | *(geheim)*                                      |
-| `EMAIL_FROM`      | Absender-Adresse für E-Mails                  | `aktionen@gruene-mitte.de`                      |
-| `EMAIL_FROM_NAME` | Anzeigename des Absenders                     | `"Kreisvorstand B90/GRÜNE Berlin-Mitte"`        |
-| `CRON_SECRET`     | Bearer-Token für Cron-API-Endpunkte           | `openssl rand -hex 16`                          |
-| `ALLOWED_EMBED_DOMAIN` | Erlaubte Domain für Iframe-Einbettung (CSP `frame-ancestors`) | `https://www.gruene-mitte.de` |
-
-### Kreisverbands-Konfiguration
-
-Alle folgenden Variablen sind **optional** — ohne Angabe werden die Berlin-Mitte-Defaults verwendet. Für den Einsatz in anderen Kreisverbänden die passenden Werte setzen.
-
-#### Organisation & Branding
-
-| Variable                      | Beschreibung                              | Beispiel                                          |
-|-------------------------------|-------------------------------------------|----------------------------------------------------|
-| `NEXT_PUBLIC_ORG_SHORT_NAME`  | Kurzname (öffentlich, erscheint in der UI) | `B90/GRÜNE Köln`                                  |
-| `ORG_FULL_NAME`               | Vollständiger Name                        | `BÜNDNIS 90/DIE GRÜNEN Köln`                      |
-| `ORG_LEGAL_NAME`              | Rechtlicher Name (für Datenschutz/Impressum) | `BÜNDNIS 90/DIE GRÜNEN Kreisverband Köln`      |
-| `ORG_RESPONSIBLE`             | Verantwortliche Person/Rolle              | `Kreisvorstand BÜNDNIS 90/DIE GRÜNEN Köln`        |
-| `ORG_SUBTITLE`                | Untertitel (erscheint in E-Mail-Headern)  | `Kreisvorstand`                                   |
-
-#### Kontakt & Website
-
-| Variable         | Beschreibung               | Beispiel                          |
-|------------------|----------------------------|------------------------------------|
-| `CONTACT_EMAIL`  | Haupt-Kontaktadresse       | `info@gruene-koeln.de`            |
-| `WEBSITE_URL`    | Website des Kreisverbands  | `www.gruene-koeln.de`             |
-| `IMPRESSUM_URL`  | Link zur Impressumsseite   | `https://gruene-koeln.de/impressum` |
-
-#### Adresse
-
-| Variable              | Beschreibung      | Beispiel             |
-|-----------------------|-------------------|----------------------|
-| `ADDRESS_STREET`      | Straße + Hausnr.  | `Mauritiuswall 1`    |
-| `ADDRESS_POSTAL_CODE` | Postleitzahl      | `50676`              |
-| `ADDRESS_CITY`        | Stadt             | `Köln`               |
-
-#### Datenschutzbeauftragte*r
-
-| Variable          | Beschreibung                | Beispiel                          |
-|-------------------|-----------------------------|-----------------------------------|
-| `DSB_NAME`        | Name/Org des/der DSB        | `SCO-CON:SULT`                    |
-| `DSB_STREET`      | Straße + Hausnr.            | `Hauptstraße 27`                  |
-| `DSB_POSTAL_CODE` | Postleitzahl                | `53604`                           |
-| `DSB_CITY`        | Stadt                       | `Bad Honnef`                      |
-| `DSB_EMAIL`       | E-Mail-Adresse              | `datenschutz@example.de`          |
-| `DSB_PHONE`       | Telefonnummer               | `02224/988290`                    |
-
-#### Aufsichtsbehörde
-
-| Variable               | Beschreibung                  | Beispiel                                    |
-|------------------------|-------------------------------|---------------------------------------------|
-| `AUFSICHT_NAME`        | Name der Behörde              | `LfDI Baden-Württemberg`                    |
-| `AUFSICHT_STREET`      | Straße + Hausnr.              | `Lautenschlagerstr. 20`                     |
-| `AUFSICHT_POSTAL_CODE` | Postleitzahl                  | `70173`                                     |
-| `AUFSICHT_CITY`        | Stadt                         | `Stuttgart`                                 |
-| `AUFSICHT_PHONE`       | Telefonnummer                 | `0711 / 615541-0`                           |
-| `AUFSICHT_EMAIL`       | E-Mail-Adresse                | `poststelle@lfdi.bwl.de`                    |
-| `AUFSICHT_URL`         | Website der Behörde           | `https://www.baden-wuerttemberg.datenschutz.de` |
-
-#### Auftragsverarbeiter
-
-| Variable                    | Beschreibung                          | Beispiel                                       |
-|-----------------------------|---------------------------------------|------------------------------------------------|
-| `HOSTING_PROVIDER`          | Hosting-Anbieter                      | `Hetzner Online GmbH`                          |
-| `HOSTING_ADDRESS`           | Adresse des Hosting-Anbieters         | `Industriestr. 25, 91710 Gunzenhausen`         |
-| `HOSTING_LOCATION`          | Standort der Server                   | `Deutschland`                                  |
-| `HOSTING_PRIVACY_URL`       | Datenschutzerklärung des Hosters      | `https://www.hetzner.com/de/legal/privacy-policy` |
-| `EMAIL_PROVIDER`            | E-Mail-Dienstleister                  | `Verdigado eG`                                 |
-| `EMAIL_PROVIDER_PRIVACY_URL`| Datenschutzerklärung des E-Mail-Anbieters | `https://www.verdigado.com/datenschutz`    |
-
-#### Sonstiges
-
-| Variable                | Beschreibung                              | Beispiel              |
-|-------------------------|-------------------------------------------|-----------------------|
-| `DATENSCHUTZ_STAND`     | Datum der Datenschutzerklärung            | `März 2026`           |
-| `ACCOUNT_DELETION_DATE` | Frist für Datenlöschung nach Wahlkampf    | `31. Oktober 2026`    |
-
-#### Wahlkreise
-
-| Variable         | Beschreibung                                                                 | Beispiel |
-|------------------|------------------------------------------------------------------------------|----------|
-| `WAHLKREISE_JSON` | JSON-Array mit `{nummer, name}` pro Wahlkreis. Wenn nicht gesetzt, werden die 7 Wahlkreise von Berlin-Mitte als Standard verwendet. Die Nummern müssen mit den Werten im Excel-Import übereinstimmen. | `'[{"nummer":1,"name":"Wahlkreis 1"},{"nummer":2,"name":"Wahlkreis 2"}]'` |
-| `NEXT_PUBLIC_WAHLKREIS_LABEL` | Bezeichnung der Gebietseinheit in Oberfläche, Fehlermeldungen und Excel-Dateien (Einzahl). Default: `Wahlkreis`. Wird beim Build eingebettet. Excel-Importe mit der Spalte „Wahlkreis“ funktionieren weiterhin. | `Stadtbezirk` |
-| `NEXT_PUBLIC_WAHLKREIS_LABEL_PLURAL` | Mehrzahl. Default: Einzahl + „e“ (bzw. `Wahlkreise`). | `Stadtbezirke` |
-| `NEXT_PUBLIC_WAHLKREIS_LABEL_SHORT` | Kurzform für Filterleiste, Aktionskarten und Karten-Popups. Default: `WK`, bei eigener Einzahl diese. | `Stadtbezirk` |
-| `NEXT_PUBLIC_THEME` | Visuelles Theme: `brutalist` (Default) oder `emerald` (Design der Leipziger OBM-Kampagne 2027). Wird beim Build eingebettet. Siehe `docs/design/theming.md`. | `emerald` |
-
----
-
-## Iframe-Einbettung
-
-Einzelne Aktions-Anmeldeformulare können direkt in externe Websites eingebettet werden.
-
-**URL-Schema:** `https://<app-domain>/embed/actions/<aktionId>`
-
-### Einbettungs-Code
-
-```html
-<iframe
-  id="grn-aktion"
-  src="https://<app-domain>/embed/actions/<aktionId>"
-  width="100%"
-  height="600"
-  style="border:0;"
-></iframe>
-<script>
-  window.addEventListener('message', (e) => {
-    if (e.origin !== 'https://<app-domain>') return;
-    if (e.data?.type === 'grn-actions-resize') {
-      document.getElementById('grn-aktion').style.height = e.data.height + 'px';
-    }
-  });
-</script>
-```
-
-Das Script passt die iframe-Höhe automatisch an den Formularinhalt an (z.B. nach Absenden oder bei Fehlermeldungen). Die Aktions-ID ist im Dashboard bei jeder Aktion einsehbar.
-
-### Konfiguration
-
-In der `.env` die erlaubte Einbettungsdomäne setzen:
-
-```env
-ALLOWED_EMBED_DOMAIN=https://www.gruene-mitte.de
-```
-
-Ohne diese Variable ist Einbettung nur von `'self'` erlaubt (d.h. nur von der App-Domain selbst). Mit gesetzter Variable erlaubt der CSP-Header `frame-ancestors 'self' https://www.gruene-mitte.de` — alle anderen Domains werden vom Browser blockiert.
-
----
-
-## Projektstruktur
-
-```
-├── .ddev/
-│   └── config.yaml              # DDEV-Konfiguration
-├── docs/
-│   ├── DEPLOYMENT.md            # Deployment-Anleitung
-│   ├── anleitung-wahlkampfexperten.md  # Benutzerhandbuch
-│   └── design/                  # Design-Dokumentation
-│       ├── theming.md           # Theme-System, Tokens, Komponenten-Muster
-│       ├── theme-brutalist.md   # Default-Theme (Soft Brutalism)
-│       └── theme-emerald.md     # Theme der Leipziger OBM-Kampagne 2027
-├── prisma/
-│   ├── migrations/              # Datenbank-Migrationen
-│   ├── schema.prisma            # Datenmodell
-│   └── seed.ts                  # Testdaten
-├── public/                      # Statische Dateien (Logos, Fonts)
-├── src/
-│   ├── __tests__/               # Vitest: Sicherheits-, Handler- und Routen-Tests
-│   ├── app/
-│   │   ├── (auth)/              # Login-Seite
-│   │   ├── embed/               # Einbettbare Anmeldeformulare (iframe)
-│   │   ├── (public)/            # Öffentliche Seiten (Übersicht, Anmeldung, Abmeldung, Datenschutz)
-│   │   ├── manage/              # Interner Bereich (Aktionen, Statistik, Benutzer*innen, Teams, Wahlkreise, Konto)
-│   │   └── api/                 # API-Routen
-│   │       ├── actions/         #   Aktionen-CRUD, Anmeldungen pro Aktion, Export, Excel-Import und -Vorlage
-│   │       ├── signups/         #   Anmeldung, Abmeldung, Übersicht per E-Mail, Export der Anmeldungen
-│   │       ├── statistics/      #   Statistik und Auswertungs-Export
-│   │       ├── me/              #   Eigenes Konto, Passwort, eigene Teams
-│   │       ├── users/           #   Benutzer*innen (Liste auch für Expert*innen, Verwaltung nur Admin)
-│   │       ├── teams/           #   Teams (Liste für alle, Verwaltung nur Admin)
-│   │       ├── districts/       #   Wahlkreise (Liste öffentlich, Bearbeiten nur Admin)
-│   │       └── cron/            #   daily-summary, cleanup-signups, send-reminders
-│   ├── components/
-│   │   ├── ui/                  # UI-Primitives (Button, Input, Card, Dialog, Badge, Select)
-│   │   ├── AktionCard.tsx       # Aktionskarte
-│   │   ├── AktionMap.tsx        # Leaflet-Kartenkomponente
-│   │   ├── AnmeldeFormular.tsx   # Anmeldeformular
-│   │   ├── ExcelUpload.tsx      # Excel-Upload mit Vorschau
-│   │   ├── FilterBar.tsx        # Wahlkreis-/Datum-/Tageszeit-Filter
-│   │   └── SelectionBar.tsx     # Sammelanmeldungs-Leiste
-│   └── lib/
-│       ├── auth.ts              # NextAuth-Konfiguration
-│       ├── db.ts                # Prisma-Client-Singleton
-│       ├── district-config.ts   # Kreisverbands-Konfiguration (alle Org-Werte)
-│       ├── email.ts             # E-Mail-Versand (Nodemailer)
-│       ├── email-templates.ts   # HTML-E-Mail-Templates
-│       ├── excel.ts             # Excel-Import/-Export (ExcelJS)
-│       ├── geocoding.ts         # Nominatim-Geocoding
-│       └── validators.ts        # Zod-Schemas
-├── .env.example
-├── next.config.ts
-├── vitest.config.ts
-└── package.json
-```
-
----
-
-## Lizenz
-
-Lizenziert unter der European Union Public Licence v. 1.2 (EUPL-1.2).
-Der vollständige Lizenztext befindet sich in der Datei LICENSE in diesem Repository
-sowie unter: https://eupl.eu/1.2/de/
+Lizenziert unter der European Union Public Licence v. 1.2 (EUPL-1.2), siehe [LICENSE](LICENSE) und https://eupl.eu/1.2/de/.
