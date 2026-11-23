@@ -53,8 +53,9 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
     onFilterChange({ ...filters, kategorien: next });
   }
 
+  // Das Datum zaehlt als ein Filter, egal ob Anfang, Ende oder beides gesetzt ist
   const activeFilterCount =
-    (filters.datum ? 1 : 0) +
+    (filters.datum || filters.datumBis ? 1 : 0) +
     (filters.tageszeit.length > 0 ? 1 : 0) +
     (filters.wahlkreise.length > 0 ? 1 : 0) +
     (filters.kategorien.length > 0 ? 1 : 0);
@@ -125,9 +126,8 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
               </div>
             </div>
 
-            {/* Clear (shown inline on lg+, sobald Datum, Tageszeit oder Art gesetzt ist) */}
-            {activeFilterCount > 0 &&
-              (filters.datum || filters.tageszeit.length > 0 || filters.kategorien.length > 0) && (
+            {/* Clear (shown inline on lg+, sobald irgendein Filter gesetzt ist) */}
+            {activeFilterCount > 0 && (
               <button
                 onClick={() =>
                   onFilterChange({
