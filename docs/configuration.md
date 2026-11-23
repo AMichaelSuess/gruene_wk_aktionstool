@@ -65,6 +65,12 @@ Alle folgenden Variablen sind **optional** – ohne Angabe gelten die Werte von 
 | `GEOCODING_CITY`       | Stadt, die beim Geocoding an Adressen angehängt wird (Default: `ADDRESS_CITY`) | `Köln` |
 | `NEXT_PUBLIC_MAP_CENTER` | Startansicht der Karte als `Breitengrad,Längengrad`      | `"50.9375,6.9603"`   |
 | `NEXT_PUBLIC_MAP_ZOOM` | Zoomstufe der Startansicht                                 | `13`                 |
+| `NEXT_PUBLIC_MAP_TILE_URL` | Kachelserver der Karte, nur `https`; der Host wird automatisch in die CSP übernommen (Default: `https://tile.openstreetmap.de/{z}/{x}/{y}.png`, FOSSGIS e.V., Server in der EU) | `"https://sgx.geodatenzentrum.de/…/{z}/{y}/{x}.png"` |
+| `NEXT_PUBLIC_MAP_ATTRIBUTION` | Quellenangabe unter der Karte (HTML, vom Anbieter vorgeschrieben). Bei eigenem Kachelserver mit anpassen | `'© <a href="https://basemap.de">basemap.de</a> / BKG (CC BY 4.0)'` |
+| `MAP_TILE_PROVIDER` | Anbieter der Kartenkacheln für die Datenschutzerklärung (Default: FOSSGIS e.V.) | `"Bundesamt für Kartographie und Geodäsie (BKG), Frankfurt am Main"` |
+| `MAP_TILE_PROVIDER_PRIVACY_URL` | Datenschutzerklärung des Kachelanbieters | `"https://www.bkg.bund.de/datenschutz"` |
+
+Wer den Kachelserver wechselt, prüft auch, ob der Abschnitt „Übermittlung in Drittländer“ der Datenschutzerklärung noch stimmt. Ein vollständiges Beispiel (basemap.de) steht in [`.env.example`](../.env.example).
 
 ### Wahlkreise
 

@@ -25,10 +25,11 @@ Web-App zur Koordination von Wahlkampf-Aktionen für Kreisverbände von BÜNDNIS
 - Kategorien „Flyern“, „Infostand“ und „Plakatieren“ statt „Straße“
 - E-Mails mit Textteil und antippbaren Telefonnummern
 - Bestätigungsdialoge vor dem Löschen, Rückmeldungen als Toasts
+- Karte auf Touch-Geräten mit zwei Fingern verschieben, damit sich die Seite mit einem Finger scrollen lässt
 
 **Anpassbar ohne Code-Änderung**
 - Zwei Themes per `NEXT_PUBLIC_THEME`: `brutalist` (Grüne CI, Standard) und `emerald` (Leipziger OBM-Kampagne)
-- Bezeichnung der Gebiete („Stadtbezirk“ statt „Wahlkreis“), Gebiete ohne Nummern, Kartenausschnitt, Geocoding-Stadt
+- Bezeichnung der Gebiete („Stadtbezirk“ statt „Wahlkreis“), Gebiete ohne Nummern, Kartenausschnitt, Kachelserver der Karte, Geocoding-Stadt
 - Kontaktformular der Datenschutzbeauftragten statt E-Mail und Telefon
 
 **Sicherheit und Datenschutz** – drei Sicherheitsprüfungen im November 2026 ([Berichte](docs/assessments/security/)), die Befunde sind behoben:
@@ -37,6 +38,7 @@ Web-App zur Koordination von Wahlkampf-Aktionen für Kreisverbände von BÜNDNIS
 - Passwörter mit mindestens 12 Zeichen; eine Passwortänderung beendet alle Sitzungen
 - Öffentliche Aktionsdaten ohne Kontaktdaten der Ansprechpersonen; Team-Trennung für Expert*innen verschärft
 - Das Anmeldeformular verrät nicht, ob eine Adresse schon angemeldet ist; Abmelden erfordert einen Klick
+- Kartenkacheln vom OpenStreetMap-Server der FOSSGIS e.V. in der EU statt von tile.openstreetmap.org (Großbritannien); die Datenschutzerklärung nennt den Kartenanbieter
 - Audit-Log für Exporte, Kontoänderungen, Löschungen und fehlgeschlagene Logins; E-Mail-Logs werden nach 7 Tagen gelöscht
 
 **Betrieb und Qualität**
