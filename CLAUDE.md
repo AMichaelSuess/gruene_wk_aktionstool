@@ -339,8 +339,8 @@ All UI must work in every theme. See `docs/design/theming.md` for the token tabl
 - Purpose: Notify volunteers of registration and changes; notify contact persons of daily summaries
 - Sending: `src/lib/email.ts` (`sendEmail()`) wraps nodemailer, always writes to `EmailLog` regardless of success/failure
 - Templates: `src/lib/email-templates.ts` — named export functions per type (`anmeldebestaetigungEmail`, `aenderungsEmail`, `absageEmail`, `tagesUebersichtEmail`, `erinnerungsEmail`)
-- Purpose: Retain historical participation counts when `Anmeldung` records are deleted or when an `Aktion` is hard-deleted would be blocked
-- Note: `AktionStatistik.aktionId` is `onDelete: SetNull`, so an admin hard-delete of an `Aktion` keeps its statistik record (with `aktionId` null)
+- Purpose: Retain historical participation counts when the cleanup cron deletes `Anmeldung` records
+- Note: `AktionStatistik.aktionId` is `onDelete: Cascade`, so an admin hard-delete of an `Aktion` removes its statistik record too (hard delete is for test data, duplicates and mistakes; real cancellations use ABGESAGT)
 ## Entry Points
 - Location: `src/app/(public)/page.tsx`
 - Triggers: Any unauthenticated browser request to `/`

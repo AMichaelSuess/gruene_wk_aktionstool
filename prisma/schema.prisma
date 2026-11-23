@@ -160,9 +160,11 @@ model EmailLog {
 
 model AktionStatistik {
   id               String    @id @default(cuid())
-  // Bleibt erhalten, wenn die Aktion endgueltig geloescht wird
+  // Wird mit der Aktion geloescht: eine endgueltig geloeschte Aktion (Test,
+  // Dublette, Fehleingabe) soll in keiner Statistik mehr auftauchen. Echte
+  // Absagen laufen ueber ABGESAGT und behalten ihre Statistik.
   aktionId         String?   @unique
-  aktion           Aktion?   @relation(fields: [aktionId], references: [id], onDelete: SetNull)
+  aktion           Aktion?   @relation(fields: [aktionId], references: [id], onDelete: Cascade)
   anmeldungenCount Int
   aktionDatum      DateTime  @db.Date
   wahlkreisId      String
