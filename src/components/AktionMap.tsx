@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -78,7 +78,11 @@ const isTouchDevice = () =>
   typeof window !== "undefined" && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 
 export default function AktionMap({ aktionen, onSelect }: AktionMapProps) {
-  const geoAktionen = aktionen.filter((a) => a.latitude && a.longitude);
+  // Memoized so that re-renders (e.g. the touch hint) don't re-run FitBounds and reset the view
+  const geoAktionen = useMemo(
+    () => aktionen.filter((a) => a.latitude && a.longitude),
+    [aktionen]
+  );
   const [touch] = useState(isTouchDevice);
   const [showHint, setShowHint] = useState(false);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
