@@ -167,7 +167,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
                       type="checkbox"
                       checked={form.teamIds.includes(team.id)}
                       onChange={() => toggleTeam(team.id)}
-                      className="rounded border-gray-300"
+                      className="w-4 h-4 accent-primary cursor-pointer"
                     />
                     <span className="text-sm text-gray-700">{team.name}</span>
                   </label>
