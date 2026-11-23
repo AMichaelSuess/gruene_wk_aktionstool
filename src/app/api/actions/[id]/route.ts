@@ -7,7 +7,7 @@ import { aktionSchema } from "@/lib/validators";
 import { geocodeAddress } from "@/lib/geocoding";
 import { sendEmail } from "@/lib/email";
 import { audit, logServerError } from "@/lib/audit";
-import { aenderungsEmail, absageEmail } from "@/lib/email-templates";
+import { aenderungsEmail } from "@/lib/email-templates";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import {
@@ -229,7 +229,8 @@ export async function PUT(
   }
 }
 
-// DELETE: Cancel action
+// DELETE: Aktion endgueltig loeschen (nur Admins, keine E-Mails). Absagen mit
+// Benachrichtigung der Angemeldeten: POST /api/actions/[id]/cancel.
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -239,51 +240,23 @@ export async function DELETE(
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
   }
 
+  if (session.user.role !== "ADMIN") {
+    audit("ZUGRIFF_VERWEIGERT", session.user.id, { route: "DELETE /api/actions/[id]" });
+    return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
+  }
+
   const { id } = await params;
 
   const existing = await prisma.aktion.findUnique({
     where: { id },
-    include: { anmeldungen: true, teams: { select: { teamId: true } } },
-    // createdById is a scalar field – included automatically
   });
 
   if (!existing) {
     return NextResponse.json({ error: "Aktion nicht gefunden" }, { status: 404 });
   }
 
-  if (!hasAktionAccess(session.user, existing)) {
-    audit("ZUGRIFF_VERWEIGERT", session.user.id, { aktionId: id, route: "DELETE /api/actions/[id]" });
-    return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
-  }
+  await prisma.aktion.delete({ where: { id } });
+  audit("AKTION_ENDGUELTIG_GELOESCHT", session.user.id, { aktionId: id });
 
-  await prisma.aktion.update({
-    where: { id },
-    data: { status: "ABGESAGT" },
-  });
-
-  // Send cancellation email to all registrants
-  if (existing.anmeldungen.length > 0) {
-    const emailData = absageEmail({
-      titel: existing.titel,
-      datum: existing.datum,
-      startzeit: existing.startzeit,
-      endzeit: existing.endzeit,
-      adresse: existing.adresse,
-      ansprechpersonName: existing.ansprechpersonName,
-      ansprechpersonEmail: existing.ansprechpersonEmail,
-      ansprechpersonTelefon: existing.ansprechpersonTelefon,
-    });
-
-    for (const anmeldung of existing.anmeldungen) {
-      await sendEmail({
-        to: anmeldung.email,
-        subject: emailData.subject,
-        html: emailData.html,
-        typ: "ABSAGE",
-        aktionId: existing.id,
-      });
-    }
-  }
-
-  return NextResponse.json({ message: "Aktion abgesagt" });
+  return NextResponse.json({ message: "Aktion gelöscht" });
 }

@@ -49,7 +49,7 @@ Page URLs are English (UI text stays German): plural lists, `/new`, `/[id]`, sub
 - `src/app/api/` — REST endpoints: auth, action CRUD, export (Excel/Signal), upload, cron jobs
 
 API routes (English, resource-style; JSON fields stay German like the Prisma model):
-- `/api/actions` — list (public with `?public=true`), create, `PATCH` bulk category; `/api/actions/[id]` read/update/cancel
+- `/api/actions` — list (public with `?public=true`), create, `PATCH` bulk category; `/api/actions/[id]` read/update, `DELETE` = hard delete without emails (ADMIN); `POST /api/actions/[id]/cancel` sets ABGESAGT and emails the volunteers
 - `/api/actions/[id]/signups` — signups of one action, `DELETE …/signups/[signupId]` (EXPERT+)
 - `/api/actions/export`, `/api/actions/import`, `/api/actions/import-template` — Excel/Signal export, Excel import and template (EXPERT+)
 - `/api/signups` — public sign-up; `/api/signups/lookup` and `/api/signups/unsubscribe` — unsubscribe via cancelToken (POST, token in the body); `/api/signups/send-overview` — email a volunteer their signups; `/api/signups/export` — export signups (EXPERT+)
@@ -58,7 +58,6 @@ API routes (English, resource-style; JSON fields stay German like the Prisma mod
 - `/api/users`, `/api/users/[id]` — list (experts: members of their teams), create/update/delete (ADMIN)
 - `/api/teams`, `/api/teams/[id]` — list (ADMIN also gets Wahlkreis and counts), create/update/delete (ADMIN)
 - `/api/districts`, `/api/districts/[id]` — public list (ADMIN also gets counts), update (ADMIN)
-- `/api/admin/aktionen/[id]` — hard delete of an action (ADMIN)
 - `/api/cron/daily-summary`, `/api/cron/cleanup-signups`, `/api/cron/send-reminders` — cron jobs
 
 ### Data Model

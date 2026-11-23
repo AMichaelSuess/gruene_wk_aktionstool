@@ -124,10 +124,10 @@ describe("EXPERT darf nicht auf weitere Admin-Endpunkte zugreifen", () => {
     expect(res.status).toBe(401);
   });
 
-  it("DELETE /api/admin/aktionen/[id] → 403 für EXPERT, nichts gelöscht", async () => {
-    const { DELETE } = await import("@/app/api/admin/aktionen/[id]/route");
+  it("DELETE /api/actions/[id] → 403 für EXPERT, nichts gelöscht", async () => {
+    const { DELETE } = await import("@/app/api/actions/[id]/route");
     const { prisma } = await import("@/lib/db");
-    const req = createRequest("/api/admin/aktionen/aktion-1", { method: "DELETE" });
+    const req = createRequest("/api/actions/aktion-1", { method: "DELETE" });
     const res = await DELETE(req as any, { params: Promise.resolve({ id: "aktion-1" }) });
     expect(res.status).toBe(403);
     expect(prisma.aktion.delete).not.toHaveBeenCalled();

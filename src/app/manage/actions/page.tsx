@@ -185,7 +185,7 @@ export default function DashboardPage() {
     if (!cancelId) return;
     const id = cancelId;
     setCancelId(null);
-    const res = await fetch(`/api/actions/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/actions/${id}/cancel`, { method: "POST" });
     if (res.ok) {
       setAktionen((prev) => prev.map((a) => (a.id === id ? { ...a, status: "ABGESAGT" } : a)));
       toast.success("Die Aktion wurde abgesagt.");
@@ -198,7 +198,7 @@ export default function DashboardPage() {
     if (!deleteTarget) return;
     const { id, titel } = deleteTarget;
     setDeleteTarget(null);
-    const res = await fetch(`/api/admin/aktionen/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/actions/${id}`, { method: "DELETE" });
     if (res.ok) {
       setAktionen((prev) => prev.filter((a) => a.id !== id));
       setSelectedIds((prev) => {

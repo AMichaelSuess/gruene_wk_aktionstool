@@ -350,7 +350,6 @@ Ohne diese Variable ist Einbettung nur von `'self'` erlaubt (d.h. nur von der Ap
 │   │       ├── users/           #   Benutzer*innen (Liste auch für Expert*innen, Verwaltung nur Admin)
 │   │       ├── teams/           #   Teams (Liste für alle, Verwaltung nur Admin)
 │   │       ├── districts/       #   Wahlkreise (Liste öffentlich, Bearbeiten nur Admin)
-│   │       ├── admin/           #   Endgültiges Löschen von Aktionen (nur Admin)
 │   │       └── cron/            #   daily-summary, cleanup-signups, send-reminders
 │   ├── components/
 │   │   ├── ui/                  # UI-Primitives (Button, Input, Card, Dialog, Badge, Select)
