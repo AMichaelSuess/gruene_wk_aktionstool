@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -72,14 +72,57 @@ function FitBounds({ aktionen }: { aktionen: AktionMapProps["aktionen"] }) {
   return null;
 }
 
+// Touch devices: one finger scrolls the page, two fingers move and zoom the map.
+// With dragging disabled, Leaflet's pinch handler still pans along with the fingers.
+const isTouchDevice = () =>
+  typeof window !== "undefined" && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
 export default function AktionMap({ aktionen, onSelect }: AktionMapProps) {
   const geoAktionen = aktionen.filter((a) => a.latitude && a.longitude);
+  const [touch] = useState(isTouchDevice);
+  const [showHint, setShowHint] = useState(false);
+  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+  }, []);
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (!touch) return;
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    if (e.touches.length === 1) {
+      setShowHint(true);
+      hintTimer.current = setTimeout(() => setShowHint(false), 1500);
+    } else {
+      setShowHint(false);
+    }
+  }
 
   return (
-    <div className="h-[500px] md:h-[600px] rounded-xl overflow-hidden border border-gray-200">
+    <div
+      className="relative h-[500px] md:h-[600px] rounded-xl overflow-hidden border border-gray-200"
+      onTouchMove={handleTouchMove}
+      onTouchEnd={(e) => {
+        if (e.touches.length === 0 && hintTimer.current) {
+          clearTimeout(hintTimer.current);
+          hintTimer.current = setTimeout(() => setShowHint(false), 800);
+        }
+      }}
+    >
+      {touch && (
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center bg-ink/60 p-6 text-center text-lg font-bold text-canvas transition-opacity duration-300 ${
+            showHint ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          Zum Verschieben der Karte zwei Finger benutzen
+        </div>
+      )}
       <MapContainer
         center={MAP_CENTER}
         zoom={MAP_ZOOM}
+        dragging={!touch}
         className="h-full w-full"
       >
         <TileLayer attribution={MAP_ATTRIBUTION} url={MAP_TILE_URL} />
