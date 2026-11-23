@@ -1,6 +1,6 @@
 # Aktionskoordination
 
-Web-App zur Koordination von Wahlkampf-Aktionen für Kreisverbände von BÜNDNIS 90/DIE GRÜNEN. Freiwillige finden Aktionen auf einer öffentlichen Seite mit Karte und melden sich ohne Konto an. Expert*innen planen Aktionen ihrer Teams im internen Bereich, Admins verwalten Teams, Benutzer*innen und Wahlkreise.
+Web-App zur Koordination von Wahlkampf-Aktionen für Kreisverbände von BÜNDNIS 90/DIE GRÜNEN. Freiwillige finden Aktionen auf einer öffentlichen Seite mit Karte und melden sich ohne Konto an. Expert\*innen planen Aktionen ihrer Teams im internen Bereich, Admins verwalten Teams, Benutzer\*innen und Wahlkreise.
 
 > **Fork von [maassfm/gruene_wk_aktionstool](https://github.com/maassfm/gruene_wk_aktionstool)**, dem Aktionstool von BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte. Der Fork wird unter anderem für die OBM-Wahl Leipzig 2027 eingesetzt. Allgemeine Fehlerbehebungen und Funktionen werden als Pull Request an das Original zurückgegeben.
 
