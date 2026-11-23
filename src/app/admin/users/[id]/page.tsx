@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -25,6 +26,9 @@ interface User {
 export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const { data: session } = useSession();
+  // Die eigene Rolle und den eigenen Status sperrt auch die API (Selbst-Aussperren)
+  const isSelf = session?.user.id === id;
   const [allTeams, setAllTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
@@ -136,6 +140,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
             label="Rolle"
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value })}
+            disabled={isSelf}
             options={[
               { value: "EXPERT", label: "Expert*in" },
               { value: "ADMIN", label: "Admin" },
@@ -145,11 +150,17 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
             label="Status"
             value={form.active ? "active" : "inactive"}
             onChange={(e) => setForm({ ...form, active: e.target.value === "active" })}
+            disabled={isSelf}
             options={[
               { value: "active", label: "Aktiv" },
               { value: "inactive", label: "Inaktiv" },
             ]}
           />
+          {isSelf && (
+            <p className="text-sm text-gray-600">
+              Deine eigene Rolle und deinen Status kann nur eine andere Admin-Person ändern.
+            </p>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

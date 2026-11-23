@@ -43,12 +43,18 @@ export default function UsersPage() {
   }, []);
 
   async function toggleActive(user: User) {
-    await fetch("/api/admin/users", {
+    setDeleteError("");
+    const res = await fetch("/api/admin/users", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: user.id, active: !user.active }),
     });
-    setUsers(users.map((u) => (u.id === user.id ? { ...u, active: !u.active } : u)));
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setDeleteError(data.error || "Der Status konnte nicht geändert werden.");
+      return;
+    }
+    setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, active: !u.active } : u)));
   }
 
   async function confirmDelete() {
@@ -140,13 +146,16 @@ export default function UsersPage() {
                         <Link href={`/admin/users/${user.id}`}>
                           <Button variant="outline" size="sm">Bearbeiten</Button>
                         </Link>
-                        <Button variant="outline" size="sm" onClick={() => toggleActive(user)}>
-                          {user.active ? "Deaktivieren" : "Aktivieren"}
-                        </Button>
+                        {/* Sich selbst deaktivieren oder loeschen sperrt sich aus */}
                         {user.id !== session?.user.id && (
-                          <Button variant="danger" size="sm" onClick={() => setDeleteTarget(user)}>
-                            Löschen
-                          </Button>
+                          <>
+                            <Button variant="outline" size="sm" onClick={() => toggleActive(user)}>
+                              {user.active ? "Deaktivieren" : "Aktivieren"}
+                            </Button>
+                            <Button variant="danger" size="sm" onClick={() => setDeleteTarget(user)}>
+                              Löschen
+                            </Button>
+                          </>
                         )}
                       </div>
                     </td>
