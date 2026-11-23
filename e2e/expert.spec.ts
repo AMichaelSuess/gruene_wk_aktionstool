@@ -99,6 +99,14 @@ test.describe("Expert*in: Aktionen", () => {
     expect((await db.aktion.findUnique({ where: { id } }))?.status).toBe("ABGESAGT");
   });
 
+  test("Excel-Vorlage für den Import herunterladen", async ({ page }) => {
+    await page.goto("/manage/actions/new");
+    await page.getByRole("button", { name: "Excel-Import" }).click();
+    const download = page.waitForEvent("download");
+    await page.getByRole("link", { name: /Vorlage herunterladen/ }).click();
+    expect((await download).suggestedFilename()).toBe("aktionen-vorlage.xlsx");
+  });
+
   test("Aktionen als Excel exportieren", async ({ page }) => {
     await page.goto("/manage/actions");
     const download = page.waitForEvent("download");

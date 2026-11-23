@@ -125,11 +125,9 @@ export default function ExcelUpload({
       </CardHeader>
 
       <div className="mb-4">
-        {/* File download from an API route, not a page. The rule mistakes the
-            path for the dynamic route /api/actions/[id]. */}
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
           href="/api/actions/import-template"
+          download
           className="text-primary hover:underline text-sm font-medium"
         >
           📥 Vorlage herunterladen
