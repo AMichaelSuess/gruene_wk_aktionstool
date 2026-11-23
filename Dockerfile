@@ -65,6 +65,8 @@ COPY prisma ./prisma
 RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=builder /app/next.config.ts ./
+# next start lädt next.config.ts zur Laufzeit neu, samt der Module, die es importiert
+COPY --from=builder /app/src/lib/map-config.ts ./src/lib/map-config.ts
 COPY --from=builder /app/public ./public
 # .next muss für den Laufzeit-Cache schreibbar sein, alles andere nur lesbar
 COPY --from=builder --chown=node:node /app/.next ./.next
