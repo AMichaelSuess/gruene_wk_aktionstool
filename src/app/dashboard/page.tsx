@@ -631,7 +631,7 @@ export default function DashboardPage() {
 // Eine Filterzeile: Beschriftung links, auf dem Handy darueber
 function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div role="group" aria-label={label} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+    <div role="group" aria-label={label} className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:gap-4">
       <span className="text-sm font-bold case-ui sm:w-32 shrink-0">{label}</span>
       <div className="flex flex-wrap items-center gap-2">{children}</div>
     </div>
@@ -648,12 +648,12 @@ function FilterCheckbox({
   children: React.ReactNode;
 }) {
   return (
-    <label className="flex items-center gap-2 text-sm cursor-pointer">
+    <label className="flex items-baseline gap-2 text-sm cursor-pointer">
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="w-5 h-5 accent-primary cursor-pointer"
+        className="self-center w-5 h-5 accent-primary cursor-pointer"
       />
       {children}
     </label>

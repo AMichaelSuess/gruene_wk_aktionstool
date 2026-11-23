@@ -60,178 +60,174 @@ export default function FilterBar({ filters, onFilterChange, wahlkreise }: Filte
     (filters.wahlkreise.length > 0 ? 1 : 0) +
     (filters.kategorien.length > 0 ? 1 : 0);
 
+  function resetFilters() {
+    onFilterChange({ datum: "", datumBis: "", tageszeit: [], wahlkreise: [], kategorien: [] });
+  }
+
+  const resetLink = activeFilterCount > 0 && (
+    <button
+      type="button"
+      onClick={resetFilters}
+      className="shrink-0 text-xs font-bold case-ui tracking-ui text-ink underline underline-offset-2 cursor-pointer hover:text-primary hover:decoration-2 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
+    >
+      Filter zurücksetzen
+    </button>
+  );
+
   // Mit Kampagnen-Kopfbereich gibt es auf der Startseite keinen sticky Header darüber
   return (
     <div className={`bg-white border-b-ui border-line sticky z-40 ${theme.hero ? "top-0" : "top-[52px]"}`}>
       <div className="max-w-7xl mx-auto px-4">
-        {/* Toggle button: visible on mobile and tablet (< lg) */}
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="lg:hidden w-full py-3 flex items-center justify-between text-sm font-bold case-ui tracking-ui text-ink focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
-        >
-          <span>
-            Filter {activeFilterCount > 0 ? `(${activeFilterCount})` : ""}
-          </span>
-          <span className="text-xs">{expanded ? "▲" : "▼"}</span>
-        </button>
+        {/* Kopfzeile auf Handy und Tablet: Auf-/Zuklappen, Zuruecksetzen auch im zugeklappten Zustand */}
+        <div className="lg:hidden flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            aria-expanded={expanded}
+            aria-controls="filter-inhalt"
+            className="flex-1 py-3 flex items-center justify-between text-sm font-bold case-ui tracking-ui text-ink cursor-pointer focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
+          >
+            <span>Filter {activeFilterCount > 0 ? `(${activeFilterCount})` : ""}</span>
+            <span className="text-xs" aria-hidden="true">{expanded ? "▲" : "▼"}</span>
+          </button>
+          {resetLink}
+        </div>
 
-        {/* Filter content */}
         <div
-          className={`${
-            expanded ? "block" : "hidden"
-          } lg:block py-3`}
+          id="filter-inhalt"
+          className={`${expanded ? "flex" : "hidden"} lg:flex items-start gap-4 pb-3 lg:pt-3`}
         >
-          {/* Row 1: Datum + Tageszeit + Clear (lg: inline) */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 lg:flex-nowrap">
-            {/* Datum */}
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-bold case-ui tracking-ui text-ink shrink-0">Datum:</label>
-              <input
-                type="date"
-                value={filters.datum}
-                onChange={(e) => onFilterChange({ ...filters, datum: e.target.value })}
-                className="text-sm rounded-control border-ui border-line-strong bg-white px-2 py-1 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
-              />
-              <span className="text-ink font-bold">–</span>
-              <input
-                type="date"
-                value={filters.datumBis}
-                onChange={(e) => onFilterChange({ ...filters, datumBis: e.target.value })}
-                className="text-sm rounded-control border-ui border-line-strong bg-white px-2 py-1 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
-              />
-            </div>
-
-            {/* Tageszeit */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <label className="text-xs font-bold case-ui tracking-ui text-ink shrink-0">Tageszeit:</label>
-              <div className="flex gap-1 flex-wrap">
-                {TAGESZEITEN.map((tz) => (
-                  <button
-                    key={tz.value}
-                    onClick={() =>
-                      tz.value === ""
-                        ? onFilterChange({ ...filters, tageszeit: [] })
-                        : toggleTageszeit(tz.value)
-                    }
-                    className={`rounded-button text-xs px-2 py-1 font-bold case-ui tracking-ui border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
-                      (tz.value === "" && filters.tageszeit.length === 0) ||
-                      (tz.value !== "" && filters.tageszeit.includes(tz.value))
-                        ? "bg-primary text-white border-line"
-                        : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
-                    }`}
-                  >
-                    {tz.label}
-                  </button>
-                ))}
+          <div className="flex-1 min-w-0 space-y-3 lg:space-y-2">
+            <FilterRow label="Datum">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <input
+                  type="date"
+                  aria-label="Datum von"
+                  value={filters.datum}
+                  onChange={(e) => onFilterChange({ ...filters, datum: e.target.value })}
+                  className={DATE_INPUT_CLASS}
+                />
+                <span className="text-ink font-bold" aria-hidden="true">–</span>
+                <input
+                  type="date"
+                  aria-label="Datum bis"
+                  value={filters.datumBis}
+                  onChange={(e) => onFilterChange({ ...filters, datumBis: e.target.value })}
+                  className={DATE_INPUT_CLASS}
+                />
               </div>
-            </div>
+            </FilterRow>
 
-            {/* Clear (shown inline on lg+, sobald irgendein Filter gesetzt ist) */}
-            {activeFilterCount > 0 && (
-              <button
-                onClick={() =>
-                  onFilterChange({
-                    datum: "",
-                    datumBis: "",
-                    tageszeit: [],
-                    wahlkreise: [],
-                    kategorien: [],
-                  })
-                }
-                className="text-xs font-bold case-ui tracking-ui text-ink underline underline-offset-2 cursor-pointer lg:ml-auto hover:text-primary hover:decoration-2 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus hidden lg:block"
-              >
-                Filter zurücksetzen
-              </button>
-            )}
-          </div>
-
-          {/* Row 2: Art (Kategorie) + Wahlkreise */}
-          <div className="flex items-center gap-x-6 gap-y-3 mt-3 flex-wrap">
-            {/* Art der Aktion */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <label className="text-xs font-bold case-ui tracking-ui text-ink shrink-0">Art:</label>
-              <div className="flex gap-1 flex-wrap">
-                <button
-                  onClick={() => onFilterChange({ ...filters, kategorien: [] })}
-                  className={`rounded-button text-xs px-2 py-1 font-bold case-ui tracking-ui border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
-                    filters.kategorien.length === 0
-                      ? "bg-primary text-white border-line"
-                      : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
-                  }`}
+            <FilterRow label="Tageszeit">
+              {TAGESZEITEN.map((tz) => (
+                <Chip
+                  key={tz.value}
+                  active={
+                    tz.value === ""
+                      ? filters.tageszeit.length === 0
+                      : filters.tageszeit.includes(tz.value)
+                  }
+                  onClick={() =>
+                    tz.value === ""
+                      ? onFilterChange({ ...filters, tageszeit: [] })
+                      : toggleTageszeit(tz.value)
+                  }
                 >
-                  Alle
-                </button>
-                {KATEGORIEN.map((kat) => (
-                  <button
-                    key={kat.value}
-                    onClick={() => toggleKategorie(kat.value)}
-                    className={`rounded-button text-xs px-2 py-1 font-bold case-ui tracking-ui border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
-                      filters.kategorien.includes(kat.value)
-                        ? "bg-primary text-white border-line"
-                        : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
-                    }`}
-                  >
-                    {kat.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+                  {tz.label}
+                </Chip>
+              ))}
+            </FilterRow>
 
-            {/* Wahlkreise */}
-            <div className="flex items-center gap-2 flex-wrap">
-            <label className="text-xs font-bold case-ui tracking-ui text-ink shrink-0">{WAHLKREIS_LABEL_SHORT}:</label>
-            <div className="flex gap-1 flex-wrap">
-              <button
-                onClick={() => onFilterChange({ ...filters, wahlkreise: [] })}
-                className={`rounded-button text-xs px-2 py-1 font-bold case-ui tracking-ui border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
-                  filters.wahlkreise.length === 0
-                    ? "bg-primary text-white border-line"
-                    : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
-                }`}
+            <FilterRow label="Art">
+              <Chip
+                active={filters.kategorien.length === 0}
+                onClick={() => onFilterChange({ ...filters, kategorien: [] })}
               >
                 Alle
-              </button>
+              </Chip>
+              {KATEGORIEN.map((kat) => (
+                <Chip
+                  key={kat.value}
+                  active={filters.kategorien.includes(kat.value)}
+                  onClick={() => toggleKategorie(kat.value)}
+                >
+                  {kat.label}
+                </Chip>
+              ))}
+            </FilterRow>
+
+            <FilterRow label={WAHLKREIS_LABEL_SHORT}>
+              <Chip
+                active={filters.wahlkreise.length === 0}
+                onClick={() => onFilterChange({ ...filters, wahlkreise: [] })}
+              >
+                Alle
+              </Chip>
               {wahlkreise.map((wk) => (
-                <button
+                <Chip
                   key={wk.nummer}
+                  active={filters.wahlkreise.includes(wk.nummer)}
                   onClick={() => toggleWahlkreis(wk.nummer)}
                   // Nummern-Chips bleiben kompakt (lange Berliner Namen); der Name steht im Tooltip
                   title={WAHLKREIS_NUMMERN_ANZEIGEN ? wk.name : undefined}
-                  className={`rounded-button text-xs font-bold border-ui transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
-                    WAHLKREIS_NUMMERN_ANZEIGEN ? "w-7 h-7" : "px-2 py-1 case-ui tracking-ui"
-                  } ${
-                    filters.wahlkreise.includes(wk.nummer)
-                      ? "bg-primary text-white border-line"
-                      : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
-                  }`}
+                  compact={WAHLKREIS_NUMMERN_ANZEIGEN}
                 >
                   {WAHLKREIS_NUMMERN_ANZEIGEN ? wk.nummer : wk.name}
-                </button>
+                </Chip>
               ))}
-            </div>
-            </div>
-
-            {/* Clear button (mobile/tablet: after WK row) */}
-            {activeFilterCount > 0 && (
-              <button
-                onClick={() =>
-                  onFilterChange({
-                    datum: "",
-                    datumBis: "",
-                    tageszeit: [],
-                    wahlkreise: [],
-                    kategorien: [],
-                  })
-                }
-                className="text-xs font-bold case-ui tracking-ui text-ink underline underline-offset-2 cursor-pointer ml-auto hover:text-primary hover:decoration-2 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus lg:hidden"
-              >
-                Filter zurücksetzen
-              </button>
-            )}
+            </FilterRow>
           </div>
+
+          {/* Auf grossen Bildschirmen oben rechts */}
+          <div className="hidden lg:block">{resetLink}</div>
         </div>
       </div>
     </div>
+  );
+}
+
+const DATE_INPUT_CLASS =
+  "min-w-0 flex-1 sm:flex-none text-sm rounded-control border-ui border-line-strong bg-white px-2 py-1 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus";
+
+// Eine Filterzeile: Beschriftung links, auf dem Handy darueber
+function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-3">
+      <span className="text-xs font-bold case-ui tracking-ui text-ink shrink-0 sm:w-28">{label}</span>
+      <div className="flex flex-wrap items-center gap-1">{children}</div>
+    </div>
+  );
+}
+
+function Chip({
+  active,
+  onClick,
+  title,
+  compact = false,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  title?: string;
+  compact?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      aria-pressed={active}
+      className={`rounded-button text-xs font-bold border-ui transition-colors cursor-pointer focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
+        compact ? "w-7 h-7" : "px-2 py-1 case-ui tracking-ui"
+      } ${
+        active
+          ? "bg-primary text-white border-line"
+          : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 
