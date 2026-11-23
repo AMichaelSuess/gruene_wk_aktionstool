@@ -329,6 +329,27 @@
 }
 
 /* ── Base ─────────────────────────────────────────────────────────── */
+/* All themes are light: native form controls stay light even when the
+   operating system is in dark mode */
+:root {
+  color-scheme: light;
+}
+
+/* Safari on macOS colors the parts of date/time fields itself (seen as
+   cyan digits, hard to read), the separators inherit; keep all parts in
+   the field's text color */
+::-webkit-datetime-edit-year-field,
+::-webkit-datetime-edit-month-field,
+::-webkit-datetime-edit-day-field,
+::-webkit-datetime-edit-hour-field,
+::-webkit-datetime-edit-minute-field,
+::-webkit-datetime-edit-second-field,
+::-webkit-datetime-edit-millisecond-field,
+::-webkit-datetime-edit-meridiem-field,
+::-webkit-datetime-edit-text {
+  color: inherit;
+}
+
 body {
   background: var(--t-canvas);
   color: var(--t-ink);
