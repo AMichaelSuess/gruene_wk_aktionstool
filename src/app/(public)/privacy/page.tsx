@@ -145,6 +145,34 @@ export default function DatenschutzPage() {
 
         <section>
           <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
+            Kartendarstellung
+          </h2>
+          <p className="mb-3">
+            Auf der Startseite zeigen wir die Orte der Aktionen auf einer Karte. Die Kartenbilder
+            lädt dein Browser direkt vom Kartendienst {districtConfig.mapTileProvider}. Dabei
+            erhält der Kartendienst deine IP-Adresse, Angaben zu deinem Browser, die Adresse
+            unserer Website und den Zeitpunkt des Abrufs. Ohne diese Übermittlung kann die Karte
+            nicht angezeigt werden. Der Kartendienst setzt keine Cookies.
+          </p>
+          <p className="mb-3">
+            Rechtsgrundlage ist unser berechtigtes Interesse, die Orte der Aktionen anschaulich
+            darzustellen (Art. 6 Abs. 1 lit. f DSGVO). Für die Verarbeitung beim Kartendienst ist
+            dieser selbst verantwortlich. Näheres in seiner Datenschutzerklärung:
+          </p>
+          <p>
+            <a
+              href={districtConfig.mapTileProviderPrivacyUrl}
+              className="text-primary underline break-all"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {districtConfig.mapTileProviderPrivacyUrl}
+            </a>
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-headline text-xl font-bold text-primary case-ui mb-3">
             Übermittlung in Drittländer
           </h2>
           <p>
@@ -190,10 +218,18 @@ export default function DatenschutzPage() {
             Cookies
           </h2>
           <p>
-            Diese Website verwendet keine Tracking-Cookies. Für eingeloggte Expert*innen und
-            Administrator*innen wird ein technisch notwendiger Session-Cookie gesetzt. Dieser
-            enthält eine verschlüsselte Sitzungs-ID, wird nicht zur Verfolgung genutzt und erlischt
-            automatisch beim Schließen des Browsers bzw. nach Ablauf der Sitzung.
+            Diese Website verwendet keine Tracking-Cookies. Wenn du dich nur für Aktionen anmeldest,
+            setzen wir überhaupt keine Cookies.
+          </p>
+          <p className="mt-3">
+            Nur beim Login von Expert*innen und Administrator*innen setzen wir technisch
+            notwendige Cookies: ein Sitzungs-Cookie mit der verschlüsselten Anmeldung und, während
+            des Logins, Cookies zum Schutz vor gefälschten Anfragen. Sie werden nicht zur
+            Verfolgung genutzt. Das Sitzungs-Cookie bleibt auch nach dem Schließen des Browsers
+            erhalten: Es gilt 24 Stunden ab der letzten Nutzung, eine Sitzung endet spätestens
+            7 Tage nach dem Login. Beim Abmelden wird es gelöscht. Im internen Bereich merkt sich
+            dein Browser außerdem die gewählten Filter (im lokalen Speicher des Browsers); diese
+            Angaben werden nicht an uns übertragen.
           </p>
         </section>
 

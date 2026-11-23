@@ -6,6 +6,7 @@
  */
 import { describe, it, expect } from "vitest";
 import nextConfig from "../../../next.config";
+import { tileSourceForCsp } from "@/lib/map-config";
 
 describe("CSP Header Configuration", () => {
   it("should have a Content-Security-Policy header configured", async () => {
@@ -56,14 +57,14 @@ describe("CSP Header Configuration", () => {
     expect(csp).toContain("img-src 'self' data: https:");
   });
 
-  it("should contain connect-src 'self' https://*.tile.openstreetmap.org for map tiles", async () => {
+  it("should contain connect-src 'self' https://tile.openstreetmap.de for map tiles", async () => {
     const headersConfig = await nextConfig.headers!();
     const catchAllRoute = headersConfig.find((h) => h.source === "/((?!embed).*)")!;
     const csp = catchAllRoute.headers.find(
       (h) => h.key === "Content-Security-Policy"
     )!.value;
     expect(csp).toContain(
-      "connect-src 'self' https://*.tile.openstreetmap.org"
+      "connect-src 'self' https://tile.openstreetmap.de"
     );
   });
 
@@ -121,12 +122,37 @@ describe("X-Powered-By", () => {
 });
 
 describe("img-src", () => {
-  it("erlaubt Bilder nur von der eigenen Domain und den OpenStreetMap-Kacheln", async () => {
+  it("erlaubt Bilder nur von der eigenen Domain und dem Kachelserver der Karte", async () => {
     const headersConfig = await nextConfig.headers!();
     for (const route of headersConfig) {
       const csp = route.headers.find((h) => h.key === "Content-Security-Policy")!.value;
       const imgSrc = csp.split(";").map((d) => d.trim()).find((d) => d.startsWith("img-src"));
-      expect(imgSrc).toBe("img-src 'self' data: https://*.tile.openstreetmap.org");
+      expect(imgSrc).toBe("img-src 'self' data: https://tile.openstreetmap.de");
     }
+  });
+});
+
+describe("tileSourceForCsp", () => {
+  it("übernimmt Schema und Host der Kachel-URL", () => {
+    expect(tileSourceForCsp("https://tile.openstreetmap.de/{z}/{x}/{y}.png")).toBe(
+      "https://tile.openstreetmap.de"
+    );
+    expect(
+      tileSourceForCsp(
+        "https://sgx.geodatenzentrum.de/wmts_basemapde/tile/1.0.0/x/default/GLOBAL_WEBMERCATOR/{z}/{y}/{x}.png"
+      )
+    ).toBe("https://sgx.geodatenzentrum.de");
+  });
+
+  it("macht aus dem Subdomain-Platzhalter {s} einen Wildcard-Host", () => {
+    expect(tileSourceForCsp("https://{s}.tile.example.org/{z}/{x}/{y}.png")).toBe(
+      "https://*.tile.example.org"
+    );
+  });
+
+  it("lehnt http und Hosts ab, die die CSP aufbrechen könnten", () => {
+    expect(() => tileSourceForCsp("http://tile.example.org/{z}/{x}/{y}.png")).toThrow();
+    expect(() => tileSourceForCsp("https://a.org;script-src */{z}.png")).toThrow();
+    expect(() => tileSourceForCsp("https://a.org *.evil.com/{z}.png")).toThrow();
   });
 });

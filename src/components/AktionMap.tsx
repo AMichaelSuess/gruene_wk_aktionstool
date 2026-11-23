@@ -6,7 +6,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import { MAP_CENTER, MAP_ZOOM } from "@/lib/map-config";
+import { MAP_ATTRIBUTION, MAP_CENTER, MAP_TILE_URL, MAP_ZOOM } from "@/lib/map-config";
 import { theme } from "@/lib/theme";
 import { WAHLKREIS_LABEL_SHORT, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
 
@@ -82,10 +82,7 @@ export default function AktionMap({ aktionen, onSelect }: AktionMapProps) {
         zoom={MAP_ZOOM}
         className="h-full w-full"
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        <TileLayer attribution={MAP_ATTRIBUTION} url={MAP_TILE_URL} />
 
         <FitBounds aktionen={geoAktionen} />
 

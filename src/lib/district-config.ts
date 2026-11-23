@@ -85,6 +85,14 @@ export const districtConfig = {
   emailProvider: process.env.EMAIL_PROVIDER || "Verdigado eG",
   emailProviderPrivacyUrl: process.env.EMAIL_PROVIDER_PRIVACY_URL || "https://www.verdigado.com/datenschutz",
 
+  // Kachelserver der Karte (eigenständig verantwortlich, kein Auftragsverarbeiter).
+  // Muss zu NEXT_PUBLIC_MAP_TILE_URL passen, siehe src/lib/map-config.ts
+  mapTileProvider:
+    process.env.MAP_TILE_PROVIDER ||
+    "FOSSGIS e.V. (OpenStreetMap Deutschland), Server in Deutschland und Finnland",
+  mapTileProviderPrivacyUrl:
+    process.env.MAP_TILE_PROVIDER_PRIVACY_URL || "https://www.fossgis.de/datenschutzerklärung/",
+
   // Sonstiges
   datenschutzStand: process.env.DATENSCHUTZ_STAND || "März 2026",
   accountDeletionDate: process.env.ACCOUNT_DELETION_DATE || "31. Oktober 2026",

@@ -1,14 +1,17 @@
 import type { NextConfig } from "next";
+import { DEFAULT_MAP_TILE_URL, tileSourceForCsp } from "./src/lib/map-config";
 
 const isDev = process.env.NODE_ENV === "development";
 const allowedEmbedDomain = process.env.ALLOWED_EMBED_DOMAIN || "";
+// Host of the map tile server, so the browser may load its tiles
+const tiles = tileSourceForCsp(process.env.NEXT_PUBLIC_MAP_TILE_URL || DEFAULT_MAP_TILE_URL);
 
 // In dev mode Turbopack requires 'unsafe-eval' and 'unsafe-inline' for HMR.
 // In production the strict CSP is enforced.
 const cspBase = (extra: string) =>
   isDev
-    ? `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self' ws: wss: https://*.tile.openstreetmap.org; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'${extra}`
-    : `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self' https://*.tile.openstreetmap.org; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'${extra}`;
+    ? `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: ${tiles}; connect-src 'self' ws: wss: ${tiles}; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'${extra}`
+    : `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: ${tiles}; connect-src 'self' ${tiles}; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'${extra}`;
 
 // Regular routes: no embedding allowed
 const csp = cspBase("; frame-ancestors 'none'");
