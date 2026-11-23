@@ -84,7 +84,8 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
                   {districtConfig.orgShortName}
                 </span>
                 <span className="hidden sm:inline text-sm text-white/70 ml-2">
-                  Interner Bereich
+                  Wahlkampfaktionen
+                  <span className="text-accent font-bold"> · Interner Bereich</span>
                 </span>
               </div>
             </Link>

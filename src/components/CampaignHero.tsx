@@ -66,8 +66,9 @@ export default function CampaignHero({ hero, nav }: { hero: HeroConfig; nav: Rea
       <div className="relative max-w-7xl mx-auto px-4 sm:h-64 flex flex-col">
         {/* Auf grossen Bildschirmen endet die Zeile 2rem vor dem Foto, das Menue steht also am
             rechten Rand der gruenen Flaeche. Das Foto haengt am Fensterrand, der Container ist
-            zentriert: abgezogen wird nur der Teil des Fotos, der in den Container hineinragt. */}
-        <div className="py-3 flex items-center justify-between gap-8 lg:mr-[max(0px,calc(var(--hero-photo-w)_+_1rem_-_max(0px,(100vw_-_80rem)_/_2)))]">
+            zentriert: abgezogen wird nur der Teil des Fotos, der in den Container hineinragt.
+            Feste Hoehe h-16 wie die anderen Header, damit die Wortmarke beim Seitenwechsel nicht springt. */}
+        <div className="h-16 shrink-0 flex items-center justify-between gap-8 lg:mr-[max(0px,calc(var(--hero-photo-w)_+_1rem_-_max(0px,(100vw_-_80rem)_/_2)))]">
           <Link href="/">
             <span className={`font-headline font-bold text-lg ${wordmarkClass}`}>{orgShortName}</span>
             <span className="hidden sm:inline text-sm text-white/70 ml-2">Wahlkampfaktionen</span>
