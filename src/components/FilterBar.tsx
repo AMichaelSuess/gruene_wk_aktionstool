@@ -223,7 +223,7 @@ function Chip({
       } ${
         active
           ? "bg-primary text-white border-line"
-          : "bg-white text-ink border-line-strong hover:bg-ink hover:text-white"
+          : "bg-white text-ink border-line-strong hover:bg-hover-chip hover:text-hover-chip-ink"
       }`}
     >
       {children}

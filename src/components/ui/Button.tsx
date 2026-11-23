@@ -26,6 +26,11 @@ const variantStyles: Record<ButtonVariant, string> = {
     "bg-white text-primary border-ui border-primary shadow-ui-brand hover:shadow-ui-brand-sm hover:press-sm enabled:hover:bg-hover active:shadow-none active:press",
 };
 
+// A selected toggle (primary with aria-pressed, e.g. an active filter) keeps
+// its fill on hover, so a click shows its result right away
+const pressedPrimaryStyles =
+  "bg-primary text-white border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press";
+
 const sizeStyles: Record<ButtonSize, string> = {
   sm: "px-3 py-1.5 text-sm",
   md: "px-4 py-2 text-base",
@@ -34,10 +39,12 @@ const sizeStyles: Record<ButtonSize, string> = {
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = "primary", size = "md", loading, className = "", children, disabled, ...props }, ref) => {
+    const pressed = props["aria-pressed"] === true || props["aria-pressed"] === "true";
+    const variantClass = variant === "primary" && pressed ? pressedPrimaryStyles : variantStyles[variant];
     return (
       <button
         ref={ref}
-        className={`inline-flex items-center rounded-button justify-center font-bold case-ui tracking-ui transition-all focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:press-none ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+        className={`inline-flex items-center rounded-button justify-center font-bold case-ui tracking-ui transition-all focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:press-none ${variantClass} ${sizeStyles[size]} ${className}`}
         disabled={disabled || loading}
         {...props}
       >

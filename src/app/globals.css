@@ -28,6 +28,8 @@
   --color-hover-primary: var(--t-hover-primary); /* primary buttons */
   --color-hover-primary-ink: var(--t-hover-primary-ink);
   --color-hover-danger: var(--t-hover-danger);   /* danger buttons */
+  --color-hover-chip: var(--t-hover-chip);       /* filter chips, view toggle */
+  --color-hover-chip-ink: var(--t-hover-chip-ink);
 
   /* Ink and lines */
   --color-ink: var(--t-ink);                     /* body text, dark fills */
@@ -106,6 +108,9 @@
   --t-hover-primary: #005538;
   --t-hover-primary-ink: #FFFFFF;
   --t-hover-danger: #E6007E;
+  /* Chips have no shadow to press, so they invert to black */
+  --t-hover-chip: #000000;
+  --t-hover-chip-ink: #FFFFFF;
 
   --t-ink: #000000;
   --t-line: #000000;
@@ -173,6 +178,8 @@
   --t-hover-primary: #C8DA20;
   --t-hover-primary-ink: #002D2D;
   --t-hover-danger: #8A003C;
+  --t-hover-chip: #C8DA20;
+  --t-hover-chip-ink: #002D2D;
 
   --t-ink: #002D2D;
   --t-line: #C9D7D6;

@@ -53,6 +53,7 @@ Components                           bg-primary, border-ui, rounded-card, shadow
 | `hover` | `--t-hover` | Hover fill of white or transparent clickables (secondary, outline, action, ghost buttons, nav items) | `#FFFFFF` (unchanged) | `#C8DA20` |
 | `hover-primary` / `hover-primary-ink` | `--t-hover-primary*` | Hover fill and text of primary buttons | `#005538` / `#FFF` (unchanged) | `#C8DA20` / `#002D2D` |
 | `hover-danger` | `--t-hover-danger` | Hover fill of danger buttons | `#E6007E` (unchanged) | `#8A003C` |
+| `hover-chip` / `hover-chip-ink` | `--t-hover-chip*` | Hover fill and text of filter chips and the list/map toggle | `#000000` / `#FFF` | `#C8DA20` / `#002D2D` |
 | `ink` | `--t-ink` | Body text, dark fills | `#000000` | `#002D2D` |
 | `line` | `--t-line` | Container borders and dividers | `#000000` | `#C9D7D6` |
 | `line-strong` | `--t-line-strong` | Borders of form controls and clickable chips (≥ 3:1 against white) | `#000000` | `#5C7A7C` |
@@ -112,7 +113,7 @@ Use them with any color utility: `bg-primary`, `text-ink`, `border-line-strong`,
 
 The press utilities exist so the brutalist "push the button down" effect can be switched off per theme. Always pair `hover:shadow-ui-sm` with `hover:press-sm` and `active:shadow-none` with `active:press`.
 
-Themes without the press effect need another clear hover signal, so every clickable also gets a hover fill: `hover:bg-hover` on white or transparent elements, `hover:bg-hover-primary hover:text-hover-primary-ink` on primary fills, `hover:bg-hover-danger` on danger fills (on `<button>` with `enabled:` in front, so disabled buttons stay unchanged). In brutalist the fills equal the resting colors; in emerald they turn Gelbgrün like the campaign website's buttons. Clickable cards get `hover:border-line-strong`.
+Themes without the press effect need another clear hover signal, so every clickable also gets a hover fill: `hover:bg-hover` on white or transparent elements, `hover:bg-hover-primary hover:text-hover-primary-ink` on primary fills, `hover:bg-hover-danger` on danger fills (on `<button>` with `enabled:` in front, so disabled buttons stay unchanged). In brutalist the fills equal the resting colors; in emerald they turn Gelbgrün like the campaign website's buttons. Clickable cards get `hover:border-line-strong`. Exception: a selected toggle (active filter chip, `Button variant="primary"` with `aria-pressed`) keeps its fill on hover, so a click shows its result immediately.
 
 ---
 
@@ -171,7 +172,7 @@ Label: `text-sm font-bold case-ui tracking-ui text-ink`.
 
 **Badge:** `inline-flex items-center rounded-badge px-2 py-0.5 text-xs font-bold case-ui tracking-ui border-badge border-line` plus one of `bg-gray-100 text-ink` · `bg-primary text-white` · `bg-warning text-ink` · `bg-danger text-white` · `bg-info text-white`.
 
-**Filter chip:** `rounded-button text-xs px-2 py-1 font-bold case-ui tracking-ui border-ui`; active `bg-primary text-white border-line`; idle `bg-white text-ink border-line-strong hover:bg-ink hover:text-white`.
+**Filter chip:** `rounded-button text-xs px-2 py-1 font-bold case-ui tracking-ui border-ui`; active `bg-primary text-white border-line`; idle `bg-white text-ink border-line-strong hover:bg-hover-chip hover:text-hover-chip-ink`.
 
 **Dialog:** `<dialog class="backdrop:bg-ink/60 bg-white rounded-card border-ui border-line shadow-ui-xl p-0 max-w-lg w-full mx-4">`, header divider `border-b-ui border-line`.
 

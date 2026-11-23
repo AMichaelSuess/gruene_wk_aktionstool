@@ -122,7 +122,7 @@ function AktionenPageInner() {
               className={`px-4 py-2 text-sm font-bold case-ui tracking-ui min-h-[44px] transition-colors focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
                 view === "liste"
                   ? "bg-primary text-white"
-                  : "bg-white text-ink hover:bg-ink hover:text-white"
+                  : "bg-white text-ink hover:bg-hover-chip hover:text-hover-chip-ink"
               }`}
             >
               Liste
@@ -132,7 +132,7 @@ function AktionenPageInner() {
               className={`px-4 py-2 text-sm font-bold case-ui tracking-ui min-h-[44px] transition-colors border-l-ui border-line focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus ${
                 view === "karte"
                   ? "bg-primary text-white"
-                  : "bg-white text-ink hover:bg-ink hover:text-white"
+                  : "bg-white text-ink hover:bg-hover-chip hover:text-hover-chip-ink"
               }`}
             >
               Karte
