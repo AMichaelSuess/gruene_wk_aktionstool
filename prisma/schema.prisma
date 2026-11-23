@@ -160,8 +160,9 @@ model EmailLog {
 
 model AktionStatistik {
   id               String    @id @default(cuid())
-  aktionId         String    @unique
-  aktion           Aktion    @relation(fields: [aktionId], references: [id], onDelete: Restrict)
+  // Bleibt erhalten, wenn die Aktion endgueltig geloescht wird
+  aktionId         String?   @unique
+  aktion           Aktion?   @relation(fields: [aktionId], references: [id], onDelete: SetNull)
   anmeldungenCount Int
   aktionDatum      DateTime  @db.Date
   wahlkreisId      String

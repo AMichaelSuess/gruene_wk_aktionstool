@@ -256,7 +256,7 @@ All UI must work in every theme. See `docs/design/theming.md` for the token tabl
   - Elevation: `shadow-ui-sm|ui|ui-lg|ui-xl`, `shadow-ui-brand*`, `shadow-ui-selected`, `shadow-ui-up`; hover pattern `shadow-ui hover:shadow-ui-sm hover:press-sm active:shadow-none active:press`
   - Labels/buttons/badges: `case-ui tracking-ui`; headings: `font-headline`
 - **Every bordered surface needs a radius token.** It is `0` in brutalist, so a missing one is only visible in other themes.
-- **Reuse `src/components/ui/`** (Button, Card, Input, Select, Badge, Dialog), `BrandLogo` (renders nothing when the theme uses a wordmark; pair the org name with `wordmarkClass`) and `CampaignHero` (via `PublicHeader`).
+- **Reuse `src/components/ui/`** (Button, Card, Input, Select, Badge, Dialog, Toaster/`toast` for results of list actions; form errors stay inline), `BrandLogo` (renders nothing when the theme uses a wordmark; pair the org name with `wordmarkClass`) and `CampaignHero` (via `PublicHeader`).
 - **Contrast:** light accents (`accent`, `warning`, `highlight`, `cta` in emerald) are fills or text on dark surfaces, never text on white.
 - **New visual values** go into every theme block in `globals.css` (a missing `--t-*` silently falls back to brutalist); email colors go into `theme.email` in `src/lib/theme.ts`.
 - **Verify UI changes in both themes**, e.g. `NEXT_PUBLIC_THEME=emerald npm run build && NEXT_PUBLIC_THEME=emerald npx next start -p 3210`.
@@ -337,7 +337,7 @@ All UI must work in every theme. See `docs/design/theming.md` for the token tabl
 - Sending: `src/lib/email.ts` (`sendEmail()`) wraps nodemailer, always writes to `EmailLog` regardless of success/failure
 - Templates: `src/lib/email-templates.ts` — named export functions per type (`anmeldebestaetigungEmail`, `aenderungsEmail`, `absageEmail`, `tagesUebersichtEmail`, `erinnerungsEmail`)
 - Purpose: Retain historical participation counts when `Anmeldung` records are deleted or when an `Aktion` is hard-deleted would be blocked
-- Note: `onDelete: Restrict` on `AktionStatistik.aktionId` prevents hard-delete of an `Aktion` that already has a statistik record
+- Note: `AktionStatistik.aktionId` is `onDelete: SetNull`, so an admin hard-delete of an `Aktion` keeps its statistik record (with `aktionId` null)
 ## Entry Points
 - Location: `src/app/(public)/page.tsx`
 - Triggers: Any unauthenticated browser request to `/`
