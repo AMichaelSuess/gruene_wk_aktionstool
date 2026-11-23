@@ -22,10 +22,10 @@ export async function GET(req: NextRequest) {
   const token = new URL(req.url).searchParams.get("token");
 
   if (!token) {
-    return NextResponse.redirect(new URL("/abmeldung?fehler=1", baseUrl));
+    return NextResponse.redirect(new URL("/unsubscribe/done?error=1", baseUrl));
   }
 
-  const target = new URL("/abmeldung/bestaetigen", baseUrl);
+  const target = new URL("/unsubscribe", baseUrl);
   target.searchParams.set("token", token);
   return NextResponse.redirect(target);
 }

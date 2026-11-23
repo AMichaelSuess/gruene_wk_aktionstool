@@ -41,7 +41,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError("E-Mail oder Passwort ist falsch.");
       } else {
-        router.push("/dashboard");
+        router.push("/manage/actions");
         router.refresh();
       }
     } catch {

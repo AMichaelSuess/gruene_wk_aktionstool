@@ -3,10 +3,10 @@ import Link from "next/link";
 export default async function AbmeldungPage({
   searchParams,
 }: {
-  searchParams: Promise<{ fehler?: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
-  const { fehler } = await searchParams;
-  const isError = fehler === "1";
+  const { error } = await searchParams;
+  const isError = error === "1";
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12 text-center">

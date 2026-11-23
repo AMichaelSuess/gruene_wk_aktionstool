@@ -30,7 +30,7 @@ function AnmeldenPageContent() {
   const [success, setSuccess] = useState(false);
 
   const initialIds = useMemo(() => {
-    const param = searchParams.get("aktionen");
+    const param = searchParams.get("actions");
     return param ? param.split(",").filter(Boolean) : [];
   }, [searchParams]);
 

@@ -523,7 +523,7 @@ gunzip -c /home/gruene/backups/gruene_aktionen_YYYYMMDD_HHMMSS.sql.gz | psql -U 
 
 ### Passwörter ändern
 
-Nach dem ersten Login als Admin unter `/admin/users` die Passwörter aller Accounts ändern.
+Nach dem ersten Login als Admin unter `/manage/users` die Passwörter aller Accounts ändern.
 
 ---
 

@@ -92,7 +92,7 @@ export default function UsersPage() {
           )}
         </div>
         {isAdmin && (
-          <Link href="/admin/users/neu">
+          <Link href="/manage/users/new">
             <Button>Neue*r Benutzer*in</Button>
           </Link>
         )}
@@ -142,7 +142,7 @@ export default function UsersPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2 justify-end">
-                        <Link href={`/admin/users/${user.id}`}>
+                        <Link href={`/manage/users/${user.id}`}>
                           <Button variant="outline" size="sm">Bearbeiten</Button>
                         </Link>
                         {/* Sich selbst deaktivieren oder loeschen sperrt sich aus */}

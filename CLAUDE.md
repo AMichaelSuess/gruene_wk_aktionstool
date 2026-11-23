@@ -39,10 +39,12 @@ Test credentials (after seeding):
 
 ### Route Structure
 
-- `src/app/(public)/` — public pages: action overview, registration, unsubscribe, privacy policy, impressum
-- `src/app/(auth)/` — login
-- `src/app/dashboard/` — Expert dashboard (requires EXPERT role), action CRUD
-- `src/app/admin/` — Admin area (requires ADMIN role), user/team/Wahlkreis management
+Page URLs are English (UI text stays German): plural lists, `/new`, `/[id]`, sub-lists under their parent.
+
+- `src/app/(public)/` — public pages: `/` (action list), `/signup?actions=…`, `/unsubscribe?token=…`, `/unsubscribe/done`, `/my-signups?email=…`, `/privacy`, `/imprint`
+- `src/app/(auth)/` — `/login`
+- `src/app/embed/` — `/embed/actions/[id]`, sign-up form for iframes
+- `src/app/manage/` — internal area (login required): `/manage/actions` (`/new`, `/[id]`, `/[id]/signups`), `/manage/statistics`, `/manage/users`, `/manage/account` for experts and admins; `/manage/teams`, `/manage/districts` (Wahlkreise/Stadtbezirke) and `/manage/users/new|[id]` for admins only (enforced in `src/proxy.ts`)
 - `src/app/api/` — REST endpoints: auth, action CRUD, export (Excel/Signal), upload, cron jobs
 
 Public API routes:
@@ -295,13 +297,13 @@ All UI must work in every theme. See `docs/design/theming.md` for the token tabl
 - Depends on: `src/app/api/aktionen`, `src/app/api/anmeldungen`, `src/app/api/wahlkreise`
 - Used by: End-users (volunteers)
 - Purpose: Expert (campaign team) action management
-- Location: `src/app/dashboard/`
+- Location: `src/app/manage/actions/`
 - Contains: Action list, create/edit forms, registrant view
 - Depends on: All `/api/aktionen`, `/api/export`, `/api/upload`, `/api/user/teams`, `/api/wahlkreise` endpoints
 - Used by: Users with EXPERT or ADMIN role
 - Purpose: Full platform administration
-- Location: `src/app/admin/`
-- Contains: All-action overview, team CRUD, user CRUD
+- Location: `src/app/manage/` (statistics, users, teams, districts)
+- Contains: Statistics, team CRUD, user CRUD, district settings
 - Depends on: All `/api/admin/*` endpoints plus standard aktionen endpoints
 - Used by: Users with ADMIN role only
 - Purpose: All server-side logic, data access, business rules

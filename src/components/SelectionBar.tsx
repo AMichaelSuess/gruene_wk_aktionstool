@@ -11,7 +11,7 @@ export default function SelectionBar({ selectedIds, aktionTitles }: SelectionBar
   const router = useRouter();
 
   function handleAnmelden() {
-    router.push(`/anmelden?aktionen=${selectedIds.join(",")}`);
+    router.push(`/signup?actions=${selectedIds.join(",")}`);
   }
 
   return (

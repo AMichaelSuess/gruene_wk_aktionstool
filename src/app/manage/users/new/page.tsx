@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -14,61 +13,31 @@ interface Team {
   name: string;
 }
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  active: boolean;
-  teams: Team[];
-}
-
-export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function NewUserPage() {
   const router = useRouter();
-  const { data: session } = useSession();
-  // Die eigene Rolle und den eigenen Status sperrt auch die API (Selbst-Aussperren)
-  const isSelf = session?.user.id === id;
-  const [allTeams, setAllTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
-  const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     name: "",
     email: "",
+    password: "",
     role: "EXPERT",
-    active: true,
     teamIds: [] as string[],
-    newPassword: "",
   });
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/admin/users").then((r) => r.json()),
-      fetch("/api/admin/teams").then((r) => r.json()),
-    ]).then(([users, teams]: [User[], Team[]]) => {
-      const user = users.find((u: User) => u.id === id);
-      if (user) {
-        setForm({
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          active: user.active,
-          teamIds: user.teams.map((t) => t.id),
-          newPassword: "",
-        });
-      }
-      setAllTeams(teams);
-      setFetchLoading(false);
-    });
-  }, [id]);
+    fetch("/api/admin/teams")
+      .then((r) => r.json())
+      .then(setTeams);
+  }, []);
 
   function toggleTeam(teamId: string) {
     setForm((f) => ({
       ...f,
       teamIds: f.teamIds.includes(teamId)
-        ? f.teamIds.filter((tid) => tid !== teamId)
+        ? f.teamIds.filter((id) => id !== teamId)
         : [...f.teamIds, teamId],
     }));
   }
@@ -78,48 +47,32 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
     setLoading(true);
     setError("");
 
-    const payload: Record<string, unknown> = {
-      id,
-      name: form.name,
-      email: form.email,
-      role: form.role,
-      active: form.active,
-      // Admins stehen über den Teams und bekommen keine Team-Zuordnung
-      teamIds: form.role === "ADMIN" ? [] : form.teamIds,
-    };
-    if (form.newPassword) {
-      payload.password = form.newPassword;
-    }
-
     const res = await fetch("/api/admin/users", {
-      method: "PUT",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      // Admins stehen über den Teams und bekommen keine Team-Zuordnung
+      body: JSON.stringify({ ...form, teamIds: form.role === "ADMIN" ? [] : form.teamIds }),
     });
 
     if (res.ok) {
-      router.push("/admin/users");
+      router.push("/manage/users");
     } else {
       const data = await res.json();
-      setError(data.error || "Fehler beim Speichern");
+      setError(data.error || "Fehler beim Erstellen");
     }
 
     setLoading(false);
   }
 
-  if (fetchLoading) {
-    return <div className="text-gray-500">Lade Daten...</div>;
-  }
-
   return (
     <div className="max-w-xl">
       <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-6">
-        Benutzer*in bearbeiten
+        Neue*r Benutzer*in
       </h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>Daten ändern</CardTitle>
+          <CardTitle>Benutzer*in anlegen</CardTitle>
         </CardHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -136,31 +89,24 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             required
           />
+          <Input
+            label="Initiales Passwort"
+            type="password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            required
+            minLength={12}
+            maxLength={72}
+          />
           <Select
             label="Rolle"
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value })}
-            disabled={isSelf}
             options={[
               { value: "EXPERT", label: "Expert*in" },
               { value: "ADMIN", label: "Admin" },
             ]}
           />
-          <Select
-            label="Status"
-            value={form.active ? "active" : "inactive"}
-            onChange={(e) => setForm({ ...form, active: e.target.value === "active" })}
-            disabled={isSelf}
-            options={[
-              { value: "active", label: "Aktiv" },
-              { value: "inactive", label: "Inaktiv" },
-            ]}
-          />
-          {isSelf && (
-            <p className="text-sm text-gray-600">
-              Deine eigene Rolle und deinen Status kann nur eine andere Admin-Person ändern.
-            </p>
-          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -168,11 +114,11 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
             </label>
             {form.role === "ADMIN" ? (
               <p className="text-sm text-gray-600">{ADMIN_TEAMS_HINWEIS}</p>
-            ) : allTeams.length === 0 ? (
+            ) : teams.length === 0 ? (
               <p className="text-sm text-gray-500">Keine Teams vorhanden</p>
             ) : (
               <div className="space-y-2">
-                {allTeams.map((team) => (
+                {teams.map((team) => (
                   <label key={team.id} className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
@@ -187,15 +133,6 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
             )}
           </div>
 
-          <Input
-            label="Neues Passwort (leer lassen = unverändert)"
-            type="password"
-            value={form.newPassword}
-            onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
-            minLength={12}
-            maxLength={72}
-          />
-
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 text-sm">
               {error}
@@ -204,7 +141,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
 
           <div className="flex gap-3">
             <Button type="submit" loading={loading}>
-              Speichern
+              Erstellen
             </Button>
             <Button variant="ghost" type="button" onClick={() => router.back()}>
               Abbrechen

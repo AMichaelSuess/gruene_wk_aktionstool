@@ -523,9 +523,9 @@ Ein erneuter Start schickt niemandem eine zweite Erinnerung oder Tagesübersicht
 - [ ] Größenlimit für Anfragen greift (Prüfbefehl liefert `413`, siehe [Abschnitt 4](#größenlimit-für-anfragen))
 - [ ] Login mit dem Bootstrap-Admin funktioniert
 - [ ] `BOOTSTRAP_ADMIN_PASSWORD` ist aus Coolify gelöscht
-- [ ] **Datenschutzerklärung** (`/datenschutz`) zeigt die richtigen Angaben: Kreisverband,
+- [ ] **Datenschutzerklärung** (`/privacy`) zeigt die richtigen Angaben: Kreisverband,
       Datenschutzbeauftragte*r, Aufsichtsbehörde, Hosting-Anbieter, E-Mail-Anbieter
-- [ ] **Impressum** (`/impressum`) ist korrekt
+- [ ] **Impressum** (`/imprint`) ist korrekt
 - [ ] Kopfzeile und Login-Seite zeigen den richtigen Kurznamen
 - [ ] Karte startet über dem richtigen Ort
 - [ ] Testanmeldung durchgeführt: Bestätigungs-E-Mail kommt an, Abmelde-Link führt auf `<DOMAIN>`

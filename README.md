@@ -24,7 +24,7 @@ Ermöglicht die Verwaltung von Wahlkampfaktionen, Freiwilligen-Anmeldungen, Exce
 - **Admin-Bereich** für Benutzer-, Team- und Wahlkreis-Verwaltung mit Statistik-Dashboard
 - **E-Mail-System** via SMTP (Bestätigung, Änderung, Absage, tägliche Übersicht)
 - **Export** als Excel oder Signal-Textformat
-- **Iframe-Einbettung** einzelner Anmeldeformulare auf externen Websites via `/embed/aktion/[id]`
+- **Iframe-Einbettung** einzelner Anmeldeformulare auf externen Websites via `/embed/actions/[id]`
 - **Cron-Jobs:** Tägliche Übersichts-E-Mail, Erinnerungs-E-Mails an Angemeldete (Abend vor der Aktion) und automatische Löschung von Anmeldedaten nach 72 Stunden
 
 ---
@@ -282,14 +282,14 @@ Alle folgenden Variablen sind **optional** — ohne Angabe werden die Berlin-Mit
 
 Einzelne Aktions-Anmeldeformulare können direkt in externe Websites eingebettet werden.
 
-**URL-Schema:** `https://<app-domain>/embed/aktion/<aktionId>`
+**URL-Schema:** `https://<app-domain>/embed/actions/<aktionId>`
 
 ### Einbettungs-Code
 
 ```html
 <iframe
   id="grn-aktion"
-  src="https://<app-domain>/embed/aktion/<aktionId>"
+  src="https://<app-domain>/embed/actions/<aktionId>"
   width="100%"
   height="600"
   style="border:0;"

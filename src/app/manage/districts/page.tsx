@@ -48,7 +48,7 @@ export default function WahlkreisePage() {
                 </h3>
                 {WAHLKREIS_NUMMERN_ANZEIGEN && <p className="text-sm text-gray-700 mt-1">{wk.name}</p>}
               </div>
-              <Link href={`/admin/wahlkreise/${wk.id}`}>
+              <Link href={`/manage/districts/${wk.id}`}>
                 <Button variant="outline" size="sm">Bearbeiten</Button>
               </Link>
             </div>

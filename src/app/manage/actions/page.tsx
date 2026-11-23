@@ -332,7 +332,7 @@ export default function DashboardPage() {
               </a>
             </>
           )}
-          <Link href="/dashboard/aktionen/neu">
+          <Link href="/manage/actions/new">
             <Button>Neue Aktion</Button>
           </Link>
         </div>
@@ -429,7 +429,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-card border-ui border-line shadow-ui p-8 text-center text-gray-500">
           <p>Keine Aktionen für diese Filter gefunden.</p>
           {aktionen.length === 0 && (
-            <Link href="/dashboard/aktionen/neu" className="text-primary font-bold hover:underline mt-2 inline-block">
+            <Link href="/manage/actions/new" className="text-primary font-bold hover:underline mt-2 inline-block">
               Erste Aktion anlegen
             </Link>
           )}
@@ -495,13 +495,13 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="flex flex-col gap-2 shrink-0 sm:flex-row sm:flex-wrap items-start">
-                  <Link href={`/dashboard/aktionen/${aktion.id}/anmeldungen`} className="sm:w-auto self-start">
+                  <Link href={`/manage/actions/${aktion.id}/signups`} className="sm:w-auto self-start">
                     <Button variant="outline" size="sm" className="w-full sm:w-auto">
                       Anmeldungen
                     </Button>
                   </Link>
                   <div className="flex gap-2 w-full sm:w-auto self-start items-center">
-                    <Link href={`/dashboard/aktionen/${aktion.id}`} className="flex-1 sm:flex-none self-start">
+                    <Link href={`/manage/actions/${aktion.id}`} className="flex-1 sm:flex-none self-start">
                       <Button variant="outline" size="sm" className="w-full sm:w-auto">
                         Bearbeiten
                       </Button>

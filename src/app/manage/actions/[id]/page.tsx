@@ -96,7 +96,7 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
     });
 
     if (res.ok) {
-      router.push("/dashboard");
+      router.push("/manage/actions");
     } else {
       const data = await res.json();
       setError(data.error || "Fehler beim Speichern");

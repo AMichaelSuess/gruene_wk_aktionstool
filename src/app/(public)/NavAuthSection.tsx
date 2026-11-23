@@ -14,7 +14,7 @@ export default function NavAuthSection({ session }: Props) {
 
   return (
     <Link
-      href="/dashboard"
+      href="/manage/actions"
       className="text-sm font-medium text-white/70 hover:text-white transition-colors"
     >
       Zum internen Bereich →

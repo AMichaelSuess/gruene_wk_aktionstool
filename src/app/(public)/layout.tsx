@@ -26,7 +26,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
                   Login
                 </Link>
               )}
-              <Link href="/datenschutz" className="hover:text-white transition-colors case-ui tracking-ui font-bold">
+              <Link href="/privacy" className="hover:text-white transition-colors case-ui tracking-ui font-bold">
                 Datenschutz
               </Link>
               <Link href={districtConfig.impressumUrl} className="hover:text-white transition-colors case-ui tracking-ui font-bold">

@@ -107,7 +107,7 @@ export default function ExcelUpload({
       const data = await res.json().catch(() => null);
       if (data?.ohneKoordinaten > 0) toast.warning(data.message);
       else toast.success(data?.message || "Der Import ist abgeschlossen.");
-      router.push("/dashboard");
+      router.push("/manage/actions");
     } else {
       // Begruendung vom Server anzeigen (z. B. unbekanntes Team), falls vorhanden
       const data = await res.json().catch(() => null);

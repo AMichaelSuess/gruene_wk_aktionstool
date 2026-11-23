@@ -121,7 +121,7 @@ function baseLayout(content: string): string {
         <p>${districtConfig.orgFullName}</p>
         <p>Diese E-Mail wurde automatisch versendet. Bitte antworte nicht auf diese E-Mail.</p>
         <div class="footer-links">
-          <a href="${baseUrl}/datenschutz">Datenschutzerklärung</a><span class="footer-separator">·</span><a href="${districtConfig.impressumUrl}">Impressum</a>
+          <a href="${baseUrl}/privacy">Datenschutzerklärung</a><span class="footer-separator">·</span><a href="${districtConfig.impressumUrl}">Impressum</a>
         </div>
       </div>
     </div>
@@ -160,7 +160,7 @@ export function anmeldebestaetigungEmail(
     <strong>${districtConfig.orgTeamNames}</strong><br>
     ${districtConfig.orgResponsible}</p>
     <hr class="section-divider" />
-    <p>Du kannst dir jederzeit eine Übersicht aller Aktionen, für die du angemeldet bist, per E-Mail zusenden lassen: <a href="${baseUrl}/meine-aktionen-bestaetigen?email=${encodeURIComponent(email)}">Meine Anmeldungen per E-Mail anfordern →</a></p>
+    <p>Du kannst dir jederzeit eine Übersicht aller Aktionen, für die du angemeldet bist, per E-Mail zusenden lassen: <a href="${baseUrl}/my-signups?email=${encodeURIComponent(email)}">Meine Anmeldungen per E-Mail anfordern →</a></p>
     <p>Du hast dich für ${aktionen.length > 1 ? "folgende Aktionen" : "folgende Aktion"} angemeldet:</p>
     ${aktionen.map((a, i) => {
     const cancelLink = cancelTokens?.[i]
@@ -395,7 +395,7 @@ export function tagesUebersichtEmail(
     ${neueAnmeldungenHtml && abmeldungenHtml ? '<hr class="section-divider" />' : ""}
     ${abmeldungenHtml}
     <hr class="section-divider" />
-    <p><a href="${baseUrl}/dashboard" class="cta-button" style="${ctaStyle}">Zum internen Bereich →</a></p>
+    <p><a href="${baseUrl}/manage/actions" class="cta-button" style="${ctaStyle}">Zum internen Bereich →</a></p>
   `;
 
   return { subject, html: baseLayout(content) };

@@ -24,9 +24,9 @@ interface NavSection {
   items: NavItem[];
 }
 
-const aktionen: NavItem = { href: "/dashboard", label: "Aktionen", icon: "aktionen", activePrefix: "/dashboard/aktionen/" };
-const statistik: NavItem = { href: "/admin", label: "Statistik", icon: "statistik" };
-const benutzer: NavItem = { href: "/admin/users", label: "Benutzer*innen", icon: "benutzer", activePrefix: "/admin/users/" };
+const aktionen: NavItem = { href: "/manage/actions", label: "Aktionen", icon: "aktionen", activePrefix: "/manage/actions/" };
+const statistik: NavItem = { href: "/manage/statistics", label: "Statistik", icon: "statistik" };
+const benutzer: NavItem = { href: "/manage/users", label: "Benutzer*innen", icon: "benutzer", activePrefix: "/manage/users/" };
 
 // Expert*innen: Statistik und Benutzer*innen zeigen nur die eigenen Teams
 const expertSections: NavSection[] = [{ items: [aktionen, statistik, benutzer] }];
@@ -36,8 +36,8 @@ const adminSections: NavSection[] = [
   {
     title: "Verwaltung",
     items: [
-      { href: "/admin/teams", label: "Teams", icon: "teams", activePrefix: "/admin/teams/" },
-      { href: "/admin/wahlkreise", label: WAHLKREIS_LABEL_PLURAL, icon: "wahlkreise", activePrefix: "/admin/wahlkreise/" },
+      { href: "/manage/teams", label: "Teams", icon: "teams", activePrefix: "/manage/teams/" },
+      { href: "/manage/districts", label: WAHLKREIS_LABEL_PLURAL, icon: "wahlkreise", activePrefix: "/manage/districts/" },
       benutzer,
     ],
   },
@@ -77,7 +77,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             >
               ☰
             </button>
-            <Link href="/dashboard" className="flex items-center gap-2">
+            <Link href="/manage/actions" className="flex items-center gap-2">
               <BrandLogo variant="onDark" size={36} />
               <div>
                 <span className={`font-headline font-bold text-lg case-ui tracking-ui ${wordmarkClass}`}>
@@ -155,10 +155,10 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
               </div>
             )}
             <Link
-              href="/dashboard/konto"
+              href="/manage/account"
               onClick={() => setMenuOpen(false)}
               className={`${itemClass} ${
-                pathname === "/dashboard/konto"
+                pathname === "/manage/account"
                   ? "bg-primary text-white border-line shadow-ui-sm"
                   : idleItemClass
               }`}

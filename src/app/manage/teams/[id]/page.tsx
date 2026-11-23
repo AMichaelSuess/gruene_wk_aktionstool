@@ -4,40 +4,44 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
-import { WAHLKREIS_LABEL, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
+import { WAHLKREIS_LABEL, formatWahlkreisMitLabel } from "@/lib/wahlkreis-label";
 
-interface WahlkreisDetail {
+interface Wahlkreis {
   id: string;
   nummer: number;
   name: string;
-  _count: { teams: number; aktionen: number };
 }
 
-export default function EditWahlkreisPage({ params }: { params: Promise<{ id: string }> }) {
+export default function EditTeamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     name: "",
-    nummer: "",
+    wahlkreisId: "",
   });
-  const [counts, setCounts] = useState({ teams: 0, aktionen: 0 });
 
   useEffect(() => {
-    fetch("/api/admin/wahlkreise")
-      .then((r) => r.json())
-      .then((data: WahlkreisDetail[]) => {
-        const wk = data.find((w) => w.id === id);
-        if (wk) {
-          setForm({ name: wk.name, nummer: String(wk.nummer) });
-          setCounts(wk._count);
-        }
-        setFetchLoading(false);
-      });
+    Promise.all([
+      fetch("/api/admin/teams").then((r) => r.json()),
+      fetch("/api/wahlkreise").then((r) => r.json()),
+    ]).then(([teams, wk]) => {
+      const team = teams.find((t: { id: string; name: string; wahlkreis: { id: string } | null }) => t.id === id);
+      if (team) {
+        setForm({
+          name: team.name,
+          wahlkreisId: team.wahlkreis?.id ?? "",
+        });
+      }
+      setWahlkreise(wk);
+      setFetchLoading(false);
+    });
   }, [id]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -45,21 +49,14 @@ export default function EditWahlkreisPage({ params }: { params: Promise<{ id: st
     setLoading(true);
     setError("");
 
-    const nummerInt = parseInt(form.nummer, 10);
-    if (isNaN(nummerInt) || nummerInt < 1) {
-      setError("Nummer muss eine positive ganze Zahl sein");
-      setLoading(false);
-      return;
-    }
-
-    const res = await fetch("/api/admin/wahlkreise", {
+    const res = await fetch("/api/admin/teams", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, name: form.name, nummer: nummerInt }),
+      body: JSON.stringify({ id, name: form.name, wahlkreisId: form.wahlkreisId || null }),
     });
 
     if (res.ok) {
-      router.push("/admin/wahlkreise");
+      router.push("/manage/teams");
     } else {
       const data = await res.json();
       setError(data.error || "Fehler beim Speichern");
@@ -69,42 +66,35 @@ export default function EditWahlkreisPage({ params }: { params: Promise<{ id: st
   }
 
   if (fetchLoading) {
-    return <div className="text-gray-500">Lade {WAHLKREIS_LABEL}...</div>;
+    return <div className="text-gray-500">Lade Team...</div>;
   }
 
   return (
     <div className="max-w-xl">
       <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-6">
-        {WAHLKREIS_LABEL} bearbeiten
+        Team bearbeiten
       </h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>{WAHLKREIS_LABEL}-Daten ändern</CardTitle>
+          <CardTitle>Team-Daten ändern</CardTitle>
         </CardHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            // Ohne sichtbare Nummern bestimmt sie nur die Reihenfolge in Filter und Listen
-            label={WAHLKREIS_NUMMERN_ANZEIGEN ? "Nummer" : "Position in der Reihenfolge"}
-            type="number"
-            value={form.nummer}
-            onChange={(e) => setForm({ ...form, nummer: e.target.value })}
-            required
-            min={1}
-          />
-          <Input
-            label="Name"
+            label="Teamname"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             required
             minLength={2}
           />
-
-          <div className="text-sm text-gray-600 border-t-ui border-line pt-3">
-            <span className="mr-4">👥 {counts.teams} Teams</span>
-            <span>📋 {counts.aktionen} Aktionen</span>
-          </div>
+          <Select
+            label={`${WAHLKREIS_LABEL} (optional)`}
+            value={form.wahlkreisId}
+            onChange={(e) => setForm({ ...form, wahlkreisId: e.target.value })}
+            options={wahlkreise.map((w) => ({ value: w.id, label: formatWahlkreisMitLabel(w, WAHLKREIS_LABEL) }))}
+            placeholder="– Bezirksweit –"
+          />
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 text-sm">

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
-import { WAHLKREIS_LABEL, formatWahlkreisMitLabel } from "@/lib/wahlkreis-label";
+import { WAHLKREIS_LABEL, formatWahlkreis } from "@/lib/wahlkreis-label";
 
 interface Wahlkreis {
   id: string;
@@ -14,35 +14,18 @@ interface Wahlkreis {
   name: string;
 }
 
-export default function EditTeamPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function NewTeamPage() {
   const router = useRouter();
   const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>([]);
   const [loading, setLoading] = useState(false);
-  const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const [form, setForm] = useState({
-    name: "",
-    wahlkreisId: "",
-  });
+  const [form, setForm] = useState({ name: "", wahlkreisId: "" });
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/admin/teams").then((r) => r.json()),
-      fetch("/api/wahlkreise").then((r) => r.json()),
-    ]).then(([teams, wk]) => {
-      const team = teams.find((t: { id: string; name: string; wahlkreis: { id: string } | null }) => t.id === id);
-      if (team) {
-        setForm({
-          name: team.name,
-          wahlkreisId: team.wahlkreis?.id ?? "",
-        });
-      }
-      setWahlkreise(wk);
-      setFetchLoading(false);
-    });
-  }, [id]);
+    fetch("/api/wahlkreise")
+      .then((r) => r.json())
+      .then(setWahlkreise);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,34 +33,29 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
     setError("");
 
     const res = await fetch("/api/admin/teams", {
-      method: "PUT",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, name: form.name, wahlkreisId: form.wahlkreisId || null }),
+      body: JSON.stringify(form),
     });
 
     if (res.ok) {
-      router.push("/admin/teams");
+      router.push("/manage/teams");
     } else {
       const data = await res.json();
-      setError(data.error || "Fehler beim Speichern");
+      setError(data.error || "Fehler beim Erstellen");
     }
-
     setLoading(false);
-  }
-
-  if (fetchLoading) {
-    return <div className="text-gray-500">Lade Team...</div>;
   }
 
   return (
     <div className="max-w-xl">
       <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-6">
-        Team bearbeiten
+        Neues Team
       </h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>Team-Daten ändern</CardTitle>
+          <CardTitle>Team anlegen</CardTitle>
         </CardHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -86,13 +64,15 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             required
-            minLength={2}
           />
           <Select
             label={`${WAHLKREIS_LABEL} (optional)`}
             value={form.wahlkreisId}
             onChange={(e) => setForm({ ...form, wahlkreisId: e.target.value })}
-            options={wahlkreise.map((w) => ({ value: w.id, label: formatWahlkreisMitLabel(w, WAHLKREIS_LABEL) }))}
+            options={wahlkreise.map((wk) => ({
+              value: wk.id,
+              label: formatWahlkreis(wk),
+            }))}
             placeholder="– Bezirksweit –"
           />
 
@@ -104,7 +84,7 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
 
           <div className="flex gap-3">
             <Button type="submit" loading={loading}>
-              Speichern
+              Erstellen
             </Button>
             <Button variant="ghost" type="button" onClick={() => router.back()}>
               Abbrechen

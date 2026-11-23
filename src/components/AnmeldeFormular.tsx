@@ -231,7 +231,7 @@ export default function AnmeldeFormular({
               Ich stimme der Verarbeitung meiner Daten zum Zweck der Koordination
               von Wahlkampfaktionen zu.{" "}
               <Link
-                href="/datenschutz"
+                href="/privacy"
                 target="_blank"
                 className="text-primary font-bold hover:underline"
               >

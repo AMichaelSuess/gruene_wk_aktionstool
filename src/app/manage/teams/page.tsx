@@ -50,7 +50,7 @@ export default function TeamsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-headline text-2xl font-bold text-primary case-ui">Teams</h1>
-        <Link href="/admin/teams/neu">
+        <Link href="/manage/teams/new">
           <Button>Neues Team</Button>
         </Link>
       </div>
@@ -71,7 +71,7 @@ export default function TeamsPage() {
                 </p>
               </div>
               <div className="flex flex-wrap justify-end gap-2">
-                <Link href={`/admin/teams/${team.id}`}>
+                <Link href={`/manage/teams/${team.id}`}>
                   <Button variant="outline" size="sm">Bearbeiten</Button>
                 </Link>
                 <Button variant="danger" size="sm" onClick={() => setDeleteTarget(team)}>

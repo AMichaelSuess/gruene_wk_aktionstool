@@ -161,21 +161,21 @@ describe("Selbstabmeldung: Link aus der E-Mail (GET) ändert nichts", () => {
 
     expect(res.status).toBe(307);
     const location = new URL(res.headers.get("location")!);
-    expect(location.pathname).toBe("/abmeldung/bestaetigen");
+    expect(location.pathname).toBe("/unsubscribe");
     expect(location.searchParams.get("token")).toBe("abc123valid");
     expect(prisma.anmeldung.delete).not.toHaveBeenCalled();
     expect(prisma.emailLog.create).not.toHaveBeenCalled();
   });
 
-  it("Fehlender Token: leitet zu /abmeldung?fehler=1 weiter", async () => {
+  it("Fehlender Token: leitet zu /unsubscribe/done?error=1 weiter", async () => {
     const { GET } = await import("@/app/api/anmeldungen/abmelden/route");
 
     const res = await GET(createAbmeldenRequest(null) as any);
 
     expect(res.status).toBe(307);
     const location = res.headers.get("location");
-    expect(location).toContain("/abmeldung");
-    expect(location).toContain("fehler=1");
+    expect(location).toContain("/unsubscribe/done");
+    expect(location).toContain("error=1");
   });
 });
 
