@@ -33,8 +33,73 @@ interface TeamOption {
   name: string;
 }
 
+type DateFilter = "alle" | "heute" | "morgen" | "woche";
+
+interface Filters {
+  dateFilter: DateFilter;
+  activeOnly: boolean;
+  hidePast: boolean;
+  kategorieFilter: string[];
+  teamFilter: string;
+  nurEigene: boolean;
+}
+
+const DATE_FILTERS: DateFilter[] = ["alle", "heute", "morgen", "woche"];
+
+const DATE_FILTER_OPTIONS: { value: DateFilter; label: string }[] = [
+  { value: "alle", label: "Alle" },
+  { value: "heute", label: "Heute" },
+  { value: "morgen", label: "Morgen" },
+  { value: "woche", label: "Diese Woche" },
+];
+
+const DEFAULT_FILTERS: Filters = {
+  dateFilter: "alle",
+  activeOnly: false,
+  hidePast: true,
+  kategorieFilter: [],
+  teamFilter: "",
+  nurEigene: false,
+};
+
+// Filter bleiben im Browser gespeichert (pro Person), damit sie nach einem
+// Seitenwechsel oder Neuladen erhalten bleiben
+function filterStorageKey(userId: string) {
+  return `dashboard-filter:${userId}`;
+}
+
+function loadFilters(userId: string): Partial<Filters> {
+  try {
+    const raw = localStorage.getItem(filterStorageKey(userId));
+    if (!raw) return {};
+    const data = JSON.parse(raw);
+    const result: Partial<Filters> = {};
+    if (DATE_FILTERS.includes(data.dateFilter)) result.dateFilter = data.dateFilter;
+    if (typeof data.activeOnly === "boolean") result.activeOnly = data.activeOnly;
+    if (typeof data.hidePast === "boolean") result.hidePast = data.hidePast;
+    if (Array.isArray(data.kategorieFilter)) {
+      result.kategorieFilter = data.kategorieFilter.filter((k: unknown) =>
+        KATEGORIEN.some((kat) => kat.value === k)
+      );
+    }
+    if (typeof data.teamFilter === "string") result.teamFilter = data.teamFilter;
+    if (typeof data.nurEigene === "boolean") result.nurEigene = data.nurEigene;
+    return result;
+  } catch {
+    return {};
+  }
+}
+
+function saveFilters(userId: string, filters: Filters) {
+  try {
+    localStorage.setItem(filterStorageKey(userId), JSON.stringify(filters));
+  } catch {
+    // Speicher nicht verfuegbar (z. B. privates Fenster): Filter gelten nur bis zum Neuladen
+  }
+}
+
 export default function DashboardPage() {
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const isAdmin = session?.user.role === "ADMIN";
   const userId = session?.user.id;
 
@@ -43,14 +108,27 @@ export default function DashboardPage() {
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Aktion | null>(null);
 
-  // Filter States
-  const [dateFilter, setDateFilter] = useState<"alle" | "heute" | "morgen" | "woche">("alle");
-  const [activeOnly, setActiveOnly] = useState(false);
-  const [hidePast, setHidePast] = useState(true);
-  const [kategorieFilter, setKategorieFilter] = useState<string[]>([]);
-  const [teamFilter, setTeamFilter] = useState("");
-  const [nurEigene, setNurEigene] = useState(false);
+  // Filter: null, bis die gespeicherten Werte geladen sind. Das geht erst, wenn
+  // feststeht, wer eingeloggt ist (auf dem Server ist die Session immer "loading")
+  const [savedFilters, setSavedFilters] = useState<Filters | null>(null);
+  if (savedFilters === null && sessionStatus !== "loading") {
+    setSavedFilters({ ...DEFAULT_FILTERS, ...(userId ? loadFilters(userId) : {}) });
+  }
+  const filters = savedFilters ?? DEFAULT_FILTERS;
+  const { dateFilter, activeOnly, hidePast, kategorieFilter, nurEigene } = filters;
   const [teams, setTeams] = useState<TeamOption[]>([]);
+  const [teamsLoaded, setTeamsLoaded] = useState(false);
+
+  function updateFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
+    const next = { ...filters, [key]: value };
+    setSavedFilters(next);
+    if (userId) saveFilters(userId, next);
+  }
+
+  function resetFilters() {
+    setSavedFilters(DEFAULT_FILTERS);
+    if (userId) saveFilters(userId, DEFAULT_FILTERS);
+  }
 
   // Mehrfachauswahl fuer die Bulk-Umkategorisierung
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -74,11 +152,30 @@ export default function DashboardPage() {
     if (!session) return;
     fetch(isAdmin ? "/api/admin/teams" : "/api/user/teams")
       .then((r) => (r.ok ? r.json() : []))
-      .then((data: TeamOption[]) => setTeams(data.map((t) => ({ id: t.id, name: t.name }))));
+      .then((data: TeamOption[]) => {
+        setTeams(data.map((t) => ({ id: t.id, name: t.name })));
+        setTeamsLoaded(true);
+      });
   }, [session, isAdmin]);
 
   // Expert*innen mit nur einem Team brauchen keinen Team-Filter
   const showTeamFilter = isAdmin ? teams.length > 0 : teams.length > 1;
+
+  // Ein gespeichertes Team, das es nicht mehr gibt (oder dessen Filter gar nicht
+  // angezeigt wird), wuerde sonst unsichtbar alle Aktionen ausblenden
+  const teamFilter =
+    !teamsLoaded || (showTeamFilter && teams.some((t) => t.id === filters.teamFilter))
+      ? filters.teamFilter
+      : "";
+
+  // "Filter zurücksetzen" nur anbieten, wenn etwas vom Standard abweicht
+  const filtersActive =
+    dateFilter !== DEFAULT_FILTERS.dateFilter ||
+    activeOnly !== DEFAULT_FILTERS.activeOnly ||
+    hidePast !== DEFAULT_FILTERS.hidePast ||
+    kategorieFilter.length > 0 ||
+    teamFilter !== DEFAULT_FILTERS.teamFilter ||
+    nurEigene !== DEFAULT_FILTERS.nurEigene;
 
   function handleCancel(id: string) {
     setCancelId(id);
@@ -158,8 +255,11 @@ export default function DashboardPage() {
   const exportQuery = exportParams.toString() ? `&${exportParams.toString()}` : "";
 
   function toggleKategorieFilter(value: string) {
-    setKategorieFilter((prev) =>
-      prev.includes(value) ? prev.filter((k) => k !== value) : [...prev, value]
+    updateFilter(
+      "kategorieFilter",
+      kategorieFilter.includes(value)
+        ? kategorieFilter.filter((k) => k !== value)
+        : [...kategorieFilter, value]
     );
   }
 
@@ -209,7 +309,9 @@ export default function DashboardPage() {
     );
   }
 
-  if (loading) {
+  // Erst rendern, wenn die gespeicherten Filter da sind, damit die Liste nicht
+  // kurz mit den Standardfiltern aufblitzt
+  if (loading || savedFilters === null) {
     return <div className="text-gray-500 p-8">Lade Aktionen...</div>;
   }
 
@@ -236,103 +338,90 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-6 mb-8 bg-white rounded-card border-ui border-line p-4 shadow-ui">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-bold case-ui">Zeitraum:</span>
-          <Button
-            variant={dateFilter === "alle" ? "primary" : "outline"}
-            size="sm"
-            onClick={() => setDateFilter("alle")}
-          >
-            Alle
-          </Button>
-          <Button
-            variant={dateFilter === "heute" ? "primary" : "outline"}
-            size="sm"
-            onClick={() => setDateFilter("heute")}
-          >
-            Heute
-          </Button>
-          <Button
-            variant={dateFilter === "morgen" ? "primary" : "outline"}
-            size="sm"
-            onClick={() => setDateFilter("morgen")}
-          >
-            Morgen
-          </Button>
-          <Button
-            variant={dateFilter === "woche" ? "primary" : "outline"}
-            size="sm"
-            onClick={() => setDateFilter("woche")}
-          >
-            Diese Woche
-          </Button>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 border-l-ui border-gray-300 pl-6">
-          <span className="text-sm font-bold case-ui">Art:</span>
-          <Button
-            variant={kategorieFilter.length === 0 ? "primary" : "outline"}
-            size="sm"
-            onClick={() => setKategorieFilter([])}
-          >
-            Alle
-          </Button>
-          {KATEGORIEN.map((kat) => (
-            <Button
-              key={kat.value}
-              variant={kategorieFilter.includes(kat.value) ? "primary" : "outline"}
-              size="sm"
-              onClick={() => toggleKategorieFilter(kat.value)}
+      {/* Filter */}
+      <div className="mb-8 bg-white rounded-card border-ui border-line p-4 shadow-ui">
+        <div className="flex items-center justify-between gap-4 pb-3 mb-4 border-b-ui border-line">
+          <h2 className="font-headline text-lg font-bold case-ui">Filter</h2>
+          {filtersActive && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="text-xs font-bold case-ui tracking-ui text-ink underline underline-offset-2 cursor-pointer hover:text-primary hover:decoration-2 focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
             >
-              {kat.label}
+              Filter zurücksetzen
+            </button>
+          )}
+        </div>
+        <div className="space-y-4">
+          <FilterRow label="Zeitraum">
+            {DATE_FILTER_OPTIONS.map((opt) => (
+              <Button
+                key={opt.value}
+                variant={dateFilter === opt.value ? "primary" : "outline"}
+                size="sm"
+                aria-pressed={dateFilter === opt.value}
+                onClick={() => updateFilter("dateFilter", opt.value)}
+              >
+                {opt.label}
+              </Button>
+            ))}
+          </FilterRow>
+          <FilterRow label="Art">
+            <Button
+              variant={kategorieFilter.length === 0 ? "primary" : "outline"}
+              size="sm"
+              aria-pressed={kategorieFilter.length === 0}
+              onClick={() => updateFilter("kategorieFilter", [])}
+            >
+              Alle
             </Button>
-          ))}
-        </div>
-        <div className="flex flex-wrap items-center gap-4 border-l-ui border-gray-300 pl-6">
-          <label className="flex items-center gap-2 text-sm font-bold case-ui cursor-pointer">
-            <input
-              type="checkbox"
-              checked={activeOnly}
-              onChange={(e) => setActiveOnly(e.target.checked)}
-              className="w-4 h-4 accent-primary cursor-pointer"
-            />
-            Nur Aktive (Aktiv & Geändert)
-          </label>
-          <label className="flex items-center gap-2 text-sm font-bold case-ui cursor-pointer">
-            <input
-              type="checkbox"
-              checked={hidePast}
-              onChange={(e) => setHidePast(e.target.checked)}
-              className="w-4 h-4 accent-primary cursor-pointer"
-            />
-            Vergangene ausblenden (älter als 1 Tag)
-          </label>
-        </div>
-        <div className="flex flex-wrap items-center gap-4 border-l-ui border-gray-300 pl-6">
+            {KATEGORIEN.map((kat) => (
+              <Button
+                key={kat.value}
+                variant={kategorieFilter.includes(kat.value) ? "primary" : "outline"}
+                size="sm"
+                aria-pressed={kategorieFilter.includes(kat.value)}
+                onClick={() => toggleKategorieFilter(kat.value)}
+              >
+                {kat.label}
+              </Button>
+            ))}
+          </FilterRow>
           {showTeamFilter && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold case-ui">Team:</span>
-              <div className="w-48">
+            <FilterRow label="Team">
+              <div className="w-full sm:w-64">
                 <Select
                   aria-label="Team"
                   value={teamFilter}
-                  onChange={(e) => setTeamFilter(e.target.value)}
+                  onChange={(e) => updateFilter("teamFilter", e.target.value)}
                   options={teams.map((t) => ({ value: t.id, label: t.name }))}
                   placeholder="Alle Teams"
                 />
               </div>
-            </div>
+            </FilterRow>
           )}
-          <label className="flex items-center gap-2 text-sm font-bold case-ui cursor-pointer">
-            <input
-              type="checkbox"
-              checked={nurEigene}
-              onChange={(e) => setNurEigene(e.target.checked)}
-              className="w-4 h-4 accent-primary cursor-pointer"
-            />
-            Nur von mir angelegte
-          </label>
+          <FilterRow label="Ausblenden">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-6">
+              <FilterCheckbox
+                checked={activeOnly}
+                onChange={(checked) => updateFilter("activeOnly", checked)}
+              >
+                Abgesagte
+              </FilterCheckbox>
+              <FilterCheckbox
+                checked={hidePast}
+                onChange={(checked) => updateFilter("hidePast", checked)}
+              >
+                Vergangene (älter als 1 Tag)
+              </FilterCheckbox>
+              <FilterCheckbox
+                checked={nurEigene}
+                onChange={(checked) => updateFilter("nurEigene", checked)}
+              >
+                Von anderen angelegte
+              </FilterCheckbox>
+            </div>
+          </FilterRow>
         </div>
       </div>
 
@@ -536,6 +625,38 @@ export default function DashboardPage() {
         </div>
       </Dialog>
     </div>
+  );
+}
+
+// Eine Filterzeile: Beschriftung links, auf dem Handy darueber
+function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+      <span className="text-sm font-bold case-ui sm:w-32 shrink-0">{label}</span>
+      <div className="flex flex-wrap items-center gap-2">{children}</div>
+    </div>
+  );
+}
+
+function FilterCheckbox({
+  checked,
+  onChange,
+  children,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="flex items-center gap-2 text-sm cursor-pointer">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="w-5 h-5 accent-primary cursor-pointer"
+      />
+      {children}
+    </label>
   );
 }
 
