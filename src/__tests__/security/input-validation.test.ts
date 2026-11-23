@@ -154,28 +154,29 @@ describe("Eingabevalidierung: Öffentliche Anmeldung", () => {
   });
 });
 
-describe("Input-Validierung: PUT /api/admin/users (userUpdateSchema)", () => {
-  it("PUT ohne ID wird abgelehnt (400)", async () => {
+describe("Input-Validierung: PUT /api/users (userUpdateSchema)", () => {
+  it("PUT: eine ID im Body wird ignoriert, es zählt die ID aus dem Pfad", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { PUT } = await import("@/app/api/admin/users/route");
+    const { PUT } = await import("@/app/api/users/[id]/route");
     const { prisma } = await import("@/lib/db");
+    (prisma.user.update as ReturnType<typeof vi.fn>).mockResolvedValue({ id: "user-1", password: "hash", teams: [] });
 
-    const req = createJsonRequest("/api/admin/users", { name: "Test" }, "PUT");
-    const res = await PUT(req as any);
+    const req = createJsonRequest("/api/users/user-1", { id: "anderer-user", name: "Test User" }, "PUT");
+    const res = await PUT(req as any, { params: Promise.resolve({ id: "user-1" }) });
 
-    expect(res.status).toBe(400);
-    const body = await res.json();
-    expect(body.error).toBe("Validierungsfehler");
-    expect(prisma.user.update as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    expect(prisma.user.update as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "user-1" } })
+    );
   });
 
   it("PUT mit ungueltigem E-Mail-Format wird abgelehnt (400)", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { PUT } = await import("@/app/api/admin/users/route");
+    const { PUT } = await import("@/app/api/users/[id]/route");
     const { prisma } = await import("@/lib/db");
 
-    const req = createJsonRequest("/api/admin/users", { id: "user-1", email: "not-an-email" }, "PUT");
-    const res = await PUT(req as any);
+    const req = createJsonRequest("/api/users/user-1", { email: "not-an-email" }, "PUT");
+    const res = await PUT(req as any, { params: Promise.resolve({ id: "user-1" }) });
 
     expect(res.status).toBe(400);
     expect(prisma.user.update as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
@@ -183,11 +184,11 @@ describe("Input-Validierung: PUT /api/admin/users (userUpdateSchema)", () => {
 
   it("PUT mit zu kurzem Passwort wird abgelehnt (400)", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { PUT } = await import("@/app/api/admin/users/route");
+    const { PUT } = await import("@/app/api/users/[id]/route");
     const { prisma } = await import("@/lib/db");
 
-    const req = createJsonRequest("/api/admin/users", { id: "user-1", password: "abc" }, "PUT");
-    const res = await PUT(req as any);
+    const req = createJsonRequest("/api/users/user-1", { password: "abc" }, "PUT");
+    const res = await PUT(req as any, { params: Promise.resolve({ id: "user-1" }) });
 
     expect(res.status).toBe(400);
     expect(prisma.user.update as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
@@ -195,11 +196,11 @@ describe("Input-Validierung: PUT /api/admin/users (userUpdateSchema)", () => {
 
   it("PUT mit ungueltiger Role wird abgelehnt (400)", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { PUT } = await import("@/app/api/admin/users/route");
+    const { PUT } = await import("@/app/api/users/[id]/route");
     const { prisma } = await import("@/lib/db");
 
-    const req = createJsonRequest("/api/admin/users", { id: "user-1", role: "SUPERADMIN" }, "PUT");
-    const res = await PUT(req as any);
+    const req = createJsonRequest("/api/users/user-1", { role: "SUPERADMIN" }, "PUT");
+    const res = await PUT(req as any, { params: Promise.resolve({ id: "user-1" }) });
 
     expect(res.status).toBe(400);
     expect(prisma.user.update as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
@@ -207,7 +208,7 @@ describe("Input-Validierung: PUT /api/admin/users (userUpdateSchema)", () => {
 
   it("PUT mit gueltigem partiellem Update funktioniert (200)", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { PUT } = await import("@/app/api/admin/users/route");
+    const { PUT } = await import("@/app/api/users/[id]/route");
     const { prisma } = await import("@/lib/db");
 
     (prisma.user.update as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -222,8 +223,8 @@ describe("Input-Validierung: PUT /api/admin/users (userUpdateSchema)", () => {
       teams: [],
     });
 
-    const req = createJsonRequest("/api/admin/users", { id: "user-1", name: "Neuer Name" }, "PUT");
-    const res = await PUT(req as any);
+    const req = createJsonRequest("/api/users/user-1", { name: "Neuer Name" }, "PUT");
+    const res = await PUT(req as any, { params: Promise.resolve({ id: "user-1" }) });
 
     expect(res.status).toBe(200);
     expect(prisma.user.update as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
@@ -233,7 +234,7 @@ describe("Input-Validierung: PUT /api/admin/users (userUpdateSchema)", () => {
 
   it("PUT mit active=false funktioniert (boolean-Validierung)", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { PUT } = await import("@/app/api/admin/users/route");
+    const { PUT } = await import("@/app/api/users/[id]/route");
     const { prisma } = await import("@/lib/db");
 
     (prisma.user.update as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -248,8 +249,8 @@ describe("Input-Validierung: PUT /api/admin/users (userUpdateSchema)", () => {
       teams: [],
     });
 
-    const req = createJsonRequest("/api/admin/users", { id: "user-1", active: false }, "PUT");
-    const res = await PUT(req as any);
+    const req = createJsonRequest("/api/users/user-1", { active: false }, "PUT");
+    const res = await PUT(req as any, { params: Promise.resolve({ id: "user-1" }) });
 
     expect(res.status).toBe(200);
     expect(prisma.user.update as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(

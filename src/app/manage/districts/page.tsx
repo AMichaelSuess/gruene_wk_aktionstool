@@ -17,7 +17,7 @@ export default function WahlkreisePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/wahlkreise")
+    fetch("/api/districts")
       .then((r) => r.json())
       .then((data) => {
         setWahlkreise(data);

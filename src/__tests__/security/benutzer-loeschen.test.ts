@@ -1,6 +1,6 @@
 /**
- * Sicherheitstests: Benutzer*innen loeschen (DELETE /api/admin/users)
- * und Admins ohne Team-Mitgliedschaften (POST/PUT /api/admin/users)
+ * Sicherheitstests: Benutzer*innen loeschen (DELETE /api/users)
+ * und Admins ohne Team-Mitgliedschaften (POST/PUT /api/users)
  *
  * Ohne angelegte Aktionen wird das Konto geloescht, sonst anonymisiert und
  * deaktiviert (DSGVO: personenbezogene Daten weg, Aktionen bleiben). Admins
@@ -25,8 +25,8 @@ beforeEach(() => {
 });
 
 async function del(id: string) {
-  const { DELETE } = await import("@/app/api/admin/users/route");
-  return DELETE(createRequest(`/api/admin/users?id=${id}`, { method: "DELETE" }) as any);
+  const { DELETE } = await import("@/app/api/users/[id]/route");
+  return DELETE(createRequest(`/api/users/${id}`, { method: "DELETE" }) as any, { params: Promise.resolve({ id }) });
 }
 
 describe("Benutzer*in löschen", () => {
@@ -84,7 +84,7 @@ describe("Benutzer*in löschen", () => {
 
   it("anonymisierte Konten erscheinen nicht in der Admin-Liste", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { GET } = await import("@/app/api/admin/users/route");
+    const { GET } = await import("@/app/api/users/route");
     await GET();
     expect(mockPrisma.user.findMany.mock.calls[0][0].where).toEqual({
       NOT: { email: { endsWith: "@geloescht.invalid" } },
@@ -101,9 +101,9 @@ describe("Admins haben keine Team-Mitgliedschaften", () => {
 
   it("neuer Admin wird ohne Teams angelegt, auch wenn Teams mitgeschickt werden", async () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
-    const { POST } = await import("@/app/api/admin/users/route");
+    const { POST } = await import("@/app/api/users/route");
     const res = await POST(
-      createJsonRequest("/api/admin/users", {
+      createJsonRequest("/api/users", {
         name: "Neue Admin",
         email: "neu@test.de",
         password: "langes-passwort-123",
@@ -116,9 +116,9 @@ describe("Admins haben keine Team-Mitgliedschaften", () => {
   });
 
   it("wer zum Admin wird, verliert alle Team-Mitgliedschaften", async () => {
-    const { PUT } = await import("@/app/api/admin/users/route");
+    const { PUT } = await import("@/app/api/users/[id]/route");
     const res = await PUT(
-      createJsonRequest("/api/admin/users", { id: "user-x", role: "ADMIN", teamIds: ["team-a"] }, "PUT") as any
+      createJsonRequest("/api/users/user-x", { role: "ADMIN", teamIds: ["team-a"] }, "PUT") as any, { params: Promise.resolve({ id: "user-x" }) }
     );
     expect(res.status).toBe(200);
     expect(mockPrisma.user.update.mock.calls[0][0].data.teams).toEqual({ deleteMany: {}, create: [] });
@@ -126,15 +126,15 @@ describe("Admins haben keine Team-Mitgliedschaften", () => {
 
   it("Team-Angaben fuer bestehende Admins werden ignoriert", async () => {
     mockPrisma.user.findUnique.mockResolvedValue({ role: "ADMIN" });
-    const { PUT } = await import("@/app/api/admin/users/route");
-    await PUT(createJsonRequest("/api/admin/users", { id: "user-x", teamIds: ["team-a"] }, "PUT") as any);
+    const { PUT } = await import("@/app/api/users/[id]/route");
+    await PUT(createJsonRequest("/api/users/user-x", { teamIds: ["team-a"] }, "PUT") as any, { params: Promise.resolve({ id: "user-x" }) });
     expect(mockPrisma.user.update.mock.calls[0][0].data.teams).toEqual({ deleteMany: {}, create: [] });
   });
 
   it("Expert*innen behalten ihre Teams", async () => {
     mockPrisma.user.findUnique.mockResolvedValue({ role: "EXPERT" });
-    const { PUT } = await import("@/app/api/admin/users/route");
-    await PUT(createJsonRequest("/api/admin/users", { id: "user-x", teamIds: ["team-a"] }, "PUT") as any);
+    const { PUT } = await import("@/app/api/users/[id]/route");
+    await PUT(createJsonRequest("/api/users/user-x", { teamIds: ["team-a"] }, "PUT") as any, { params: Promise.resolve({ id: "user-x" }) });
     expect(mockPrisma.user.update.mock.calls[0][0].data.teams).toEqual({
       deleteMany: {},
       create: [{ teamId: "team-a" }],
@@ -142,9 +142,9 @@ describe("Admins haben keine Team-Mitgliedschaften", () => {
   });
 });
 
-async function put(body: unknown) {
-  const { PUT } = await import("@/app/api/admin/users/route");
-  return PUT(createJsonRequest("/api/admin/users", body, "PUT") as any);
+async function put({ id, ...body }: { id: string } & Record<string, unknown>) {
+  const { PUT } = await import("@/app/api/users/[id]/route");
+  return PUT(createJsonRequest(`/api/users/${id}`, body, "PUT") as any, { params: Promise.resolve({ id }) });
 }
 
 describe("Admin-Konten: kein Selbstaussperren", () => {

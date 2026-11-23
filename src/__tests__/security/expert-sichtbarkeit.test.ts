@@ -80,16 +80,16 @@ describe("Statistik (GET /api/statistics)", () => {
   });
 });
 
-describe("Benutzerliste (GET /api/admin/users)", () => {
+describe("Benutzerliste (GET /api/users)", () => {
   it("401 ohne Sitzung", async () => {
     await mockAuth(null);
-    const { GET } = await import("@/app/api/admin/users/route");
+    const { GET } = await import("@/app/api/users/route");
     expect((await GET()).status).toBe(401);
   });
 
   it("EXPERT sieht nur aktive Mitglieder eigener Teams und Admins, ohne Passwort-Hash", async () => {
     await mockAuth(EXPERT_TEAM_A);
-    const { GET } = await import("@/app/api/admin/users/route");
+    const { GET } = await import("@/app/api/users/route");
     expect((await GET()).status).toBe(200);
 
     const args = mockPrisma.user.findMany.mock.calls[0][0];

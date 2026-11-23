@@ -28,7 +28,7 @@ export default function NewUserPage() {
   });
 
   useEffect(() => {
-    fetch("/api/admin/teams")
+    fetch("/api/teams")
       .then((r) => r.json())
       .then(setTeams);
   }, []);
@@ -47,7 +47,7 @@ export default function NewUserPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/admin/users", {
+    const res = await fetch("/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       // Admins stehen über den Teams und bekommen keine Team-Zuordnung

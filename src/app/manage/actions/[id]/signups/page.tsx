@@ -44,7 +44,7 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
     if (!deleteTarget) return;
     const anmeldungId = deleteTarget.id;
     setDeleteTarget(null);
-    const res = await fetch(`/api/actions/${id}/signups?anmeldungId=${anmeldungId}`, {
+    const res = await fetch(`/api/actions/${id}/signups/${anmeldungId}`, {
       method: "DELETE",
     });
     if (res.ok) {

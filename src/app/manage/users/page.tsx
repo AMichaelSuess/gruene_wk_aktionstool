@@ -34,7 +34,7 @@ export default function UsersPage() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/users")
+    fetch("/api/users")
       .then((r) => r.json())
       .then((data) => {
         setUsers(data);
@@ -43,10 +43,10 @@ export default function UsersPage() {
   }, []);
 
   async function toggleActive(user: User) {
-    const res = await fetch("/api/admin/users", {
+    const res = await fetch(`/api/users/${user.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: user.id, active: !user.active }),
+      body: JSON.stringify({ active: !user.active }),
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
@@ -61,7 +61,7 @@ export default function UsersPage() {
     if (!deleteTarget) return;
     const { id, name } = deleteTarget;
     setDeleting(true);
-    const res = await fetch(`/api/admin/users?id=${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
     setDeleting(false);
     setDeleteTarget(null);
     if (!res.ok) {

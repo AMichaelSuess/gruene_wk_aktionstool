@@ -347,9 +347,10 @@ Ohne diese Variable ist Einbettung nur von `'self'` erlaubt (d.h. nur von der Ap
 │   │       ├── signups/         #   Anmeldung, Abmeldung, Übersicht per E-Mail, Export der Anmeldungen
 │   │       ├── statistics/      #   Statistik und Auswertungs-Export
 │   │       ├── me/              #   Eigenes Konto, Passwort, eigene Teams
-│   │       ├── districts/       #   Wahlkreis-Liste
-│   │       ├── teams/           #   Team-Liste für die Auswahl
-│   │       ├── admin/           #   Admin-Endpunkte (users, teams, wahlkreise, aktionen)
+│   │       ├── users/           #   Benutzer*innen (Liste auch für Expert*innen, Verwaltung nur Admin)
+│   │       ├── teams/           #   Teams (Liste für alle, Verwaltung nur Admin)
+│   │       ├── districts/       #   Wahlkreise (Liste öffentlich, Bearbeiten nur Admin)
+│   │       ├── admin/           #   Endgültiges Löschen von Aktionen (nur Admin)
 │   │       └── cron/            #   daily-summary, cleanup-signups, send-reminders
 │   ├── components/
 │   │   ├── ui/                  # UI-Primitives (Button, Input, Card, Dialog, Badge, Select)

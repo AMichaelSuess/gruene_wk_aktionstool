@@ -176,9 +176,9 @@ describe("Team-Isolation: Anmeldung löschen", () => {
     });
     mockPrisma.anmeldung.deleteMany.mockResolvedValue({ count: 0 });
 
-    const { DELETE } = await import("@/app/api/actions/[id]/signups/route");
-    const req = createRequest("/api/actions/eigene/signups?anmeldungId=fremd", { method: "DELETE" });
-    const res = await DELETE(req as any, { params: Promise.resolve({ id: "eigene" }) });
+    const { DELETE } = await import("@/app/api/actions/[id]/signups/[signupId]/route");
+    const req = createRequest("/api/actions/eigene/signups/fremd", { method: "DELETE" });
+    const res = await DELETE(req as any, { params: Promise.resolve({ id: "eigene", signupId: "fremd" }) });
 
     expect(res.status).toBe(404);
     expect(mockPrisma.anmeldung.deleteMany).toHaveBeenCalledWith({
@@ -196,9 +196,9 @@ describe("Team-Isolation: Anmeldung löschen", () => {
     });
     mockPrisma.anmeldung.deleteMany.mockResolvedValue({ count: 1 });
 
-    const { DELETE } = await import("@/app/api/actions/[id]/signups/route");
-    const req = createRequest("/api/actions/eigene/signups?anmeldungId=a1", { method: "DELETE" });
-    const res = await DELETE(req as any, { params: Promise.resolve({ id: "eigene" }) });
+    const { DELETE } = await import("@/app/api/actions/[id]/signups/[signupId]/route");
+    const req = createRequest("/api/actions/eigene/signups/a1", { method: "DELETE" });
+    const res = await DELETE(req as any, { params: Promise.resolve({ id: "eigene", signupId: "a1" }) });
 
     expect(res.status).toBe(200);
   });
@@ -212,9 +212,9 @@ describe("Team-Isolation: Anmeldung löschen", () => {
       teams: [{ teamId: "team-b" }],
     });
 
-    const { DELETE } = await import("@/app/api/actions/[id]/signups/route");
-    const req = createRequest("/api/actions/aktion-2/signups?anmeldungId=a1", { method: "DELETE" });
-    const res = await DELETE(req as any, { params: Promise.resolve({ id: "aktion-2" }) });
+    const { DELETE } = await import("@/app/api/actions/[id]/signups/[signupId]/route");
+    const req = createRequest("/api/actions/aktion-2/signups/a1", { method: "DELETE" });
+    const res = await DELETE(req as any, { params: Promise.resolve({ id: "aktion-2", signupId: "a1" }) });
 
     expect(res.status).toBe(403);
     expect(mockPrisma.anmeldung.deleteMany).not.toHaveBeenCalled();

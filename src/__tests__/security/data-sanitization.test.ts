@@ -49,7 +49,7 @@ beforeEach(() => {
 });
 
 describe("Passwörter werden nie in Responses exponiert", () => {
-  it("GET /api/admin/users → Passwörter entfernt", async () => {
+  it("GET /api/users → Passwörter entfernt", async () => {
     await mockAuth(ADMIN_SESSION);
 
     mockPrisma.user.findMany.mockResolvedValue([
@@ -66,7 +66,7 @@ describe("Passwörter werden nie in Responses exponiert", () => {
       },
     ]);
 
-    const { GET } = await import("@/app/api/admin/users/route");
+    const { GET } = await import("@/app/api/users/route");
     const res = await GET();
     const data = await res.json();
 
@@ -76,7 +76,7 @@ describe("Passwörter werden nie in Responses exponiert", () => {
     expect(JSON.stringify(data)).not.toContain("geheimerHash");
   });
 
-  it("POST /api/admin/users → Passwort nicht in Response", async () => {
+  it("POST /api/users → Passwort nicht in Response", async () => {
     await mockAuth(ADMIN_SESSION);
 
     mockPrisma.user.findUnique.mockResolvedValue(null); // Kein existierender User
@@ -92,8 +92,8 @@ describe("Passwörter werden nie in Responses exponiert", () => {
       updatedAt: new Date(),
     });
 
-    const { POST } = await import("@/app/api/admin/users/route");
-    const req = createJsonRequest("/api/admin/users", {
+    const { POST } = await import("@/app/api/users/route");
+    const req = createJsonRequest("/api/users", {
       name: "Neue Person",
       email: "neu@test.de",
       password: "sicheres-passwort",
@@ -109,7 +109,7 @@ describe("Passwörter werden nie in Responses exponiert", () => {
     expect(JSON.stringify(data)).not.toContain("neuerHash");
   });
 
-  it("PUT /api/admin/users → Passwort nicht in Response", async () => {
+  it("PUT /api/users → Passwort nicht in Response", async () => {
     await mockAuth(ADMIN_SESSION);
 
     mockPrisma.user.update.mockResolvedValue({
@@ -124,9 +124,9 @@ describe("Passwörter werden nie in Responses exponiert", () => {
       updatedAt: new Date(),
     });
 
-    const { PUT } = await import("@/app/api/admin/users/route");
-    const req = createJsonRequest("/api/admin/users", { id: "user-1", name: "Geändert" }, "PUT");
-    const res = await PUT(req as any);
+    const { PUT } = await import("@/app/api/users/[id]/route");
+    const req = createJsonRequest("/api/users/user-1", { name: "Geändert" }, "PUT");
+    const res = await PUT(req as any, { params: Promise.resolve({ id: "user-1" }) });
     const data = await res.json();
 
     expect(res.status).toBe(200);

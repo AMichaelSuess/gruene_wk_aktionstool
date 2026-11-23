@@ -29,7 +29,7 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/admin/teams").then((r) => r.json()),
+      fetch("/api/teams").then((r) => r.json()),
       fetch("/api/districts").then((r) => r.json()),
     ]).then(([teams, wk]) => {
       const team = teams.find((t: { id: string; name: string; wahlkreis: { id: string } | null }) => t.id === id);
@@ -49,10 +49,10 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/admin/teams", {
+    const res = await fetch(`/api/teams/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, name: form.name, wahlkreisId: form.wahlkreisId || null }),
+      body: JSON.stringify({ name: form.name, wahlkreisId: form.wahlkreisId || null }),
     });
 
     if (res.ok) {

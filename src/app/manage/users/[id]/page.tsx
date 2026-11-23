@@ -45,8 +45,8 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/admin/users").then((r) => r.json()),
-      fetch("/api/admin/teams").then((r) => r.json()),
+      fetch("/api/users").then((r) => r.json()),
+      fetch("/api/teams").then((r) => r.json()),
     ]).then(([users, teams]: [User[], Team[]]) => {
       const user = users.find((u: User) => u.id === id);
       if (user) {
@@ -79,7 +79,6 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
     setError("");
 
     const payload: Record<string, unknown> = {
-      id,
       name: form.name,
       email: form.email,
       role: form.role,
@@ -91,7 +90,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
       payload.password = form.newPassword;
     }
 
-    const res = await fetch("/api/admin/users", {
+    const res = await fetch(`/api/users/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

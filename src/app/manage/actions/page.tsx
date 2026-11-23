@@ -150,7 +150,7 @@ export default function DashboardPage() {
   // Teams fuer den Team-Filter: Admins alle Teams, Expert*innen ihre eigenen
   useEffect(() => {
     if (!session) return;
-    fetch(isAdmin ? "/api/admin/teams" : "/api/me/teams")
+    fetch(isAdmin ? "/api/teams" : "/api/me/teams")
       .then((r) => (r.ok ? r.json() : []))
       .then((data: TeamOption[]) => {
         setTeams(data.map((t) => ({ id: t.id, name: t.name })));

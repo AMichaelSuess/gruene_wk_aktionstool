@@ -2,7 +2,7 @@
  * Sicherheitstests: kleinere Validierungslücken
  *
  * - Namen ohne Zeilenumbrüche, Signal-Export bleibt eine Zeile pro Anmeldung
- * - PUT /api/admin/teams prüft den Body mit Zod
+ * - PUT /api/teams prüft den Body mit Zod
  * - ungültige Filterwerte in GET /api/actions führen nicht zu 500
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -57,11 +57,11 @@ describe("Namen und Signal-Textexport", () => {
   });
 });
 
-describe("PUT /api/admin/teams", () => {
+describe("PUT /api/teams", () => {
   it("ungültiger Body (Name als Objekt) → 400, keine Änderung", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { PUT } = await import("@/app/api/admin/teams/route");
-    const res = await PUT(createJsonRequest("/api/admin/teams", { id: "t1", name: { set: "x" } }, "PUT") as any);
+    const { PUT } = await import("@/app/api/teams/[id]/route");
+    const res = await PUT(createJsonRequest("/api/teams/t1", { name: { set: "x" } }, "PUT") as any, { params: Promise.resolve({ id: "t1" }) });
     expect(res.status).toBe(400);
     expect(mockPrisma.team.update).not.toHaveBeenCalled();
   });
@@ -69,8 +69,8 @@ describe("PUT /api/admin/teams", () => {
   it("gültiger Body → Update mit geprüften Werten", async () => {
     await mockAuth(ADMIN_SESSION);
     mockPrisma.team.update.mockResolvedValue({ id: "t1", name: "Team Nord" });
-    const { PUT } = await import("@/app/api/admin/teams/route");
-    const res = await PUT(createJsonRequest("/api/admin/teams", { id: "t1", name: "Team Nord", extra: "x" }, "PUT") as any);
+    const { PUT } = await import("@/app/api/teams/[id]/route");
+    const res = await PUT(createJsonRequest("/api/teams/t1", { name: "Team Nord", extra: "x" }, "PUT") as any, { params: Promise.resolve({ id: "t1" }) });
     expect(res.status).toBe(200);
     expect(mockPrisma.team.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: "t1" }, data: { name: "Team Nord", wahlkreisId: null } })

@@ -20,7 +20,7 @@ export default function TeamsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Team | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/teams")
+    fetch("/api/teams")
       .then((r) => r.json())
       .then((data) => {
         setTeams(data);
@@ -32,7 +32,7 @@ export default function TeamsPage() {
     if (!deleteTarget) return;
     const { id, name } = deleteTarget;
     setDeleteTarget(null);
-    const res = await fetch(`/api/admin/teams?id=${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/teams/${id}`, { method: "DELETE" });
     if (res.ok) {
       setTeams((prev) => prev.filter((t) => t.id !== id));
       toast.success(`„${name}“ wurde gelöscht.`);

@@ -5,31 +5,17 @@ import { wahlkreisUpdateSchema } from "@/lib/validators";
 import { WAHLKREIS_LABEL } from "@/lib/wahlkreis-label";
 import { logServerError } from "@/lib/audit";
 
-export async function GET() {
-  const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
-  }
-
-  const wahlkreise = await prisma.wahlkreis.findMany({
-    include: {
-      _count: { select: { teams: true, aktionen: true } },
-    },
-    orderBy: { nummer: "asc" },
-  });
-
-  return NextResponse.json(wahlkreise);
-}
-
-export async function PUT(req: NextRequest) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
   }
 
   try {
+    const { id } = await params;
     const body = await req.json();
-    const validated = wahlkreisUpdateSchema.parse(body);
+    // The ID comes from the path, never from the body
+    const validated = wahlkreisUpdateSchema.parse({ ...body, id });
 
     const wahlkreis = await prisma.wahlkreis.update({
       where: { id: validated.id },
@@ -55,7 +41,7 @@ export async function PUT(req: NextRequest) {
         { status: 409 }
       );
     }
-    logServerError("PUT /api/admin/wahlkreise", error);
+    logServerError("PUT /api/districts/[id]", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

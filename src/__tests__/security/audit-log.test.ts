@@ -88,15 +88,15 @@ describe("Audit-Protokoll", () => {
       teams: [],
     });
 
-    const { PUT } = await import("@/app/api/admin/users/route");
+    const { PUT } = await import("@/app/api/users/[id]/route");
     await PUT(
-      createJsonRequest("/api/admin/users", {
-        id: "user-9",
+      createJsonRequest("/api/users/user-9", {
         name: "Neuer Name",
         email: "neu@test.de",
         password: "GeheimesPasswort123",
         role: "ADMIN",
-      }, "PUT") as any
+      }, "PUT") as any,
+      { params: Promise.resolve({ id: "user-9" }) }
     );
 
     const lines = auditLines();
@@ -115,8 +115,10 @@ describe("Audit-Protokoll", () => {
     mockPrisma.user.findUnique.mockResolvedValue({ id: "user-9", _count: { aktionen: 0 } });
     mockPrisma.user.delete.mockResolvedValue({});
 
-    const { DELETE } = await import("@/app/api/admin/users/route");
-    await DELETE(new Request("http://localhost:3000/api/admin/users?id=user-9", { method: "DELETE" }) as any);
+    const { DELETE } = await import("@/app/api/users/[id]/route");
+    await DELETE(new Request("http://localhost:3000/api/users/user-9", { method: "DELETE" }) as any, {
+      params: Promise.resolve({ id: "user-9" }),
+    });
 
     expect(auditLines()).toEqual([
       expect.objectContaining({ event: "USER_GELOESCHT", userId: "user-9", actorId: ADMIN_SESSION.user.id }),

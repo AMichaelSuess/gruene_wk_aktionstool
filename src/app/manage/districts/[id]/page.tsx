@@ -28,7 +28,7 @@ export default function EditWahlkreisPage({ params }: { params: Promise<{ id: st
   const [counts, setCounts] = useState({ teams: 0, aktionen: 0 });
 
   useEffect(() => {
-    fetch("/api/admin/wahlkreise")
+    fetch("/api/districts")
       .then((r) => r.json())
       .then((data: WahlkreisDetail[]) => {
         const wk = data.find((w) => w.id === id);
@@ -52,10 +52,10 @@ export default function EditWahlkreisPage({ params }: { params: Promise<{ id: st
       return;
     }
 
-    const res = await fetch("/api/admin/wahlkreise", {
+    const res = await fetch(`/api/districts/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, name: form.name, nummer: nummerInt }),
+      body: JSON.stringify({ name: form.name, nummer: nummerInt }),
     });
 
     if (res.ok) {

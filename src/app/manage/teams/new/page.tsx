@@ -32,7 +32,7 @@ export default function NewTeamPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/admin/teams", {
+    const res = await fetch("/api/teams", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
