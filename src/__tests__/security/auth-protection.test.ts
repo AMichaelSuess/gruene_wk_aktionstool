@@ -68,49 +68,49 @@ beforeEach(async () => {
 });
 
 describe("Authentifizierungsschutz: Anmeldungen (persönliche Daten)", () => {
-  it("GET /api/aktionen/[id]/anmeldungen → 401 ohne Auth", async () => {
-    const { GET } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
-    const req = createRequest("/api/aktionen/test-id/anmeldungen");
+  it("GET /api/actions/[id]/signups → 401 ohne Auth", async () => {
+    const { GET } = await import("@/app/api/actions/[id]/signups/route");
+    const req = createRequest("/api/actions/test-id/signups");
     const res = await GET(req as any, { params: Promise.resolve({ id: "test-id" }) });
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.error).toBeDefined();
   });
 
-  it("GET /api/export → 401 ohne Auth", async () => {
-    const { GET } = await import("@/app/api/export/route");
-    const req = createRequest("/api/export?format=xlsx");
+  it("GET /api/signups/export → 401 ohne Auth", async () => {
+    const { GET } = await import("@/app/api/signups/export/route");
+    const req = createRequest("/api/signups/export?format=xlsx");
     const res = await GET(req as any);
     expect(res.status).toBe(401);
   });
 });
 
 describe("Authentifizierungsschutz: Aktionen-Verwaltung", () => {
-  it("POST /api/aktionen → 401 ohne Auth", async () => {
-    const { POST } = await import("@/app/api/aktionen/route");
-    const req = createJsonRequest("/api/aktionen", { titel: "Test" });
+  it("POST /api/actions → 401 ohne Auth", async () => {
+    const { POST } = await import("@/app/api/actions/route");
+    const req = createJsonRequest("/api/actions", { titel: "Test" });
     const res = await POST(req as any);
     expect(res.status).toBe(401);
   });
 
-  it("PUT /api/aktionen/[id] → 401 ohne Auth", async () => {
-    const { PUT } = await import("@/app/api/aktionen/[id]/route");
-    const req = createJsonRequest("/api/aktionen/test-id", { titel: "Test" }, "PUT");
+  it("PUT /api/actions/[id] → 401 ohne Auth", async () => {
+    const { PUT } = await import("@/app/api/actions/[id]/route");
+    const req = createJsonRequest("/api/actions/test-id", { titel: "Test" }, "PUT");
     const res = await PUT(req as any, { params: Promise.resolve({ id: "test-id" }) });
     expect(res.status).toBe(401);
   });
 
-  it("DELETE /api/aktionen/[id] → 401 ohne Auth", async () => {
-    const { DELETE } = await import("@/app/api/aktionen/[id]/route");
-    const req = createRequest("/api/aktionen/test-id", { method: "DELETE" });
+  it("DELETE /api/actions/[id] → 401 ohne Auth", async () => {
+    const { DELETE } = await import("@/app/api/actions/[id]/route");
+    const req = createRequest("/api/actions/test-id", { method: "DELETE" });
     const res = await DELETE(req as any, { params: Promise.resolve({ id: "test-id" }) });
     expect(res.status).toBe(401);
   });
 
-  it("PATCH /api/aktionen/bulk-kategorie → 401 ohne Auth", async () => {
-    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+  it("PATCH /api/actions → 401 ohne Auth", async () => {
+    const { PATCH } = await import("@/app/api/actions/route");
     const req = createJsonRequest(
-      "/api/aktionen/bulk-kategorie",
+      "/api/actions",
       { ids: ["test-id"], kategorie: "HAUSTUER" },
       "PATCH"
     );
@@ -169,8 +169,8 @@ describe("Authentifizierungsschutz: Admin-Endpunkte", () => {
     expect(res.status).toBe(401);
   });
 
-  it("GET /api/admin/stats → 401 ohne Auth", async () => {
-    const { GET } = await import("@/app/api/admin/stats/route");
+  it("GET /api/statistics → 401 ohne Auth", async () => {
+    const { GET } = await import("@/app/api/statistics/route");
     const res = await GET();
     expect(res.status).toBe(401);
   });

@@ -336,24 +336,21 @@ Ohne diese Variable ist Einbettung nur von `'self'` erlaubt (d.h. nur von der Ap
 │   └── seed.ts                  # Testdaten
 ├── public/                      # Statische Dateien (Logos, Fonts)
 ├── src/
-│   ├── __tests__/
-│   │   └── security/            # Auth-, Rollen- und Sicherheitstests
+│   ├── __tests__/               # Vitest: Sicherheits-, Handler- und Routen-Tests
 │   ├── app/
 │   │   ├── (auth)/              # Login-Seite
 │   │   ├── embed/               # Einbettbare Anmeldeformulare (iframe)
 │   │   ├── (public)/            # Öffentliche Seiten (Übersicht, Anmeldung, Abmeldung, Datenschutz)
-│   │   ├── admin/               # Admin-Bereich (Nutzer, Teams, Statistiken)
-│   │   ├── dashboard/           # Expert-Dashboard (Aktionen-Verwaltung)
+│   │   ├── manage/              # Interner Bereich (Aktionen, Statistik, Benutzer*innen, Teams, Wahlkreise, Konto)
 │   │   └── api/                 # API-Routen
-│   │       ├── admin/           #   Admin-Endpunkte (stats, teams, users, aktionen)
-│   │       ├── aktionen/        #   Aktionen-CRUD + Anmeldungen pro Aktion
-│   │       ├── anmeldungen/     #   Registrierung + Abmeldung
-│   │       ├── cron/            #   daily-summary, cleanup-anmeldungen, send-erinnerungen
-│   │       ├── export/          #   Excel-/Signal-Export (Anmeldungen)
-│   │       ├── export-aktionen/ #   Aktionen-Export
-│   │       ├── upload/          #   Excel-Upload
-│   │       ├── vorlage/         #   Excel-Vorlage Download
-│   │       └── wahlkreise/      #   Wahlkreis-Liste
+│   │       ├── actions/         #   Aktionen-CRUD, Anmeldungen pro Aktion, Export, Excel-Import und -Vorlage
+│   │       ├── signups/         #   Anmeldung, Abmeldung, Übersicht per E-Mail, Export der Anmeldungen
+│   │       ├── statistics/      #   Statistik und Auswertungs-Export
+│   │       ├── me/              #   Eigenes Konto, Passwort, eigene Teams
+│   │       ├── districts/       #   Wahlkreis-Liste
+│   │       ├── teams/           #   Team-Liste für die Auswahl
+│   │       ├── admin/           #   Admin-Endpunkte (users, teams, wahlkreise, aktionen)
+│   │       └── cron/            #   daily-summary, cleanup-signups, send-reminders
 │   ├── components/
 │   │   ├── ui/                  # UI-Primitives (Button, Input, Card, Dialog, Badge, Select)
 │   │   ├── AktionCard.tsx       # Aktionskarte

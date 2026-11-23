@@ -490,8 +490,8 @@ In der Anwendung: **Scheduled Tasks** → **Add**
 | Name | Befehl | Frequency (UTC) |
 |---|---|---|
 | `daily-summary` | `curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/daily-summary` | `0 19 * * *` |
-| `cleanup-anmeldungen` | `curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/cleanup-anmeldungen` | `0 * * * *` |
-| `send-erinnerungen` | `curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/send-erinnerungen` | `0 17 * * *` |
+| `cleanup-signups` | `curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/cleanup-signups` | `0 * * * *` |
+| `send-reminders` | `curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/send-reminders` | `0 17 * * *` |
 
 Bei **Container** jeweils den Container der Anwendung eintragen (bei einer einzelnen Anwendung
 in der Regel bereits vorausgewählt).
@@ -499,8 +499,8 @@ in der Regel bereits vorausgewählt).
 | Task | Zweck | Zeitpunkt |
 |---|---|---|
 | `daily-summary` | Tagesübersicht an die Ansprechpersonen | 21:00 Sommerzeit / 20:00 Winterzeit. Der Endpunkt rechnet mit dem UTC-Datum, darf also nicht nach 24:00 UTC laufen. |
-| `cleanup-anmeldungen` | löscht Anmeldedaten 72 h nach Aktionsende und Versandprotokolle nach 7 Tagen (DSGVO) | stündlich |
-| `send-erinnerungen` | Erinnerung an Angemeldete am Abend vor der Aktion | 19:00 Sommerzeit / 18:00 Winterzeit |
+| `cleanup-signups` | löscht Anmeldedaten 72 h nach Aktionsende und Versandprotokolle nach 7 Tagen (DSGVO) | stündlich |
+| `send-reminders` | Erinnerung an Angemeldete am Abend vor der Aktion | 19:00 Sommerzeit / 18:00 Winterzeit |
 
 **Zeitzone:** Coolify interpretiert die Frequenz in der Zeitzone, die unter **Servers** →
 Server → **General** → **Timezone** eingestellt ist. Die Zeiten oben setzen **UTC** voraus –

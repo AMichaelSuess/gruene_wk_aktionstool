@@ -37,7 +37,7 @@ async function xlsxBuffer(): Promise<ArrayBuffer> {
 function upload(content: BlobPart, name = "aktionen.xlsx") {
   const form = new FormData();
   form.append("file", new File([content], name));
-  return new Request("http://localhost:3000/api/upload", { method: "POST", body: form });
+  return new Request("http://localhost:3000/api/actions/import", { method: "POST", body: form });
 }
 
 beforeEach(async () => {
@@ -46,17 +46,17 @@ beforeEach(async () => {
   await mockAuth(EXPERT_TEAM_A);
 });
 
-describe("POST /api/upload: Grenzen", () => {
+describe("POST /api/actions/import: Grenzen", () => {
   it("Datei über 5 MB → 413, wird nicht eingelesen", async () => {
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const res = await POST(upload(new Uint8Array(5 * 1024 * 1024 + 1)) as any);
     expect(res.status).toBe(413);
     expect(parseSpy).not.toHaveBeenCalled();
   });
 
   it("Content-Length deutlich über 5 MB → 413 vor dem Einlesen", async () => {
-    const { POST } = await import("@/app/api/upload/route");
-    const req = new Request("http://localhost:3000/api/upload", {
+    const { POST } = await import("@/app/api/actions/import/route");
+    const req = new Request("http://localhost:3000/api/actions/import", {
       method: "POST",
       headers: { "content-length": String(50 * 1024 * 1024) },
       body: "x",
@@ -66,21 +66,21 @@ describe("POST /api/upload: Grenzen", () => {
   });
 
   it("Keine .xlsx-Datei → 400", async () => {
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const res = await POST(upload(await xlsxBuffer(), "aktionen.xls") as any);
     expect(res.status).toBe(400);
     expect(parseSpy).not.toHaveBeenCalled();
   });
 
   it("Datei ist kein Zip → 400", async () => {
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const res = await POST(upload(new TextEncoder().encode("kein excel"), "a.xlsx") as any);
     expect(res.status).toBe(400);
     expect(parseSpy).not.toHaveBeenCalled();
   });
 
   it("Zip-Bombe (entpackt über 100 MB) → 413, wird nicht entpackt", async () => {
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const buf = await xlsxBuffer();
 
     // Im Zentralverzeichnis die entpackte Größe des ersten Eintrags auf 200 MB setzen
@@ -96,7 +96,7 @@ describe("POST /api/upload: Grenzen", () => {
   });
 
   it("mehr als 2000 Zeilen → 400", async () => {
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     parseSpy.mockReturnValue(Promise.resolve(Array.from({ length: 2001 }, () => ({}))));
     const res = await POST(upload(await xlsxBuffer()) as any);
     expect(res.status).toBe(400);
@@ -104,7 +104,7 @@ describe("POST /api/upload: Grenzen", () => {
   });
 
   it("gültige kleine Datei wird eingelesen", async () => {
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     parseSpy.mockReturnValue(Promise.resolve([]));
     const res = await POST(upload(await xlsxBuffer()) as any);
     expect(res.status).toBe(200);
@@ -112,7 +112,7 @@ describe("POST /api/upload: Grenzen", () => {
   });
 
   it("Import sucht höchstens 100 verschiedene Adressen (Geocoding-Warteschlange bleibt frei)", async () => {
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const { prisma } = await import("@/lib/db");
     const { geocodeAddress } = await import("@/lib/geocoding");
     (prisma.wahlkreis.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([{ id: "wk-1", nummer: 1, name: "Mitte" }]);
@@ -140,7 +140,7 @@ describe("POST /api/upload: Grenzen", () => {
     const req = upload(await xlsxBuffer());
     const form = await req.formData();
     form.append("import", "true");
-    const res = await POST(new Request("http://localhost:3000/api/upload", { method: "POST", body: form }) as any);
+    const res = await POST(new Request("http://localhost:3000/api/actions/import", { method: "POST", body: form }) as any);
     const body = await res.json();
 
     expect(res.status).toBe(200);

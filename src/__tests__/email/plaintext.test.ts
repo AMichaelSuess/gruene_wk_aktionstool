@@ -67,7 +67,7 @@ describe("htmlToText", () => {
     expect(text).toContain("Hallo Erika,");
     expect(text).toContain("Infostand Leopoldplatz");
     expect(text).toContain("Leopoldplatz, 13353 Berlin");
-    expect(text).toContain("/api/anmeldungen/abmelden?token=tok123");
+    expect(text).toContain("/unsubscribe?token=tok123");
     expect(text).not.toMatch(/<[a-z/][^>]*>/i);
     expect(text).not.toContain("{");
   });

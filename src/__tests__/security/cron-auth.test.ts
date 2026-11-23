@@ -97,8 +97,8 @@ describe("Cron-Endpunkt-Schutz", () => {
 
 const CRON_ROUTES = [
   ["daily-summary", () => import("@/app/api/cron/daily-summary/route")],
-  ["cleanup-anmeldungen", () => import("@/app/api/cron/cleanup-anmeldungen/route")],
-  ["send-erinnerungen", () => import("@/app/api/cron/send-erinnerungen/route")],
+  ["cleanup-anmeldungen", () => import("@/app/api/cron/cleanup-signups/route")],
+  ["send-erinnerungen", () => import("@/app/api/cron/send-reminders/route")],
 ] as const;
 
 describe("Cron-Endpunkte sind gesperrt, wenn CRON_SECRET fehlt oder zu kurz ist", () => {
@@ -130,7 +130,7 @@ describe("Cron-Endpunkte sind gesperrt, wenn CRON_SECRET fehlt oder zu kurz ist"
 
 describe("Cleanup-Cron löscht Versandprotokolle (DSGVO)", () => {
   it("löscht EmailLog-Einträge, die älter als 7 Tage sind", async () => {
-    const { POST } = await import("@/app/api/cron/cleanup-anmeldungen/route");
+    const { POST } = await import("@/app/api/cron/cleanup-signups/route");
     const { prisma } = await import("@/lib/db");
 
     (prisma.aktion.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
@@ -138,7 +138,7 @@ describe("Cleanup-Cron löscht Versandprotokolle (DSGVO)", () => {
 
     const before = Date.now();
     const res = await POST(
-      new Request("http://localhost:3000/api/cron/cleanup-anmeldungen", {
+      new Request("http://localhost:3000/api/cron/cleanup-signups", {
         method: "POST",
         headers: { Authorization: `Bearer ${CRON_SECRET}` },
       }) as any

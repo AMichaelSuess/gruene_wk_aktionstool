@@ -25,7 +25,7 @@ function BestaetigenContent() {
 
   useEffect(() => {
     if (!token) return;
-    fetch("/api/anmeldungen/abmelden/info", {
+    fetch("/api/signups/lookup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token }),
@@ -44,7 +44,7 @@ function BestaetigenContent() {
   async function handleAbmelden() {
     setStatus("sending");
     try {
-      const res = await fetch("/api/anmeldungen/abmelden", {
+      const res = await fetch("/api/signups/unsubscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),

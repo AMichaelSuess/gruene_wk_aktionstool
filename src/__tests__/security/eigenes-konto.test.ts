@@ -1,10 +1,10 @@
 /**
  * Sicherheitstests: eigenes Konto (Mein Konto)
  *
- * Passwort aendern (POST /api/user/passwort): nur mit Sitzung und korrektem
+ * Passwort aendern (PUT /api/me/password): nur mit Sitzung und korrektem
  * aktuellem Passwort; das neue Passwort muss die Passwortregeln erfuellen;
  * Fehlversuche werden pro Nutzer begrenzt.
- * Name aendern (PATCH /api/user/konto): nur der eigene Name, sonst nichts.
+ * Name aendern (PATCH /api/me): nur der eigene Name, sonst nichts.
  */
 import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import bcrypt from "bcryptjs";
@@ -34,8 +34,8 @@ beforeEach(() => {
 });
 
 async function post(body: unknown) {
-  const { POST } = await import("@/app/api/user/passwort/route");
-  return POST(createJsonRequest("/api/user/passwort", body) as any);
+  const { PUT } = await import("@/app/api/me/password/route");
+  return PUT(createJsonRequest("/api/me/password", body, "PUT") as any);
 }
 
 describe("Passwort ändern", () => {
@@ -88,20 +88,20 @@ describe("Passwort ändern", () => {
   });
 });
 
-describe("Eigenes Konto (PATCH /api/user/konto)", () => {
+describe("Eigenes Konto (PATCH /api/me)", () => {
   it("401 ohne Sitzung", async () => {
     await mockAuth(null);
-    const { PATCH } = await import("@/app/api/user/konto/route");
-    const res = await PATCH(createJsonRequest("/api/user/konto", { name: "Neu" }, "PATCH") as any);
+    const { PATCH } = await import("@/app/api/me/route");
+    const res = await PATCH(createJsonRequest("/api/me", { name: "Neu" }, "PATCH") as any);
     expect(res.status).toBe(401);
   });
 
   it("aendert nur den eigenen Namen, weitere Felder werden ignoriert", async () => {
     await mockAuth(EXPERT_TEAM_A);
     mockPrisma.user.update.mockResolvedValue({});
-    const { PATCH } = await import("@/app/api/user/konto/route");
+    const { PATCH } = await import("@/app/api/me/route");
     const res = await PATCH(
-      createJsonRequest("/api/user/konto", { name: "  Neuer Name ", role: "ADMIN", email: "x@y.de" }, "PATCH") as any
+      createJsonRequest("/api/me", { name: "  Neuer Name ", role: "ADMIN", email: "x@y.de" }, "PATCH") as any
     );
     expect(res.status).toBe(200);
     expect(mockPrisma.user.update).toHaveBeenCalledWith({
@@ -112,8 +112,8 @@ describe("Eigenes Konto (PATCH /api/user/konto)", () => {
 
   it("lehnt Namen mit Zeilenumbruch ab", async () => {
     await mockAuth(EXPERT_TEAM_A);
-    const { PATCH } = await import("@/app/api/user/konto/route");
-    const res = await PATCH(createJsonRequest("/api/user/konto", { name: "Max\nMuster" }, "PATCH") as any);
+    const { PATCH } = await import("@/app/api/me/route");
+    const res = await PATCH(createJsonRequest("/api/me", { name: "Max\nMuster" }, "PATCH") as any);
     expect(res.status).toBe(400);
     expect(mockPrisma.user.update).not.toHaveBeenCalled();
   });

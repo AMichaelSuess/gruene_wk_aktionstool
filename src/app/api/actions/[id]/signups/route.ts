@@ -25,7 +25,7 @@ export async function GET(
   }
 
   if (!hasAktionAccess(session.user, aktion)) {
-    audit("ZUGRIFF_VERWEIGERT", session.user.id, { aktionId: id, route: "GET /api/aktionen/[id]/anmeldungen" });
+    audit("ZUGRIFF_VERWEIGERT", session.user.id, { aktionId: id, route: "GET /api/actions/[id]/signups" });
     return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
   }
 
@@ -75,7 +75,7 @@ export async function DELETE(
   }
 
   if (!hasAktionAccess(session.user, aktion)) {
-    audit("ZUGRIFF_VERWEIGERT", session.user.id, { aktionId: id, route: "DELETE /api/aktionen/[id]/anmeldungen" });
+    audit("ZUGRIFF_VERWEIGERT", session.user.id, { aktionId: id, route: "DELETE /api/actions/[id]/signups" });
     return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
   }
 

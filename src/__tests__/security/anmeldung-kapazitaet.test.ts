@@ -41,7 +41,7 @@ const AKTION = {
 let ipCounter = 0;
 function signup(body: Record<string, unknown> = {}) {
   ipCounter++;
-  return new Request("http://localhost/api/anmeldungen", {
+  return new Request("http://localhost/api/signups", {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-forwarded-for": `192.0.2.${ipCounter}` },
     body: JSON.stringify({
@@ -62,10 +62,10 @@ beforeEach(() => {
   mockPrisma.aktion.findUnique.mockResolvedValue(AKTION);
 });
 
-describe("POST /api/anmeldungen: Teilnahme-Limit", () => {
+describe("POST /api/signups: Teilnahme-Limit", () => {
   it("Platz frei → Anlegen unter Sperre in einer Transaktion", async () => {
     tx.anmeldung.count.mockResolvedValue(2);
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const { sendEmail } = await import("@/lib/email");
 
     const data = await (await POST(signup() as never)).json();
@@ -80,7 +80,7 @@ describe("POST /api/anmeldungen: Teilnahme-Limit", () => {
 
   it("inzwischen voll (parallele Anmeldung war schneller) → nichts angelegt, keine Mail", async () => {
     tx.anmeldung.count.mockResolvedValue(3);
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const { sendEmail } = await import("@/lib/email");
 
     const data = await (await POST(signup() as never)).json();
@@ -92,7 +92,7 @@ describe("POST /api/anmeldungen: Teilnahme-Limit", () => {
 
   it("ohne Limit → keine Transaktion nötig", async () => {
     mockPrisma.aktion.findUnique.mockResolvedValue({ ...AKTION, maxTeilnehmer: null });
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
 
     await POST(signup() as never);
 

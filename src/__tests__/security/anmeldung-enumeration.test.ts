@@ -33,7 +33,7 @@ const AKTION = {
 };
 
 function signup(aktionIds: string[], ip: string) {
-  return new Request("http://localhost:3000/api/anmeldungen", {
+  return new Request("http://localhost:3000/api/signups", {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-forwarded-for": ip },
     body: JSON.stringify({
@@ -59,7 +59,7 @@ beforeEach(() => {
 
 describe("Öffentliche Anmeldung: keine Auskunft über bestehende Anmeldungen", () => {
   it("Doppelte Anmeldung liefert dieselbe Antwort wie eine neue Anmeldung", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
 
     mockPrisma.anmeldung.create.mockResolvedValueOnce({});
     const neu = await POST(signup(["aktion-1"], "10.0.0.1") as any);
@@ -73,7 +73,7 @@ describe("Öffentliche Anmeldung: keine Auskunft über bestehende Anmeldungen", 
   });
 
   it("Nur doppelte Anmeldungen → keine E-Mail", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const { sendEmail } = await import("@/lib/email");
 
     mockPrisma.anmeldung.create.mockRejectedValueOnce(uniqueError());
@@ -84,7 +84,7 @@ describe("Öffentliche Anmeldung: keine Auskunft über bestehende Anmeldungen", 
   });
 
   it("Neue + bestehende Anmeldung → eine E-Mail mit beiden Aktionen und dem bestehenden Abmelde-Token", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const { sendEmail } = await import("@/lib/email");
     const { anmeldebestaetigungEmail } = await import("@/lib/email-templates");
 
@@ -107,7 +107,7 @@ describe("Öffentliche Anmeldung: keine Auskunft über bestehende Anmeldungen", 
   });
 
   it("Antwort wartet nicht auf den Mailversand (Antwortzeit verraet nichts)", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const { sendEmail } = await import("@/lib/email");
     const { after } = await import("next/server");
 
@@ -124,7 +124,7 @@ describe("Öffentliche Anmeldung: keine Auskunft über bestehende Anmeldungen", 
 
   it("Versand laeuft ueber after(), nicht direkt im Handler", async () => {
     const { readFileSync } = await import("fs");
-    const source = readFileSync("src/app/api/anmeldungen/route.ts", "utf8");
+    const source = readFileSync("src/app/api/signups/route.ts", "utf8");
     expect(source).not.toMatch(/await sendEmail\(/);
     expect(source).toMatch(/after\(\s*\(\)\s*=>\s*\n?\s*sendEmail\(/);
   });

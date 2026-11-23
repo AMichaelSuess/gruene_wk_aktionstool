@@ -45,9 +45,9 @@ function createAnmeldungBody(overrides: Record<string, unknown> = {}) {
 
 describe("Eingabevalidierung: Öffentliche Anmeldung", () => {
   it("Ungültige E-Mail-Adresse → 400", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
 
-    const req = new Request("http://localhost:3000/api/anmeldungen", {
+    const req = new Request("http://localhost:3000/api/signups", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-forwarded-for": "10.0.0.1" },
       body: JSON.stringify(createAnmeldungBody({ email: "keine-email" })),
@@ -58,9 +58,9 @@ describe("Eingabevalidierung: Öffentliche Anmeldung", () => {
   });
 
   it("Fehlende Pflichtfelder → 400", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
 
-    const req = new Request("http://localhost:3000/api/anmeldungen", {
+    const req = new Request("http://localhost:3000/api/signups", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-forwarded-for": "10.0.0.2" },
       body: JSON.stringify({ aktionIds: ["aktion-1"] }), // Nur aktionIds, Rest fehlt
@@ -71,9 +71,9 @@ describe("Eingabevalidierung: Öffentliche Anmeldung", () => {
   });
 
   it("Leere aktionIds → 400", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
 
-    const req = new Request("http://localhost:3000/api/anmeldungen", {
+    const req = new Request("http://localhost:3000/api/signups", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-forwarded-for": "10.0.0.3" },
       body: JSON.stringify(createAnmeldungBody({ aktionIds: [] })),
@@ -84,7 +84,7 @@ describe("Eingabevalidierung: Öffentliche Anmeldung", () => {
   });
 
   it("SQL-Injection-Versuch im Namen → wird durch Zod/Prisma abgefangen", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const { prisma } = await import("@/lib/db");
 
     // Aktion existiert
@@ -96,7 +96,7 @@ describe("Eingabevalidierung: Öffentliche Anmeldung", () => {
     });
     (prisma.anmeldung.create as ReturnType<typeof vi.fn>).mockResolvedValue({ id: "anm-1" });
 
-    const req = new Request("http://localhost:3000/api/anmeldungen", {
+    const req = new Request("http://localhost:3000/api/signups", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-forwarded-for": "10.0.0.4" },
       body: JSON.stringify(createAnmeldungBody({
@@ -120,9 +120,9 @@ describe("Eingabevalidierung: Öffentliche Anmeldung", () => {
   });
 
   it("Datenschutz nicht akzeptiert → 400", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
 
-    const req = new Request("http://localhost:3000/api/anmeldungen", {
+    const req = new Request("http://localhost:3000/api/signups", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-forwarded-for": "10.0.0.5" },
       body: JSON.stringify(createAnmeldungBody({ datenschutz: false })),
@@ -133,9 +133,9 @@ describe("Eingabevalidierung: Öffentliche Anmeldung", () => {
   });
 
   it("Weder Telefon noch Signal angegeben → 400", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
 
-    const req = new Request("http://localhost:3000/api/anmeldungen", {
+    const req = new Request("http://localhost:3000/api/signups", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-forwarded-for": "10.0.0.6" },
       body: JSON.stringify({
@@ -261,14 +261,14 @@ describe("Input-Validierung: PUT /api/admin/users (userUpdateSchema)", () => {
   });
 });
 
-describe("Input-Validierung: PATCH /api/aktionen/bulk-kategorie", () => {
+describe("Input-Validierung: PATCH /api/actions", () => {
   it("Ungueltige Kategorie wird abgelehnt (400)", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { PATCH } = await import("@/app/api/actions/route");
     const { prisma } = await import("@/lib/db");
 
     const req = createJsonRequest(
-      "/api/aktionen/bulk-kategorie",
+      "/api/actions",
       { ids: ["aktion-1"], kategorie: "DROP TABLE aktionen" },
       "PATCH"
     );
@@ -280,11 +280,11 @@ describe("Input-Validierung: PATCH /api/aktionen/bulk-kategorie", () => {
 
   it("Leeres ids-Array wird abgelehnt (400)", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { PATCH } = await import("@/app/api/actions/route");
     const { prisma } = await import("@/lib/db");
 
     const req = createJsonRequest(
-      "/api/aktionen/bulk-kategorie",
+      "/api/actions",
       { ids: [], kategorie: "HAUSTUER" },
       "PATCH"
     );
@@ -297,11 +297,11 @@ describe("Input-Validierung: PATCH /api/aktionen/bulk-kategorie", () => {
 
   it("Fehlende Kategorie wird abgelehnt (400)", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { PATCH } = await import("@/app/api/actions/route");
     const { prisma } = await import("@/lib/db");
 
     const req = createJsonRequest(
-      "/api/aktionen/bulk-kategorie",
+      "/api/actions",
       { ids: ["aktion-1"] },
       "PATCH"
     );
@@ -313,12 +313,12 @@ describe("Input-Validierung: PATCH /api/aktionen/bulk-kategorie", () => {
 
   it("Gueltige Eingabe wird akzeptiert (200)", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { PATCH } = await import("@/app/api/actions/route");
     const { prisma } = await import("@/lib/db");
     (prisma.aktion.updateMany as ReturnType<typeof vi.fn>).mockResolvedValue({ count: 1 });
 
     const req = createJsonRequest(
-      "/api/aktionen/bulk-kategorie",
+      "/api/actions",
       { ids: ["aktion-1"], kategorie: "INFOSTAND" },
       "PATCH"
     );
@@ -332,7 +332,7 @@ describe("Input-Validierung: PATCH /api/aktionen/bulk-kategorie", () => {
 
 describe("Eingabevalidierung: Grenzen der öffentlichen Anmeldung", () => {
   function post(body: unknown, ip: string, headers: Record<string, string> = {}) {
-    return new Request("http://localhost:3000/api/anmeldungen", {
+    return new Request("http://localhost:3000/api/signups", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-forwarded-for": ip, ...headers },
       body: typeof body === "string" ? body : JSON.stringify(body),
@@ -340,20 +340,20 @@ describe("Eingabevalidierung: Grenzen der öffentlichen Anmeldung", () => {
   }
 
   it("101 Aktionen auf einmal → 400", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const ids = Array.from({ length: 101 }, (_, i) => `aktion-${i}`);
     const res = await POST(post(createAnmeldungBody({ aktionIds: ids }), "10.1.0.1") as any);
     expect(res.status).toBe(400);
   });
 
   it("Vorname mit 101 Zeichen → 400", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const res = await POST(post(createAnmeldungBody({ vorname: "a".repeat(101) }), "10.1.0.2") as any);
     expect(res.status).toBe(400);
   });
 
   it("Anfrage über 32 KB → 413, ohne Datenbankzugriff", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const { prisma } = await import("@/lib/db");
     const body = JSON.stringify(createAnmeldungBody({ nachname: "x".repeat(40_000) }));
     const res = await POST(post(body, "10.1.0.3") as any);
@@ -362,19 +362,19 @@ describe("Eingabevalidierung: Grenzen der öffentlichen Anmeldung", () => {
   });
 
   it("Content-Length über dem Limit → 413 vor dem Lesen", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const res = await POST(post(createAnmeldungBody(), "10.1.0.4", { "content-length": "999999" }) as any);
     expect(res.status).toBe(413);
   });
 
   it("Ungültiges JSON → 400", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const res = await POST(post("{kaputt", "10.1.0.5") as any);
     expect(res.status).toBe(400);
   });
 
   it("doppelte Aktions-IDs → nur eine Anmeldung", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const { prisma } = await import("@/lib/db");
     (prisma.aktion.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: "aktion-1",

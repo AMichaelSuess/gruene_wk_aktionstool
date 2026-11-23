@@ -50,7 +50,7 @@ export default function ExcelUpload({
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("/api/upload", {
+    const res = await fetch("/api/actions/import", {
       method: "POST",
       body: formData,
     });
@@ -97,7 +97,7 @@ export default function ExcelUpload({
       formData.append("teamIds", teamId);
     }
 
-    const res = await fetch("/api/upload", {
+    const res = await fetch("/api/actions/import", {
       method: "POST",
       body: formData,
     });
@@ -125,8 +125,11 @@ export default function ExcelUpload({
       </CardHeader>
 
       <div className="mb-4">
+        {/* File download from an API route, not a page. The rule mistakes the
+            path for the dynamic route /api/actions/[id]. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
-          href="/api/vorlage"
+          href="/api/actions/import-template"
           className="text-primary hover:underline text-sm font-medium"
         >
           📥 Vorlage herunterladen

@@ -178,7 +178,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof Error && error.name === "ZodError") {
       return NextResponse.json({ error: "Validierungsfehler", details: error }, { status: 400 });
     }
-    logServerError("POST /api/anmeldungen", error);
+    logServerError("POST /api/signups", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

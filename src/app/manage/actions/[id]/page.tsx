@@ -50,8 +50,8 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/aktionen/${id}`).then((r) => r.json()),
-      fetch("/api/wahlkreise").then((r) => r.json()),
+      fetch(`/api/actions/${id}`).then((r) => r.json()),
+      fetch("/api/districts").then((r) => r.json()),
       fetch("/api/teams").then((r) => r.json()),
     ]).then(([aktion, wk, tm]) => {
       setWahlkreise(wk);
@@ -89,7 +89,7 @@ export default function EditAktionPage({ params }: { params: Promise<{ id: strin
       maxTeilnehmer: form.maxTeilnehmer ? parseInt(form.maxTeilnehmer) : null,
     };
 
-    const res = await fetch(`/api/aktionen/${id}`, {
+    const res = await fetch(`/api/actions/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

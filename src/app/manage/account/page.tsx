@@ -26,7 +26,7 @@ export default function KontoPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch("/api/user/konto")
+    fetch("/api/me")
       .then((r) => r.json())
       .then((data) => {
         setName(data.name ?? "");
@@ -41,7 +41,7 @@ export default function KontoPage() {
     setNameSuccess(false);
     setNameSaving(true);
 
-    const res = await fetch("/api/user/konto", {
+    const res = await fetch("/api/me", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name }),
@@ -77,8 +77,8 @@ export default function KontoPage() {
     }
 
     setSaving(true);
-    const res = await fetch("/api/user/passwort", {
-      method: "POST",
+    const res = await fetch("/api/me/password", {
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         aktuellesPasswort: form.aktuellesPasswort,

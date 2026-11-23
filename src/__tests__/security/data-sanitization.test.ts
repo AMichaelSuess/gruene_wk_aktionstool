@@ -136,7 +136,7 @@ describe("Passwörter werden nie in Responses exponiert", () => {
 });
 
 describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
-  it("GET /api/aktionen (öffentlich) → enthält keine Anmeldungsdaten", async () => {
+  it("GET /api/actions (öffentlich) → enthält keine Anmeldungsdaten", async () => {
     await mockAuth(null); // Nicht authentifiziert
 
     const mockAktionen = [
@@ -162,8 +162,8 @@ describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
 
     mockPrisma.aktion.findMany.mockResolvedValue(mockAktionen);
 
-    const { GET } = await import("@/app/api/aktionen/route");
-    const req = new Request("http://localhost:3000/api/aktionen");
+    const { GET } = await import("@/app/api/actions/route");
+    const req = new Request("http://localhost:3000/api/actions");
     const res = await GET(req as any);
     const data = await res.json();
 
@@ -183,7 +183,7 @@ describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
     expect(data[0]).not.toHaveProperty("createdById");
   });
 
-  it("GET /api/aktionen?public=true (eingeloggt) → keine Kontaktdaten der Ansprechperson", async () => {
+  it("GET /api/actions?public=true (eingeloggt) → keine Kontaktdaten der Ansprechperson", async () => {
     await mockAuth(EXPERT_TEAM_A);
 
     mockPrisma.aktion.findMany.mockResolvedValue([
@@ -202,8 +202,8 @@ describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
       },
     ]);
 
-    const { GET } = await import("@/app/api/aktionen/route");
-    const res = await GET(new Request("http://localhost:3000/api/aktionen?public=true") as any);
+    const { GET } = await import("@/app/api/actions/route");
+    const res = await GET(new Request("http://localhost:3000/api/actions?public=true") as any);
     const data = await res.json();
 
     expect(data[0]).not.toHaveProperty("ansprechpersonEmail");
@@ -211,7 +211,7 @@ describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
     expect(data[0]).not.toHaveProperty("createdById");
   });
 
-  it("GET /api/aktionen/[id] (öffentlich) → keine Kontaktdaten und keine User-ID", async () => {
+  it("GET /api/actions/[id] (öffentlich) → keine Kontaktdaten und keine User-ID", async () => {
     await mockAuth(null);
 
     mockPrisma.aktion.findUnique.mockResolvedValue({
@@ -225,8 +225,8 @@ describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
       ansprechpersonTelefon: "030123456",
     });
 
-    const { GET } = await import("@/app/api/aktionen/[id]/route");
-    const res = await GET(new Request("http://localhost:3000/api/aktionen/aktion-1") as any, {
+    const { GET } = await import("@/app/api/actions/[id]/route");
+    const res = await GET(new Request("http://localhost:3000/api/actions/aktion-1") as any, {
       params: Promise.resolve({ id: "aktion-1" }),
     });
     const data = await res.json();

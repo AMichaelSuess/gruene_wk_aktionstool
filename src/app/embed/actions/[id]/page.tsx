@@ -27,7 +27,7 @@ export default function EmbedAktionPage() {
   useEffect(() => {
     if (!aktionId) return;
 
-    fetch(`/api/aktionen/${aktionId}`)
+    fetch(`/api/actions/${aktionId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.titel) setAktionTitle(data.titel);

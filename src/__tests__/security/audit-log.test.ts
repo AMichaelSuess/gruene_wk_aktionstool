@@ -60,8 +60,8 @@ describe("Audit-Protokoll", () => {
       },
     ]);
 
-    const { GET } = await import("@/app/api/export/route");
-    await GET(new Request("http://localhost:3000/api/export?format=xlsx&aktionId=aktion-1") as any);
+    const { GET } = await import("@/app/api/signups/export/route");
+    await GET(new Request("http://localhost:3000/api/signups/export?format=xlsx&actionId=aktion-1") as any);
 
     const lines = auditLines();
     expect(lines).toHaveLength(1);

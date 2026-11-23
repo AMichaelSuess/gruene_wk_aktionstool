@@ -22,7 +22,7 @@ export default function NewTeamPage() {
   const [form, setForm] = useState({ name: "", wahlkreisId: "" });
 
   useEffect(() => {
-    fetch("/api/wahlkreise")
+    fetch("/api/districts")
       .then((r) => r.json())
       .then(setWahlkreise);
   }, []);

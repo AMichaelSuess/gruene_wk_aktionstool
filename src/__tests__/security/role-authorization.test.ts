@@ -35,7 +35,7 @@ beforeEach(async () => {
   await mockAuth(EXPERT_TEAM_A); // Angemeldet als EXPERT
 });
 
-// GET /api/admin/users und GET /api/admin/stats sind fuer EXPERT erlaubt, aber auf
+// GET /api/admin/users und GET /api/statistics sind fuer EXPERT erlaubt, aber auf
 // die eigenen Teams eingeschraenkt: siehe expert-sichtbarkeit.test.ts
 describe("EXPERT darf nicht auf Admin-Benutzerverwaltung zugreifen", () => {
   it("POST /api/admin/users → 401 für EXPERT", async () => {
@@ -103,8 +103,8 @@ describe("EXPERT darf nicht auf weitere Admin-Endpunkte zugreifen", () => {
     expect(res.status).toBe(401);
   });
 
-  it("GET /api/admin/export-stats → 401 für EXPERT", async () => {
-    const { GET } = await import("@/app/api/admin/export-stats/route");
+  it("GET /api/statistics/export → 401 für EXPERT", async () => {
+    const { GET } = await import("@/app/api/statistics/export/route");
     const res = await GET();
     expect(res.status).toBe(401);
   });
@@ -120,9 +120,9 @@ describe("EXPERT darf nicht auf weitere Admin-Endpunkte zugreifen", () => {
 });
 
 describe("Ohne Login kein Zugriff auf Admin-Endpunkte", () => {
-  it("GET /api/admin/export-stats und /api/admin/wahlkreise → 401", async () => {
+  it("GET /api/statistics/export und /api/admin/wahlkreise → 401", async () => {
     await mockAuth(null);
-    const stats = await import("@/app/api/admin/export-stats/route");
+    const stats = await import("@/app/api/statistics/export/route");
     const wk = await import("@/app/api/admin/wahlkreise/route");
     expect((await stats.GET()).status).toBe(401);
     expect((await wk.GET()).status).toBe(401);

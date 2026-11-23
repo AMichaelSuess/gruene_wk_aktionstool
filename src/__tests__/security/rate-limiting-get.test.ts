@@ -1,7 +1,7 @@
 /**
  * Sicherheitstests: Rate-Limiting für öffentliche GET-Endpunkte (SEC-05)
  *
- * Prüft, dass GET /api/aktionen und GET /api/aktionen/[id]
+ * Prüft, dass GET /api/actions und GET /api/actions/[id]
  * vor systematischem Datenharvesting geschützt sind.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -75,9 +75,9 @@ function createGetRequest(url: string, ip: string): Request {
   });
 }
 
-describe("Rate-Limiting: GET /api/aktionen (SEC-05)", () => {
+describe("Rate-Limiting: GET /api/actions (SEC-05)", () => {
   it("Test 1: Erlaubt 60 Anfragen pro IP — keine 429 bei normaler Nutzung", async () => {
-    const { GET } = await import("@/app/api/aktionen/route");
+    const { GET } = await import("@/app/api/actions/route");
     const { prisma } = await import("@/lib/db");
 
     (prisma.aktion.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
@@ -86,14 +86,14 @@ describe("Rate-Limiting: GET /api/aktionen (SEC-05)", () => {
 
     // 60 Anfragen sollten durchgehen
     for (let i = 0; i < 60; i++) {
-      const req = createGetRequest("/api/aktionen", testIp);
+      const req = createGetRequest("/api/actions", testIp);
       const res = await GET(req as any);
       expect(res.status).not.toBe(429);
     }
   });
 
   it("Test 2: Blockiert die 61. Anfrage von derselben IP mit 429 und deutschem Fehlertext", async () => {
-    const { GET } = await import("@/app/api/aktionen/route");
+    const { GET } = await import("@/app/api/actions/route");
     const { prisma } = await import("@/lib/db");
 
     (prisma.aktion.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
@@ -102,12 +102,12 @@ describe("Rate-Limiting: GET /api/aktionen (SEC-05)", () => {
 
     // 60 Anfragen durchlassen
     for (let i = 0; i < 60; i++) {
-      const req = createGetRequest("/api/aktionen", testIp);
+      const req = createGetRequest("/api/actions", testIp);
       await GET(req as any);
     }
 
     // 61. Anfrage muss blockiert werden
-    const req = createGetRequest("/api/aktionen", testIp);
+    const req = createGetRequest("/api/actions", testIp);
     const res = await GET(req as any);
     expect(res.status).toBe(429);
 
@@ -116,27 +116,27 @@ describe("Rate-Limiting: GET /api/aktionen (SEC-05)", () => {
   });
 
   it("Test 6: Unterschiedliche IPs werden unabhängig limitiert", async () => {
-    const { GET } = await import("@/app/api/aktionen/route");
+    const { GET } = await import("@/app/api/actions/route");
     const { prisma } = await import("@/lib/db");
 
     (prisma.aktion.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
     // 60 Anfragen von IP A durchlassen (Rate-Limit erreicht)
     for (let i = 0; i < 60; i++) {
-      const req = createGetRequest("/api/aktionen", "10.0.0.1");
+      const req = createGetRequest("/api/actions", "10.0.0.1");
       await GET(req as any);
     }
 
     // IP B sollte trotzdem funktionieren
-    const req = createGetRequest("/api/aktionen", "10.0.0.2");
+    const req = createGetRequest("/api/actions", "10.0.0.2");
     const res = await GET(req as any);
     expect(res.status).not.toBe(429);
   });
 });
 
-describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
+describe("Rate-Limiting: GET /api/actions/[id] (SEC-05)", () => {
   it("Test 3: Erlaubt 30 Anfragen pro IP — keine 429 bei normaler Nutzung", async () => {
-    const { GET } = await import("@/app/api/aktionen/[id]/route");
+    const { GET } = await import("@/app/api/actions/[id]/route");
     const { prisma } = await import("@/lib/db");
 
     (prisma.aktion.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -152,14 +152,14 @@ describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
 
     // 30 Anfragen sollten durchgehen
     for (let i = 0; i < 30; i++) {
-      const req = createGetRequest("/api/aktionen/aktion-1", testIp);
+      const req = createGetRequest("/api/actions/aktion-1", testIp);
       const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-1" }) });
       expect(res.status).not.toBe(429);
     }
   });
 
   it("Test 4: Blockiert die 31. Anfrage von derselben IP mit 429 und deutschem Fehlertext", async () => {
-    const { GET } = await import("@/app/api/aktionen/[id]/route");
+    const { GET } = await import("@/app/api/actions/[id]/route");
     const { prisma } = await import("@/lib/db");
 
     (prisma.aktion.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -175,12 +175,12 @@ describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
 
     // 30 Anfragen durchlassen
     for (let i = 0; i < 30; i++) {
-      const req = createGetRequest("/api/aktionen/aktion-1", testIp);
+      const req = createGetRequest("/api/actions/aktion-1", testIp);
       await GET(req as any, { params: Promise.resolve({ id: "aktion-1" }) });
     }
 
     // 31. Anfrage muss blockiert werden
-    const req = createGetRequest("/api/aktionen/aktion-1", testIp);
+    const req = createGetRequest("/api/actions/aktion-1", testIp);
     const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-1" }) });
     expect(res.status).toBe(429);
 
@@ -189,7 +189,7 @@ describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
   });
 
   it("Test 5: Rate-Limit-Fenster läuft ab — neue Anfragen werden wieder erlaubt", async () => {
-    const { GET } = await import("@/app/api/aktionen/[id]/route");
+    const { GET } = await import("@/app/api/actions/[id]/route");
     const { prisma } = await import("@/lib/db");
 
     (prisma.aktion.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -211,12 +211,12 @@ describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
 
       // 30 Anfragen durchlassen (Limit erreicht)
       for (let i = 0; i < 30; i++) {
-        const req = createGetRequest("/api/aktionen/aktion-1", testIp);
+        const req = createGetRequest("/api/actions/aktion-1", testIp);
         await GET(req as any, { params: Promise.resolve({ id: "aktion-1" }) });
       }
 
       // 31. blockiert
-      const req31 = createGetRequest("/api/aktionen/aktion-1", testIp);
+      const req31 = createGetRequest("/api/actions/aktion-1", testIp);
       const res31 = await GET(req31 as any, { params: Promise.resolve({ id: "aktion-1" }) });
       expect(res31.status).toBe(429);
 
@@ -224,7 +224,7 @@ describe("Rate-Limiting: GET /api/aktionen/[id] (SEC-05)", () => {
       mockTime += 2 * 60 * 1000;
 
       // Jetzt sollte wieder ein Request erlaubt sein
-      const reqAfterReset = createGetRequest("/api/aktionen/aktion-1", testIp);
+      const reqAfterReset = createGetRequest("/api/actions/aktion-1", testIp);
       const resAfterReset = await GET(reqAfterReset as any, {
         params: Promise.resolve({ id: "aktion-1" }),
       });

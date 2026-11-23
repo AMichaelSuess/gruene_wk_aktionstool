@@ -452,10 +452,10 @@ Folgende Zeilen hinzufügen — **CRON_SECRET aus der `.env`-Datei eintragen!**
 0 21 * * * curl -s -X POST -H "Authorization: Bearer HIER_CRON_SECRET_EINSETZEN" http://127.0.0.1:3000/api/cron/daily-summary > /dev/null 2>&1
 
 # Anmeldedaten-Löschung 72h nach Aktionsende (stündlich)
-0 * * * * curl -s -X POST -H "Authorization: Bearer HIER_CRON_SECRET_EINSETZEN" http://127.0.0.1:3000/api/cron/cleanup-anmeldungen > /dev/null 2>&1
+0 * * * * curl -s -X POST -H "Authorization: Bearer HIER_CRON_SECRET_EINSETZEN" http://127.0.0.1:3000/api/cron/cleanup-signups > /dev/null 2>&1
 
 # Erinnerungs-E-Mails an Angemeldete – Abend vor der Aktion (17:00 UTC = 19:00 CEST / 18:00 CET)
-0 17 * * * curl -s -X POST -H "Authorization: Bearer HIER_CRON_SECRET_EINSETZEN" http://127.0.0.1:3000/api/cron/send-erinnerungen > /dev/null 2>&1
+0 17 * * * curl -s -X POST -H "Authorization: Bearer HIER_CRON_SECRET_EINSETZEN" http://127.0.0.1:3000/api/cron/send-reminders > /dev/null 2>&1
 ```
 
 ---

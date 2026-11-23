@@ -57,7 +57,7 @@ describe("send-erinnerungen", () => {
     mockPrisma.anmeldung.findMany.mockResolvedValue([ANMELDUNG("schon@test.de")]);
     mockPrisma.emailLog.findMany.mockResolvedValue([{ empfaengerEmail: "schon@test.de" }]);
 
-    const { POST } = await import("@/app/api/cron/send-erinnerungen/route");
+    const { POST } = await import("@/app/api/cron/send-reminders/route");
     const res = await POST(cronRequest("send-erinnerungen") as any);
 
     expect(res.status).toBe(200);
@@ -70,7 +70,7 @@ describe("send-erinnerungen", () => {
     mockPrisma.anmeldung.findMany.mockResolvedValue([ANMELDUNG("neu@test.de")]);
     mockPrisma.emailLog.findMany.mockResolvedValue([]);
 
-    const { POST } = await import("@/app/api/cron/send-erinnerungen/route");
+    const { POST } = await import("@/app/api/cron/send-reminders/route");
     await POST(cronRequest("send-erinnerungen") as any);
 
     expect(sendEmail).toHaveBeenCalledTimes(1);
@@ -80,7 +80,7 @@ describe("send-erinnerungen", () => {
     let release!: (v: unknown[]) => void;
     mockPrisma.anmeldung.findMany.mockReturnValue(new Promise((r) => (release = r)));
 
-    const { POST } = await import("@/app/api/cron/send-erinnerungen/route");
+    const { POST } = await import("@/app/api/cron/send-reminders/route");
     const first = POST(cronRequest("send-erinnerungen") as any);
     const second = await POST(cronRequest("send-erinnerungen") as any);
     expect(second.status).toBe(409);

@@ -89,9 +89,9 @@ describe("Verweigerter Zugriff", () => {
   it("Expert eines fremden Teams liest Anmeldungen → 403 und Protokollzeile", async () => {
     await mockAuth(EXPERT_TEAM_B);
     mockPrisma.aktion.findUnique.mockResolvedValue({ createdById: "someone", teams: [{ teamId: "team-a" }] });
-    const { GET } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
+    const { GET } = await import("@/app/api/actions/[id]/signups/route");
 
-    const res = await GET(createRequest("/api/aktionen/akt-1/anmeldungen") as never, {
+    const res = await GET(createRequest("/api/actions/akt-1/signups") as never, {
       params: Promise.resolve({ id: "akt-1" }),
     });
 
@@ -108,12 +108,12 @@ describe("Serverfehler", () => {
       new Error("\nInvalid `prisma.anmeldung.create()` invocation:\n\n{ data: { email: \"geheim@example.org\" } }"),
       { name: "PrismaClientKnownRequestError", code: "P2002" }
     );
-    logServerError("POST /api/anmeldungen", err);
+    logServerError("POST /api/signups", err);
 
     const [line] = lines(errorSpy);
     expect(line).toMatchObject({
       serverError: true,
-      route: "POST /api/anmeldungen",
+      route: "POST /api/signups",
       name: "PrismaClientKnownRequestError",
       code: "P2002",
       message: "Invalid `prisma.anmeldung.create()` invocation:",
@@ -161,8 +161,8 @@ describe("Adresse der Ansprechperson", () => {
     await mockAuth(EXPERT_TEAM_A);
     mockPrisma.aktion.findUnique.mockResolvedValue(BESTEHEND);
     mockPrisma.aktion.update.mockResolvedValue({ ...BESTEHEND, ansprechpersonEmail });
-    const { PUT } = await import("@/app/api/aktionen/[id]/route");
-    return PUT(createJsonRequest("/api/aktionen/aktion-1", body(ansprechpersonEmail), "PUT") as any, {
+    const { PUT } = await import("@/app/api/actions/[id]/route");
+    return PUT(createJsonRequest("/api/actions/aktion-1", body(ansprechpersonEmail), "PUT") as any, {
       params: Promise.resolve({ id: "aktion-1" }),
     });
   }

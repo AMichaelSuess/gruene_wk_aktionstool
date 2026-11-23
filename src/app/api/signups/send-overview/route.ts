@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: "E-Mail wurde gesendet" });
   } catch (error) {
-    logServerError("POST /api/anmeldungen/meine-aktionen", error);
+    logServerError("POST /api/signups/send-overview", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

@@ -98,7 +98,7 @@ export default function AnmeldeFormular({
     setLoading(true);
 
     try {
-      const res = await fetch("/api/anmeldungen", {
+      const res = await fetch("/api/signups", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

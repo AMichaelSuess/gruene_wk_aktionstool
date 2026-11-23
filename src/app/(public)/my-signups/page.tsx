@@ -14,7 +14,7 @@ function BestaetigenContent() {
   async function handleSend() {
     setStatus("sending");
     try {
-      const res = await fetch("/api/anmeldungen/meine-aktionen", {
+      const res = await fetch("/api/signups/send-overview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

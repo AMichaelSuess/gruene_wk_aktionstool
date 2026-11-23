@@ -3,7 +3,7 @@
  *
  * - Namen ohne Zeilenumbrüche, Signal-Export bleibt eine Zeile pro Anmeldung
  * - PUT /api/admin/teams prüft den Body mit Zod
- * - ungültige Filterwerte in GET /api/aktionen führen nicht zu 500
+ * - ungültige Filterwerte in GET /api/actions führen nicht zu 500
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mockAuth, ADMIN_SESSION, createJsonRequest } from "./helpers";
@@ -78,12 +78,12 @@ describe("PUT /api/admin/teams", () => {
   });
 });
 
-describe("GET /api/aktionen: ungültige Filterwerte", () => {
+describe("GET /api/actions: ungültige Filterwerte", () => {
   it("wahlkreis=abc und datum=kaputt → 200, Filter werden ignoriert", async () => {
     await mockAuth(null);
     mockPrisma.aktion.findMany.mockResolvedValue([]);
-    const { GET } = await import("@/app/api/aktionen/route");
-    const res = await GET(new Request("http://localhost:3000/api/aktionen?wahlkreis=abc&datum=kaputt&datumBis=x") as any);
+    const { GET } = await import("@/app/api/actions/route");
+    const res = await GET(new Request("http://localhost:3000/api/actions?district=abc&from=kaputt&to=x") as any);
     expect(res.status).toBe(200);
     const { where } = mockPrisma.aktion.findMany.mock.calls[0][0];
     expect(where).not.toHaveProperty("wahlkreis");
@@ -94,8 +94,8 @@ describe("GET /api/aktionen: ungültige Filterwerte", () => {
   it("gültige Filter werden weiter angewendet", async () => {
     await mockAuth(null);
     mockPrisma.aktion.findMany.mockResolvedValue([]);
-    const { GET } = await import("@/app/api/aktionen/route");
-    await GET(new Request("http://localhost:3000/api/aktionen?wahlkreis=1,x,3&datum=2099-01-01&datumBis=2099-01-31") as any);
+    const { GET } = await import("@/app/api/actions/route");
+    await GET(new Request("http://localhost:3000/api/actions?district=1,x,3&from=2099-01-01&to=2099-01-31") as any);
     const { where } = mockPrisma.aktion.findMany.mock.calls[0][0];
     expect(where.wahlkreis).toEqual({ nummer: { in: [1, 3] } });
     expect(where.datum.lte).toEqual(new Date("2099-01-31"));

@@ -44,8 +44,11 @@ export function phoneLink(phone: string): string {
   return `<a href="tel:${dialable}">${e(phone)}</a>`;
 }
 
+// Opens the confirmation page; only its button unsubscribes. Mail link
+// scanners (e.g. Outlook Safe Links) open every link, so the link itself must
+// not change anything.
 function cancelUrl(token: string): string {
-  return `${baseUrl}/api/anmeldungen/abmelden?token=${encodeURIComponent(token)}`;
+  return `${baseUrl}/unsubscribe?token=${encodeURIComponent(token)}`;
 }
 
 // Farben und Formen kommen aus dem aktiven Theme (src/lib/theme.ts)

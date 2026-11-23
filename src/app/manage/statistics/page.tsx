@@ -25,7 +25,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/stats")
+    fetch("/api/statistics")
       .then((r) => r.json())
       .then(setStats)
       .catch(console.error);
@@ -67,7 +67,7 @@ export default function AdminPage() {
           <div className="flex flex-wrap items-center gap-2">
             {/* Plain link: the export is a file download, not a page navigation */}
             <a
-              href="/api/admin/export-stats"
+              href="/api/statistics/export"
               className="inline-flex items-center justify-center rounded-button px-4 py-2 text-base bg-primary text-white font-bold case-ui tracking-ui border-ui border-line shadow-ui hover:shadow-ui-sm hover:press-sm hover:bg-hover-primary hover:text-hover-primary-ink active:shadow-none active:press transition-all focus:outline-none focus-visible:outline-[3px] focus-visible:outline-focus"
             >
               Auswertung exportieren

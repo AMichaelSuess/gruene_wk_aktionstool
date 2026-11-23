@@ -5,30 +5,11 @@ import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { BodyTooLargeError, readJsonLimited } from "@/lib/request-body";
 import { logServerError } from "@/lib/audit";
 
-// Required in production (checked at startup in src/instrumentation.ts)
-const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3200";
-
 const tokenSchema = z.object({ token: z.string().min(1).max(128) });
 
 // A token is 64 hex characters; anything much larger is not a real request
 const MAX_BODY_BYTES = 1024;
 const isRateLimited = createRateLimiter(20, 60 * 1000); // per minute and IP
-
-// GET: target of the unsubscribe link in emails. Must not change anything:
-// mail link scanners (e.g. Outlook Safe Links) open every link in a mail, so
-// a deleting GET would silently unregister volunteers. It only forwards to a
-// confirmation page where a person clicks the button (POST below).
-export async function GET(req: NextRequest) {
-  const token = new URL(req.url).searchParams.get("token");
-
-  if (!token) {
-    return NextResponse.redirect(new URL("/unsubscribe/done?error=1", baseUrl));
-  }
-
-  const target = new URL("/unsubscribe", baseUrl);
-  target.searchParams.set("token", token);
-  return NextResponse.redirect(target);
-}
 
 // POST: performs the unsubscribe after the person confirmed it.
 export async function POST(req: NextRequest) {
@@ -81,7 +62,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({ error: "Ungültiger Abmelde-Link" }, { status: 400 });
     }
-    logServerError("POST /api/anmeldungen/abmelden", error);
+    logServerError("POST /api/signups/unsubscribe", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

@@ -51,7 +51,7 @@ describe("hatBegonnen (Berliner Zeit)", () => {
   });
 });
 
-describe("POST /api/anmeldungen: vergangene Aktionen", () => {
+describe("POST /api/signups: vergangene Aktionen", () => {
   it("Anmeldung für eine Aktion von gestern → 'Aktion nicht verfügbar', keine Anmeldung angelegt", async () => {
     mockPrisma.aktion.findUnique.mockResolvedValue({
       id: "alt",
@@ -68,9 +68,9 @@ describe("POST /api/anmeldungen: vergangene Aktionen", () => {
       _count: { anmeldungen: 0 },
     });
 
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const res = await POST(
-      new Request("http://localhost:3000/api/anmeldungen", {
+      new Request("http://localhost:3000/api/signups", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-forwarded-for": "10.2.0.1" },
         body: JSON.stringify({

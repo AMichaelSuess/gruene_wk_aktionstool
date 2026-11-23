@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
       processed++;
       deleted += aktion._count.anmeldungen;
     } catch (error) {
-      logServerError("POST /api/cron/cleanup-anmeldungen", error);
+      logServerError("POST /api/cron/cleanup-signups", error);
       errors.push(aktion.id);
     }
   }

@@ -49,7 +49,7 @@ export default function NewAktionPage() {
   const [chosenTeamIds, setTeamIds] = useState<string[] | null>(null);
 
   useEffect(() => {
-    fetch("/api/wahlkreise")
+    fetch("/api/districts")
       .then((r) => r.json())
       .then(setWahlkreise);
   }, []);
@@ -88,7 +88,7 @@ export default function NewAktionPage() {
       maxTeilnehmer: form.maxTeilnehmer ? parseInt(form.maxTeilnehmer) : null,
     };
 
-    const res = await fetch("/api/aktionen", {
+    const res = await fetch("/api/actions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

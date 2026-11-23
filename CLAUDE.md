@@ -42,26 +42,22 @@ Test credentials (after seeding):
 
 Page URLs are English (UI text stays German): plural lists, `/new`, `/[id]`, sub-lists under their parent.
 
-- `src/app/(public)/` — public pages: `/` (action list), `/signup?actions=…`, `/unsubscribe?token=…`, `/unsubscribe/done`, `/my-signups?email=…`, `/privacy`, `/imprint`
+- `src/app/(public)/` — public pages: `/` (action list), `/signup?actions=…`, `/unsubscribe?token=…` (the link in emails), `/my-signups?email=…`, `/privacy`, `/imprint`
 - `src/app/(auth)/` — `/login`
 - `src/app/embed/` — `/embed/actions/[id]`, sign-up form for iframes
 - `src/app/manage/` — internal area (login required): `/manage/actions` (`/new`, `/[id]`, `/[id]/signups`), `/manage/statistics`, `/manage/users`, `/manage/account` for experts and admins; `/manage/teams`, `/manage/districts` (Wahlkreise/Stadtbezirke) and `/manage/users/new|[id]` for admins only (enforced in `src/proxy.ts`)
 - `src/app/api/` — REST endpoints: auth, action CRUD, export (Excel/Signal), upload, cron jobs
 
-Public API routes:
-- `/api/aktionen` — list/read actions
-- `/api/aktionen/[id]/anmeldungen` — sign up for an action
-- `/api/anmeldungen/abmelden` — unsubscribe via cancelToken
-- `/api/anmeldungen/meine-aktionen` — list user's registrations
-- `/api/wahlkreise` — list electoral districts
-- `/api/vorlage` — download Excel import template
-- `/api/export` — export signups (Excel/Signal format, EXPERT+)
-- `/api/export-aktionen` — export all actions (EXPERT+)
-- `/api/upload` — import actions from Excel (EXPERT+)
-- `/api/admin/*` — user/team/stats management (ADMIN only)
-- `/api/cron/daily-summary` — daily email summary
-- `/api/cron/cleanup-anmeldungen` — delete stale signups
-- `/api/cron/send-erinnerungen` — send reminder emails before actions
+API routes (English, resource-style; JSON fields stay German like the Prisma model):
+- `/api/actions` — list (public with `?public=true`), create, `PATCH` bulk category; `/api/actions/[id]` read/update/cancel
+- `/api/actions/[id]/signups` — signups of one action (EXPERT+)
+- `/api/actions/export`, `/api/actions/import`, `/api/actions/import-template` — Excel/Signal export, Excel import and template (EXPERT+)
+- `/api/signups` — public sign-up; `/api/signups/lookup` and `/api/signups/unsubscribe` — unsubscribe via cancelToken (POST, token in the body); `/api/signups/send-overview` — email a volunteer their signups; `/api/signups/export` — export signups (EXPERT+)
+- `/api/statistics`, `/api/statistics/export` — statistics (experts: own teams)
+- `/api/me`, `/api/me/password`, `/api/me/teams` — own account
+- `/api/districts` — list electoral districts; `/api/teams` — team list for assignment
+- `/api/admin/*` — user/team/district management and hard delete of actions (ADMIN only)
+- `/api/cron/daily-summary`, `/api/cron/cleanup-signups`, `/api/cron/send-reminders` — cron jobs
 
 ### Data Model
 
@@ -95,7 +91,7 @@ Role checks happen at the API route level. Experts can only access their own tea
 
 ### Cron Jobs
 
-`/api/cron/daily-summary`, `/api/cron/cleanup-anmeldungen`, and `/api/cron/send-erinnerungen` are protected by `Authorization: Bearer <CRON_SECRET>`. Triggered externally via server cron or curl.
+`/api/cron/daily-summary`, `/api/cron/cleanup-signups`, and `/api/cron/send-reminders` are protected by `Authorization: Bearer <CRON_SECRET>`. Triggered externally via server cron or curl.
 
 ## Tests
 
@@ -298,12 +294,12 @@ All UI must work in every theme. See `docs/design/theming.md` for the token tabl
 - Purpose: Unauthenticated volunteer-facing pages
 - Location: `src/app/(public)/`
 - Contains: Action listing, registration form, privacy policy, impressum
-- Depends on: `src/app/api/aktionen`, `src/app/api/anmeldungen`, `src/app/api/wahlkreise`
+- Depends on: `src/app/api/actions`, `src/app/api/signups`, `src/app/api/districts`
 - Used by: End-users (volunteers)
 - Purpose: Expert (campaign team) action management
 - Location: `src/app/manage/actions/`
 - Contains: Action list, create/edit forms, registrant view
-- Depends on: All `/api/aktionen`, `/api/export`, `/api/upload`, `/api/user/teams`, `/api/wahlkreise` endpoints
+- Depends on: All `/api/actions`, `/api/signups/export`, `/api/actions/import`, `/api/me/teams`, `/api/districts` endpoints
 - Used by: Users with EXPERT or ADMIN role
 - Purpose: Full platform administration
 - Location: `src/app/manage/` (statistics, users, teams, districts)
@@ -312,7 +308,7 @@ All UI must work in every theme. See `docs/design/theming.md` for the token tabl
 - Used by: Users with ADMIN role only
 - Purpose: All server-side logic, data access, business rules
 - Location: `src/app/api/`
-- Contains: Route handlers organized by resource (`aktionen`, `anmeldungen`, `export`, `upload`, `admin/*`, `cron/*`)
+- Contains: Route handlers organized by resource (`actions`, `signups`, `statistics`, `me`, `districts`, `teams`, `admin/*`, `cron/*`)
 - Depends on: `src/lib/` modules (db, auth, email, excel, validators, geocoding)
 - Used by: UI layers via `fetch()`
 - Purpose: Shared utilities and integrations
@@ -333,8 +329,8 @@ All UI must work in every theme. See `docs/design/theming.md` for the token tabl
 ## Key Abstractions
 - Purpose: Restrict EXPERTs to only their team's data
 - Implementation: `session.user.teamIds` (array of team IDs) embedded in JWT at login (`src/lib/auth.ts`)
-- Enforcement: list/export queries use `expertAktionWhere()` and single-Aktion handlers use `hasAktionAccess()` from `src/lib/aktion-teams.ts` (access = member of any assigned team, or creator). Experts may assign any team; when editing someone else's Aktion they must keep one of their own teams (`keepsOwnTeam()`) and may only remove their own teams (`removesForeignTeam()`; only the creator or an ADMIN removes others). Without access, `GET /api/aktionen/[id]` returns the public shape (no contact email/phone, no `createdById`), also to logged-in experts
-- Examples: `src/app/api/aktionen/route.ts`, `src/app/api/aktionen/[id]/route.ts`, `src/app/api/export/route.ts`
+- Enforcement: list/export queries use `expertAktionWhere()` and single-Aktion handlers use `hasAktionAccess()` from `src/lib/aktion-teams.ts` (access = member of any assigned team, or creator). Experts may assign any team; when editing someone else's Aktion they must keep one of their own teams (`keepsOwnTeam()`) and may only remove their own teams (`removesForeignTeam()`; only the creator or an ADMIN removes others). Without access, `GET /api/actions/[id]` returns the public shape (no contact email/phone, no `createdById`), also to logged-in experts
+- Examples: `src/app/api/actions/route.ts`, `src/app/api/actions/[id]/route.ts`, `src/app/api/signups/export/route.ts`
 - Purpose: Single source of truth for all input shapes
 - Location: `src/lib/validators.ts`
 - Schemas: `loginSchema`, `userSchema`, `teamSchema`, `aktionSchema`, `anmeldungSchema`, `excelRowSchema`

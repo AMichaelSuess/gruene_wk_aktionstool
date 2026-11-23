@@ -38,9 +38,9 @@ function aktion(overrides: Record<string, unknown> = {}) {
 }
 
 async function runCleanup() {
-  const { POST } = await import("@/app/api/cron/cleanup-anmeldungen/route");
+  const { POST } = await import("@/app/api/cron/cleanup-signups/route");
   return POST(
-    new Request("http://localhost:3000/api/cron/cleanup-anmeldungen", {
+    new Request("http://localhost:3000/api/cron/cleanup-signups", {
       method: "POST",
       headers: { Authorization: `Bearer ${CRON_SECRET}` },
     }) as any

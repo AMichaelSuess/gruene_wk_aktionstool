@@ -97,13 +97,13 @@ function importRequest(teamIds: string[] = []): Request {
   formData.append("file", new File(["x"], "aktionen.xlsx"));
   formData.append("import", "true");
   for (const teamId of teamIds) formData.append("teamIds", teamId);
-  return createRequest("/api/upload", { method: "POST", body: formData });
+  return createRequest("/api/actions/import", { method: "POST", body: formData });
 }
 
 function previewRequest(): Request {
   const formData = new FormData();
   formData.append("file", new File(["x"], "aktionen.xlsx"));
-  return createRequest("/api/upload", { method: "POST", body: formData });
+  return createRequest("/api/actions/import", { method: "POST", body: formData });
 }
 
 function createdTeamIds(callIndex = 0): string[] {
@@ -127,9 +127,9 @@ describe("Team-Zuordnung: Aktion anlegen", () => {
   it("ADMIN kann mehrere Teams wählen, auch solche, denen er nicht angehört", async () => {
     await mockAuth(ADMIN_IN_TEAM_A);
 
-    const { POST } = await import("@/app/api/aktionen/route");
+    const { POST } = await import("@/app/api/actions/route");
     const res = await POST(
-      createJsonRequest("/api/aktionen", { ...aktionBody, teamIds: ["team-b", "team-c"] }) as any
+      createJsonRequest("/api/actions", { ...aktionBody, teamIds: ["team-b", "team-c"] }) as any
     );
 
     expect(res.status).toBe(201);
@@ -139,8 +139,8 @@ describe("Team-Zuordnung: Aktion anlegen", () => {
   it("ADMIN ohne Teamwahl legt Aktion ohne Team an (keine Zuordnung zum eigenen Team)", async () => {
     await mockAuth(ADMIN_IN_TEAM_A);
 
-    const { POST } = await import("@/app/api/aktionen/route");
-    const res = await POST(createJsonRequest("/api/aktionen", { ...aktionBody, teamIds: [] }) as any);
+    const { POST } = await import("@/app/api/actions/route");
+    const res = await POST(createJsonRequest("/api/actions", { ...aktionBody, teamIds: [] }) as any);
 
     expect(res.status).toBe(201);
     expect(createdTeamIds()).toEqual([]);
@@ -149,9 +149,9 @@ describe("Team-Zuordnung: Aktion anlegen", () => {
   it("EXPERT kann eigenes und fremdes Team zuordnen (Themen-Team + Bezirks-Team)", async () => {
     await mockAuth(EXPERT_TEAM_A);
 
-    const { POST } = await import("@/app/api/aktionen/route");
+    const { POST } = await import("@/app/api/actions/route");
     const res = await POST(
-      createJsonRequest("/api/aktionen", { ...aktionBody, teamIds: ["team-a", "team-c"] }) as any
+      createJsonRequest("/api/actions", { ...aktionBody, teamIds: ["team-a", "team-c"] }) as any
     );
 
     expect(res.status).toBe(201);
@@ -161,8 +161,8 @@ describe("Team-Zuordnung: Aktion anlegen", () => {
   it("EXPERT kann eine Aktion nur einem fremden Team zuordnen (behält als Ersteller Zugriff)", async () => {
     await mockAuth(EXPERT_TEAM_A);
 
-    const { POST } = await import("@/app/api/aktionen/route");
-    const res = await POST(createJsonRequest("/api/aktionen", { ...aktionBody, teamIds: ["team-c"] }) as any);
+    const { POST } = await import("@/app/api/actions/route");
+    const res = await POST(createJsonRequest("/api/actions", { ...aktionBody, teamIds: ["team-c"] }) as any);
 
     expect(res.status).toBe(201);
     expect(createdTeamIds()).toEqual(["team-c"]);
@@ -172,8 +172,8 @@ describe("Team-Zuordnung: Aktion anlegen", () => {
   it("EXPERT ohne Teamwahl bekommt sein eigenes Team", async () => {
     await mockAuth(EXPERT_TEAM_A);
 
-    const { POST } = await import("@/app/api/aktionen/route");
-    const res = await POST(createJsonRequest("/api/aktionen", aktionBody) as any);
+    const { POST } = await import("@/app/api/actions/route");
+    const res = await POST(createJsonRequest("/api/actions", aktionBody) as any);
 
     expect(res.status).toBe(201);
     expect(createdTeamIds()).toEqual(["team-a"]);
@@ -182,9 +182,9 @@ describe("Team-Zuordnung: Aktion anlegen", () => {
   it("Doppelte Team-IDs werden nur einmal zugeordnet", async () => {
     await mockAuth(EXPERT_TEAM_A);
 
-    const { POST } = await import("@/app/api/aktionen/route");
+    const { POST } = await import("@/app/api/actions/route");
     const res = await POST(
-      createJsonRequest("/api/aktionen", { ...aktionBody, teamIds: ["team-a", "team-a"] }) as any
+      createJsonRequest("/api/actions", { ...aktionBody, teamIds: ["team-a", "team-a"] }) as any
     );
 
     expect(res.status).toBe(201);
@@ -194,9 +194,9 @@ describe("Team-Zuordnung: Aktion anlegen", () => {
   it("Unbekannte Team-ID → 400, keine Aktion angelegt", async () => {
     await mockAuth(EXPERT_TEAM_A);
 
-    const { POST } = await import("@/app/api/aktionen/route");
+    const { POST } = await import("@/app/api/actions/route");
     const res = await POST(
-      createJsonRequest("/api/aktionen", { ...aktionBody, teamIds: ["team-a", "gibt-es-nicht"] }) as any
+      createJsonRequest("/api/actions", { ...aktionBody, teamIds: ["team-a", "gibt-es-nicht"] }) as any
     );
 
     expect(res.status).toBe(400);
@@ -220,8 +220,8 @@ describe("Team-Zuordnung: Aktion bearbeiten", () => {
   async function put(body: Record<string, unknown>, aktion = existing) {
     mockPrisma.aktion.findUnique.mockResolvedValue(aktion);
     mockPrisma.aktion.update.mockResolvedValue(aktion);
-    const { PUT } = await import("@/app/api/aktionen/[id]/route");
-    const req = createJsonRequest("/api/aktionen/aktion-1", body, "PUT");
+    const { PUT } = await import("@/app/api/actions/[id]/route");
+    const req = createJsonRequest("/api/actions/aktion-1", body, "PUT");
     return PUT(req as any, { params: Promise.resolve({ id: "aktion-1" }) });
   }
 
@@ -340,8 +340,8 @@ describe("Aktion ansehen: Kontaktdaten nur mit Zugriff", () => {
 
   async function get(aktion: Record<string, unknown>) {
     mockPrisma.aktion.findUnique.mockResolvedValue(aktion);
-    const { GET } = await import("@/app/api/aktionen/[id]/route");
-    const req = createRequest("/api/aktionen/aktion-9");
+    const { GET } = await import("@/app/api/actions/[id]/route");
+    const req = createRequest("/api/actions/aktion-9");
     return (await GET(req as any, { params: Promise.resolve({ id: "aktion-9" }) })).json();
   }
 
@@ -371,7 +371,7 @@ describe("Team-Zuordnung beim Excel-Import", () => {
   it("ADMIN kann in Teams importieren, denen er nicht angehört", async () => {
     await mockAuth(ADMIN_IN_TEAM_A);
 
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const res = await POST(importRequest(["team-b", "team-c"]) as any);
 
     expect(res.status).toBe(200);
@@ -381,7 +381,7 @@ describe("Team-Zuordnung beim Excel-Import", () => {
   it("ADMIN ohne Teamwahl importiert ohne Team", async () => {
     await mockAuth(ADMIN_IN_TEAM_A);
 
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const res = await POST(importRequest() as any);
 
     expect(res.status).toBe(200);
@@ -391,7 +391,7 @@ describe("Team-Zuordnung beim Excel-Import", () => {
   it("EXPERT kann in ein fremdes Team importieren", async () => {
     await mockAuth(EXPERT_TEAM_A);
 
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const res = await POST(importRequest(["team-a", "team-c"]) as any);
 
     expect(res.status).toBe(200);
@@ -401,7 +401,7 @@ describe("Team-Zuordnung beim Excel-Import", () => {
   it("EXPERT ohne Teamwahl importiert in sein eigenes Team", async () => {
     await mockAuth(EXPERT_TEAM_A);
 
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const res = await POST(importRequest() as any);
 
     expect(res.status).toBe(200);
@@ -416,7 +416,7 @@ describe("Team-Zuordnung beim Excel-Import", () => {
       { ...excelRow, titel: "Ohne Teams-Spalte" },
     ]);
 
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const res = await POST(importRequest(["team-b"]) as any);
 
     expect(res.status).toBe(200);
@@ -431,7 +431,7 @@ describe("Team-Zuordnung beim Excel-Import", () => {
       { ...excelRow, teams: ["Team Nirgendwo"] },
     ]);
 
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const res = await POST(previewRequest() as any);
 
     expect(res.status).toBe(200);
@@ -443,7 +443,7 @@ describe("Team-Zuordnung beim Excel-Import", () => {
   it("Unbekannte Team-ID in der Auswahl → 400, nichts importiert", async () => {
     await mockAuth(ADMIN_IN_TEAM_A);
 
-    const { POST } = await import("@/app/api/upload/route");
+    const { POST } = await import("@/app/api/actions/import/route");
     const res = await POST(importRequest(["gibt-es-nicht"]) as any);
 
     expect(res.status).toBe(400);

@@ -72,8 +72,8 @@ describe("Team-Isolation: Anmeldungen (persönliche Daten)", () => {
       { id: "a1", vorname: "Max", nachname: "Muster", email: "max@test.de", telefon: "0171234", signalName: null },
     ]);
 
-    const { GET } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
-    const req = createRequest("/api/aktionen/aktion-1/anmeldungen");
+    const { GET } = await import("@/app/api/actions/[id]/signups/route");
+    const req = createRequest("/api/actions/aktion-1/signups");
     const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-1" }) });
 
     expect(res.status).toBe(200);
@@ -97,8 +97,8 @@ describe("Team-Isolation: Anmeldungen (persönliche Daten)", () => {
       teams: [{ teamId: "team-b" }],
     });
 
-    const { GET } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
-    const req = createRequest("/api/aktionen/aktion-2/anmeldungen");
+    const { GET } = await import("@/app/api/actions/[id]/signups/route");
+    const req = createRequest("/api/actions/aktion-2/signups");
     const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-2" }) });
 
     expect(res.status).toBe(403);
@@ -121,8 +121,8 @@ describe("Team-Isolation: Anmeldungen (persönliche Daten)", () => {
       { id: "a1", vorname: "Lisa", nachname: "Test", email: "lisa@test.de" },
     ]);
 
-    const { GET } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
-    const req = createRequest("/api/aktionen/aktion-2/anmeldungen");
+    const { GET } = await import("@/app/api/actions/[id]/signups/route");
+    const req = createRequest("/api/actions/aktion-2/signups");
     const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-2" }) });
 
     expect(res.status).toBe(200);
@@ -139,8 +139,8 @@ describe("Team-Isolation: Anmeldungen (persönliche Daten)", () => {
     });
     mockPrisma.anmeldung.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
-    const req = createRequest("/api/aktionen/aktion-3/anmeldungen");
+    const { GET } = await import("@/app/api/actions/[id]/signups/route");
+    const req = createRequest("/api/actions/aktion-3/signups");
     const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-3" }) });
 
     expect(res.status).toBe(200);
@@ -156,8 +156,8 @@ describe("Team-Isolation: Anmeldungen (persönliche Daten)", () => {
     });
     mockPrisma.anmeldung.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
-    const req = createRequest("/api/aktionen/aktion-4/anmeldungen");
+    const { GET } = await import("@/app/api/actions/[id]/signups/route");
+    const req = createRequest("/api/actions/aktion-4/signups");
     const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-4" }) });
 
     expect(res.status).toBe(200);
@@ -176,8 +176,8 @@ describe("Team-Isolation: Anmeldung löschen", () => {
     });
     mockPrisma.anmeldung.deleteMany.mockResolvedValue({ count: 0 });
 
-    const { DELETE } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
-    const req = createRequest("/api/aktionen/eigene/anmeldungen?anmeldungId=fremd", { method: "DELETE" });
+    const { DELETE } = await import("@/app/api/actions/[id]/signups/route");
+    const req = createRequest("/api/actions/eigene/signups?anmeldungId=fremd", { method: "DELETE" });
     const res = await DELETE(req as any, { params: Promise.resolve({ id: "eigene" }) });
 
     expect(res.status).toBe(404);
@@ -196,8 +196,8 @@ describe("Team-Isolation: Anmeldung löschen", () => {
     });
     mockPrisma.anmeldung.deleteMany.mockResolvedValue({ count: 1 });
 
-    const { DELETE } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
-    const req = createRequest("/api/aktionen/eigene/anmeldungen?anmeldungId=a1", { method: "DELETE" });
+    const { DELETE } = await import("@/app/api/actions/[id]/signups/route");
+    const req = createRequest("/api/actions/eigene/signups?anmeldungId=a1", { method: "DELETE" });
     const res = await DELETE(req as any, { params: Promise.resolve({ id: "eigene" }) });
 
     expect(res.status).toBe(200);
@@ -212,8 +212,8 @@ describe("Team-Isolation: Anmeldung löschen", () => {
       teams: [{ teamId: "team-b" }],
     });
 
-    const { DELETE } = await import("@/app/api/aktionen/[id]/anmeldungen/route");
-    const req = createRequest("/api/aktionen/aktion-2/anmeldungen?anmeldungId=a1", { method: "DELETE" });
+    const { DELETE } = await import("@/app/api/actions/[id]/signups/route");
+    const req = createRequest("/api/actions/aktion-2/signups?anmeldungId=a1", { method: "DELETE" });
     const res = await DELETE(req as any, { params: Promise.resolve({ id: "aktion-2" }) });
 
     expect(res.status).toBe(403);
@@ -236,8 +236,8 @@ describe("Team-Isolation: Aktionen bearbeiten", () => {
       endzeit: "12:00",
     });
 
-    const { PUT } = await import("@/app/api/aktionen/[id]/route");
-    const req = createJsonRequest("/api/aktionen/aktion-2", {
+    const { PUT } = await import("@/app/api/actions/[id]/route");
+    const req = createJsonRequest("/api/actions/aktion-2", {
       titel: "Gehackt",
       datum: "2025-06-01",
       startzeit: "10:00",
@@ -265,8 +265,8 @@ describe("Team-Isolation: Aktionen bearbeiten", () => {
       anmeldungen: [],
     });
 
-    const { DELETE } = await import("@/app/api/aktionen/[id]/route");
-    const req = createRequest("/api/aktionen/aktion-2", { method: "DELETE" });
+    const { DELETE } = await import("@/app/api/actions/[id]/route");
+    const req = createRequest("/api/actions/aktion-2", { method: "DELETE" });
     const res = await DELETE(req as any, { params: Promise.resolve({ id: "aktion-2" }) });
 
     expect(res.status).toBe(403);
@@ -280,8 +280,8 @@ describe("Team-Isolation: Datenexport", () => {
 
     mockPrisma.anmeldung.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export/route");
-    const req = createRequest("/api/export?format=txt");
+    const { GET } = await import("@/app/api/signups/export/route");
+    const req = createRequest("/api/signups/export?format=txt");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -296,9 +296,9 @@ describe("Team-Isolation: Datenexport", () => {
 
     mockPrisma.anmeldung.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export/route");
+    const { GET } = await import("@/app/api/signups/export/route");
     // Versuch, Team B zu exportieren
-    const req = createRequest("/api/export?format=txt&teamId=team-b");
+    const req = createRequest("/api/signups/export?format=txt&teamId=team-b");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -313,8 +313,8 @@ describe("Team-Isolation: Datenexport", () => {
 
     mockPrisma.anmeldung.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export/route");
-    const req = createRequest("/api/export?format=txt");
+    const { GET } = await import("@/app/api/signups/export/route");
+    const req = createRequest("/api/signups/export?format=txt");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -328,8 +328,8 @@ describe("Team-Isolation: Datenexport", () => {
 
     mockPrisma.anmeldung.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export/route");
-    const req = createRequest("/api/export?format=txt&teamId=team-b");
+    const { GET } = await import("@/app/api/signups/export/route");
+    const req = createRequest("/api/signups/export?format=txt&teamId=team-b");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -345,8 +345,8 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
 
     mockPrisma.aktion.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export-aktionen/route");
-    const req = createRequest("/api/export-aktionen?format=txt");
+    const { GET } = await import("@/app/api/actions/export/route");
+    const req = createRequest("/api/actions/export?format=txt");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -360,8 +360,8 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
 
     mockPrisma.aktion.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export-aktionen/route");
-    const req = createRequest("/api/export-aktionen?format=txt&teamId=team-b");
+    const { GET } = await import("@/app/api/actions/export/route");
+    const req = createRequest("/api/actions/export?format=txt&teamId=team-b");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -377,8 +377,8 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
 
     mockPrisma.aktion.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export-aktionen/route");
-    const req = createRequest("/api/export-aktionen?format=txt&teamId=team-b");
+    const { GET } = await import("@/app/api/actions/export/route");
+    const req = createRequest("/api/actions/export?format=txt&teamId=team-b");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -393,8 +393,8 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
 
     mockPrisma.aktion.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export-aktionen/route");
-    const req = createRequest("/api/export-aktionen?format=txt");
+    const { GET } = await import("@/app/api/actions/export/route");
+    const req = createRequest("/api/actions/export?format=txt");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -409,8 +409,8 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
 
     mockPrisma.aktion.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export-aktionen/route");
-    const req = createRequest("/api/export-aktionen?format=txt&teamId=team-b");
+    const { GET } = await import("@/app/api/actions/export/route");
+    const req = createRequest("/api/actions/export?format=txt&teamId=team-b");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -424,8 +424,8 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
 
     mockPrisma.aktion.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export-aktionen/route");
-    const req = createRequest("/api/export-aktionen?format=txt&teamId=team-a");
+    const { GET } = await import("@/app/api/actions/export/route");
+    const req = createRequest("/api/actions/export?format=txt&teamId=team-a");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -440,8 +440,8 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
 
     mockPrisma.aktion.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export-aktionen/route");
-    const req = createRequest("/api/export-aktionen?format=txt&nurEigene=true");
+    const { GET } = await import("@/app/api/actions/export/route");
+    const req = createRequest("/api/actions/export?format=txt&mine=true");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -455,8 +455,8 @@ describe("Team-Isolation: Aktionen-Export (export-aktionen)", () => {
 
     mockPrisma.aktion.findMany.mockResolvedValue([]);
 
-    const { GET } = await import("@/app/api/export-aktionen/route");
-    const req = createRequest("/api/export-aktionen?format=txt&hidePast=true");
+    const { GET } = await import("@/app/api/actions/export/route");
+    const req = createRequest("/api/actions/export?format=txt&hidePast=true");
     const res = await GET(req as any);
 
     expect(res.status).toBe(200);
@@ -486,8 +486,8 @@ describe("PII-Schutz: Oeffentlicher Aktionszugriff", () => {
 
     mockPrisma.aktion.findUnique.mockResolvedValue(aktionMitPII);
 
-    const { GET } = await import("@/app/api/aktionen/[id]/route");
-    const req = createRequest("/api/aktionen/aktion-1");
+    const { GET } = await import("@/app/api/actions/[id]/route");
+    const req = createRequest("/api/actions/aktion-1");
     const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-1" }) });
 
     expect(res.status).toBe(200);
@@ -503,8 +503,8 @@ describe("PII-Schutz: Oeffentlicher Aktionszugriff", () => {
 
     mockPrisma.aktion.findUnique.mockResolvedValue(aktionMitPII);
 
-    const { GET } = await import("@/app/api/aktionen/[id]/route");
-    const req = createRequest("/api/aktionen/aktion-1");
+    const { GET } = await import("@/app/api/actions/[id]/route");
+    const req = createRequest("/api/actions/aktion-1");
     const res = await GET(req as any, { params: Promise.resolve({ id: "aktion-1" }) });
 
     expect(res.status).toBe(200);
@@ -520,9 +520,9 @@ describe("Team-Isolation: Bulk-Umkategorisierung", () => {
     await mockAuth(EXPERT_TEAM_A);
     mockPrisma.aktion.updateMany.mockResolvedValue({ count: 1 });
 
-    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { PATCH } = await import("@/app/api/actions/route");
     const req = createJsonRequest(
-      "/api/aktionen/bulk-kategorie",
+      "/api/actions",
       { ids: ["aktion-1", "fremde-aktion"], kategorie: "HAUSTUER" },
       "PATCH"
     );
@@ -541,9 +541,9 @@ describe("Team-Isolation: Bulk-Umkategorisierung", () => {
     // Prisma matcht keine Zeile, weil die IDs zu Team B gehoeren
     mockPrisma.aktion.updateMany.mockResolvedValue({ count: 0 });
 
-    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { PATCH } = await import("@/app/api/actions/route");
     const req = createJsonRequest(
-      "/api/aktionen/bulk-kategorie",
+      "/api/actions",
       { ids: ["team-b-aktion"], kategorie: "INFOSTAND" },
       "PATCH"
     );
@@ -558,9 +558,9 @@ describe("Team-Isolation: Bulk-Umkategorisierung", () => {
     await mockAuth(ADMIN_SESSION);
     mockPrisma.aktion.updateMany.mockResolvedValue({ count: 2 });
 
-    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { PATCH } = await import("@/app/api/actions/route");
     const req = createJsonRequest(
-      "/api/aktionen/bulk-kategorie",
+      "/api/actions",
       { ids: ["a1", "a2"], kategorie: "SONSTIGES" },
       "PATCH"
     );
@@ -576,9 +576,9 @@ describe("Team-Isolation: Bulk-Umkategorisierung", () => {
     mockPrisma.aktion.updateMany.mockResolvedValue({ count: 1 });
     const { sendEmail } = await import("@/lib/email");
 
-    const { PATCH } = await import("@/app/api/aktionen/bulk-kategorie/route");
+    const { PATCH } = await import("@/app/api/actions/route");
     const req = createJsonRequest(
-      "/api/aktionen/bulk-kategorie",
+      "/api/actions",
       { ids: ["aktion-1"], kategorie: "HAUSTUER" },
       "PATCH"
     );

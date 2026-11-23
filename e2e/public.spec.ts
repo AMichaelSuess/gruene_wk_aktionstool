@@ -1,6 +1,32 @@
 /** Public pages: what volunteers see without an account. */
 import { test, expect, db } from "./test";
 import { AKTIONEN } from "./fixtures";
+import { anmeldebestaetigungEmail } from "../src/lib/email-templates";
+
+/** Path and query of the unsubscribe link in a real confirmation email. */
+function abmeldeLinkAusEmail(cancelToken: string): string {
+  const { html } = anmeldebestaetigungEmail(
+    "Abmelde",
+    "abmelden@e2e.test",
+    [
+      {
+        titel: "Aktion",
+        datum: new Date(),
+        startzeit: "10:00",
+        endzeit: "12:00",
+        adresse: "Markt 1",
+        ansprechpersonName: "Erna Kontakt",
+        ansprechpersonEmail: "kontakt@e2e.test",
+        ansprechpersonTelefon: "030 1234567",
+      },
+    ],
+    [cancelToken]
+  );
+  const href = html.match(/href="([^"]*token=[^"]*)"/)?.[1];
+  if (!href) throw new Error("Kein Abmelde-Link in der Bestätigungsmail");
+  const url = new URL(href.replaceAll("&amp;", "&"));
+  return url.pathname + url.search;
+}
 
 test.describe("Öffentliche Seiten", () => {
   test("Startseite, Datenschutz, Impressum und Login laden", async ({ page }) => {
@@ -71,10 +97,8 @@ test.describe("Anmeldung zu einer Aktion", () => {
 test.describe("Abmeldung und Übersicht", () => {
   test("Link aus der E-Mail führt zur Bestätigung, Abmelden löscht die Anmeldung", async ({ page }) => {
     const { titel, anmeldung } = AKTIONEN.abmelden;
-    // Same URL as in the confirmation email
-    await page.goto(`/api/anmeldungen/abmelden?token=${anmeldung.cancelToken}`);
+    await page.goto(abmeldeLinkAusEmail(anmeldung.cancelToken));
 
-    await expect(page).toHaveURL(/^[^?]*\/unsubscribe(\?|$)/);
     await expect(page.getByText("Von der Aktion abmelden?")).toBeVisible();
     await expect(page.getByText(titel)).toBeVisible();
 
@@ -88,14 +112,13 @@ test.describe("Abmeldung und Übersicht", () => {
     test.use({ erlaubteFehler: [/status of 404/] });
 
     test("Unbekannter Abmelde-Link zeigt einen Hinweis", async ({ page }) => {
-      await page.goto(`/api/anmeldungen/abmelden?token=${"f".repeat(64)}`);
+      await page.goto(abmeldeLinkAusEmail("f".repeat(64)));
       await expect(page.getByText("Abmeldung nicht möglich")).toBeVisible();
     });
   });
 
   test("Abmelde-Link ohne Token zeigt einen Hinweis", async ({ page }) => {
-    await page.goto("/api/anmeldungen/abmelden");
-    await expect(page).toHaveURL("/unsubscribe/done?error=1");
+    await page.goto("/unsubscribe");
     await expect(page.getByText("Abmeldung nicht möglich")).toBeVisible();
   });
 

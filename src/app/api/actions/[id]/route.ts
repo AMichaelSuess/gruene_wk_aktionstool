@@ -97,7 +97,7 @@ export async function PUT(
 
   // Experts: nur Aktionen eines ihrer Teams oder selbst angelegte
   if (!hasAktionAccess(session.user, existing)) {
-    audit("ZUGRIFF_VERWEIGERT", session.user.id, { aktionId: id, route: "PUT /api/aktionen/[id]" });
+    audit("ZUGRIFF_VERWEIGERT", session.user.id, { aktionId: id, route: "PUT /api/actions/[id]" });
     return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
   }
 
@@ -144,7 +144,7 @@ export async function PUT(
         return NextResponse.json({ error: EIGENES_TEAM_BEHALTEN_FEHLER }, { status: 400 });
       }
       if (removesForeignTeam(session.user, existing, newTeamIds)) {
-        audit("ZUGRIFF_VERWEIGERT", session.user.id, { aktionId: id, route: "PUT /api/aktionen/[id] (Team entfernen)" });
+        audit("ZUGRIFF_VERWEIGERT", session.user.id, { aktionId: id, route: "PUT /api/actions/[id] (Team entfernen)" });
         return NextResponse.json({ error: FREMDES_TEAM_ENTFERNEN_FEHLER }, { status: 403 });
       }
       if (!(await teamsExist(newTeamIds))) {
@@ -224,7 +224,7 @@ export async function PUT(
       const firstMessage = error.issues[0]?.message ?? "Validierungsfehler";
       return NextResponse.json({ error: firstMessage, details: error }, { status: 400 });
     }
-    logServerError("PUT /api/aktionen/[id]", error);
+    logServerError("PUT /api/actions/[id]", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }
@@ -252,7 +252,7 @@ export async function DELETE(
   }
 
   if (!hasAktionAccess(session.user, existing)) {
-    audit("ZUGRIFF_VERWEIGERT", session.user.id, { aktionId: id, route: "DELETE /api/aktionen/[id]" });
+    audit("ZUGRIFF_VERWEIGERT", session.user.id, { aktionId: id, route: "DELETE /api/actions/[id]" });
     return NextResponse.json({ error: "Kein Zugriff" }, { status: 403 });
   }
 

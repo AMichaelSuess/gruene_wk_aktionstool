@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({ error: "Ungültiger Abmelde-Link" }, { status: 400 });
     }
-    logServerError("POST /api/anmeldungen/abmelden/info", error);
+    logServerError("POST /api/signups/lookup", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

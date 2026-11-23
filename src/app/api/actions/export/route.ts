@@ -20,9 +20,9 @@ export async function GET(req: NextRequest) {
   const teamId = searchParams.get("teamId");
   const dateFilter = searchParams.get("dateFilter");
   const activeOnly = searchParams.get("activeOnly") === "true";
-  const kategorie = searchParams.get("kategorie");
+  const kategorie = searchParams.get("category");
   const hidePast = searchParams.get("hidePast") === "true";
-  const nurEigene = searchParams.get("nurEigene") === "true";
+  const nurEigene = searchParams.get("mine") === "true";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {};

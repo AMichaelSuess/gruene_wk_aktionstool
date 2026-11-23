@@ -34,29 +34,29 @@ interface PublicRoute {
 
 const PUBLIC_ROUTES: PublicRoute[] = [
   {
-    name: "POST /api/anmeldungen",
+    name: "POST /api/signups",
     file: "anmeldungen/route.ts",
-    load: () => import("@/app/api/anmeldungen/route"),
+    load: () => import("@/app/api/signups/route"),
     limitBytes: 32 * 1024,
   },
   {
-    name: "POST /api/anmeldungen/abmelden",
+    name: "POST /api/signups/unsubscribe",
     file: "anmeldungen/abmelden/route.ts",
-    load: () => import("@/app/api/anmeldungen/abmelden/route"),
+    load: () => import("@/app/api/signups/unsubscribe/route"),
     limitBytes: 1024,
     rateLimitPerMinute: 20,
   },
   {
-    name: "POST /api/anmeldungen/abmelden/info",
+    name: "POST /api/signups/lookup",
     file: "anmeldungen/abmelden/info/route.ts",
-    load: () => import("@/app/api/anmeldungen/abmelden/info/route"),
+    load: () => import("@/app/api/signups/lookup/route"),
     limitBytes: 1024,
     rateLimitPerMinute: 20,
   },
   {
-    name: "POST /api/anmeldungen/meine-aktionen",
+    name: "POST /api/signups/send-overview",
     file: "anmeldungen/meine-aktionen/route.ts",
-    load: () => import("@/app/api/anmeldungen/meine-aktionen/route"),
+    load: () => import("@/app/api/signups/send-overview/route"),
     limitBytes: 1024,
     rateLimitPerMinute: 5,
   },
@@ -112,10 +112,10 @@ describe("Meine Aktionen per E-Mail", () => {
     const { prisma } = await import("@/lib/db");
     const { sendEmail } = await import("@/lib/email");
     (prisma.anmeldung.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
-    const { POST } = await import("@/app/api/anmeldungen/meine-aktionen/route");
+    const { POST } = await import("@/app/api/signups/send-overview/route");
 
     const res = await POST(
-      request("http://localhost/api/anmeldungen/meine-aktionen", JSON.stringify({ email: " Max@Example.org " }))
+      request("http://localhost/api/signups/send-overview", JSON.stringify({ email: " Max@Example.org " }))
     );
 
     expect(res.status).toBe(200);
@@ -123,7 +123,7 @@ describe("Meine Aktionen per E-Mail", () => {
   });
 
   it("kein GET mehr – die Adresse gehört nicht in die URL", async () => {
-    const mod = await import("@/app/api/anmeldungen/meine-aktionen/route");
+    const mod = await import("@/app/api/signups/send-overview/route");
     expect("GET" in mod).toBe(false);
   });
 });

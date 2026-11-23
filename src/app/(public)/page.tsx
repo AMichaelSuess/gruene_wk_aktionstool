@@ -23,11 +23,11 @@ const AktionMap = dynamic(() => import("@/components/AktionMap"), {
  */
 function buildFilterParams(filters: FilterState): URLSearchParams {
   const params = new URLSearchParams();
-  if (filters.datum) params.set("datum", filters.datum);
-  if (filters.datumBis) params.set("datumBis", filters.datumBis);
-  if (filters.tageszeit.length > 0) params.set("tageszeit", filters.tageszeit.join(","));
-  if (filters.wahlkreise.length > 0) params.set("wahlkreis", filters.wahlkreise.join(","));
-  if (filters.kategorien.length > 0) params.set("kategorie", filters.kategorien.join(","));
+  if (filters.datum) params.set("from", filters.datum);
+  if (filters.datumBis) params.set("to", filters.datumBis);
+  if (filters.tageszeit.length > 0) params.set("timeOfDay", filters.tageszeit.join(","));
+  if (filters.wahlkreise.length > 0) params.set("district", filters.wahlkreise.join(","));
+  if (filters.kategorien.length > 0) params.set("category", filters.kategorien.join(","));
   return params;
 }
 
@@ -71,7 +71,7 @@ function AktionenPageInner() {
   }
 
   useEffect(() => {
-    fetch("/api/wahlkreise")
+    fetch("/api/districts")
       .then((r) => r.json())
       .then(setWahlkreise)
       .catch(() => {});
@@ -80,7 +80,7 @@ function AktionenPageInner() {
   useEffect(() => {
     const params = buildFilterParams(filters);
     params.set("public", "true");
-    fetch(`/api/aktionen?${params}`)
+    fetch(`/api/actions?${params}`)
       .then((r) => r.json())
       .then((data: Aktion[]) => {
         setAktionen(data);

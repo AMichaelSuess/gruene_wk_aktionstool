@@ -37,7 +37,7 @@ function AnmeldenPageContent() {
   const [selectedIds, setSelectedIds] = useState<string[]>(initialIds);
 
   useEffect(() => {
-    fetch("/api/aktionen?public=true")
+    fetch("/api/actions?public=true")
       .then((r) => r.json())
       .then((data: Aktion[]) => {
         setAktionen(data);

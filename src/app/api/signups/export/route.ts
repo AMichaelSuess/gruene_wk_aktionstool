@@ -15,8 +15,8 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const exportFormat = searchParams.get("format") || "xlsx";
-  const aktionId = searchParams.get("aktionId");
-  const wahlkreisId = searchParams.get("wahlkreisId");
+  const aktionId = searchParams.get("actionId");
+  const wahlkreisId = searchParams.get("districtId");
   const teamId = searchParams.get("teamId");
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -40,16 +40,16 @@ beforeEach(() => {
   mockPrisma.aktionStatistikTeam.findMany.mockResolvedValue([]);
 });
 
-describe("Statistik (GET /api/admin/stats)", () => {
+describe("Statistik (GET /api/statistics)", () => {
   it("401 ohne Sitzung", async () => {
     await mockAuth(null);
-    const { GET } = await import("@/app/api/admin/stats/route");
+    const { GET } = await import("@/app/api/statistics/route");
     expect((await GET()).status).toBe(401);
   });
 
   it("EXPERT: alle Abfragen sind auf eigene Teams und eigene Aktionen eingeschraenkt", async () => {
     await mockAuth(EXPERT_TEAM_A);
-    const { GET } = await import("@/app/api/admin/stats/route");
+    const { GET } = await import("@/app/api/statistics/route");
     expect((await GET()).status).toBe(200);
 
     for (const [args] of mockPrisma.aktion.count.mock.calls) {
@@ -73,7 +73,7 @@ describe("Statistik (GET /api/admin/stats)", () => {
 
   it("ADMIN: keine Einschraenkung", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { GET } = await import("@/app/api/admin/stats/route");
+    const { GET } = await import("@/app/api/statistics/route");
     expect((await GET()).status).toBe(200);
     expect(mockPrisma.team.findMany.mock.calls[0][0].where).toEqual({});
     expect(mockPrisma.aktion.findMany.mock.calls[0][0].where).toEqual({});

@@ -56,10 +56,10 @@ beforeEach(() => {
   ]);
 });
 
-describe("Staende in der Statistik (GET /api/admin/stats)", () => {
+describe("Staende in der Statistik (GET /api/statistics)", () => {
   it("zaehlt eine bestehende Aktion mit Statistik nur einmal", async () => {
     await mockAuth(ADMIN_SESSION);
-    const { GET } = await import("@/app/api/admin/stats/route");
+    const { GET } = await import("@/app/api/statistics/route");
     const data = await (await GET()).json();
 
     expect(data.staendeByTeam).toEqual([{ team: "Team A", count: 2 }]);

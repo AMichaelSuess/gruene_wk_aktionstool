@@ -30,7 +30,7 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
   useEffect(() => {
     Promise.all([
       fetch("/api/admin/teams").then((r) => r.json()),
-      fetch("/api/wahlkreise").then((r) => r.json()),
+      fetch("/api/districts").then((r) => r.json()),
     ]).then(([teams, wk]) => {
       const team = teams.find((t: { id: string; name: string; wahlkreis: { id: string } | null }) => t.id === id);
       if (team) {

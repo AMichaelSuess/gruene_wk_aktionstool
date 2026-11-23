@@ -139,7 +139,7 @@ export default function DashboardPage() {
   useToastLift(bulkBarRef, selectedIds.size > 0);
 
   useEffect(() => {
-    fetch("/api/aktionen")
+    fetch("/api/actions")
       .then((r) => r.json())
       .then((data) => {
         setAktionen(data);
@@ -150,7 +150,7 @@ export default function DashboardPage() {
   // Teams fuer den Team-Filter: Admins alle Teams, Expert*innen ihre eigenen
   useEffect(() => {
     if (!session) return;
-    fetch(isAdmin ? "/api/admin/teams" : "/api/user/teams")
+    fetch(isAdmin ? "/api/admin/teams" : "/api/me/teams")
       .then((r) => (r.ok ? r.json() : []))
       .then((data: TeamOption[]) => {
         setTeams(data.map((t) => ({ id: t.id, name: t.name })));
@@ -185,7 +185,7 @@ export default function DashboardPage() {
     if (!cancelId) return;
     const id = cancelId;
     setCancelId(null);
-    const res = await fetch(`/api/aktionen/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/actions/${id}`, { method: "DELETE" });
     if (res.ok) {
       setAktionen((prev) => prev.map((a) => (a.id === id ? { ...a, status: "ABGESAGT" } : a)));
       toast.success("Die Aktion wurde abgesagt.");
@@ -249,9 +249,9 @@ export default function DashboardPage() {
   if (dateFilter !== "alle") exportParams.set("dateFilter", dateFilter);
   if (activeOnly) exportParams.set("activeOnly", "true");
   if (hidePast) exportParams.set("hidePast", "true");
-  if (kategorieFilter.length > 0) exportParams.set("kategorie", kategorieFilter.join(","));
+  if (kategorieFilter.length > 0) exportParams.set("category", kategorieFilter.join(","));
   if (teamFilter) exportParams.set("teamId", teamFilter);
-  if (nurEigene) exportParams.set("nurEigene", "true");
+  if (nurEigene) exportParams.set("mine", "true");
   const exportQuery = exportParams.toString() ? `&${exportParams.toString()}` : "";
 
   function toggleKategorieFilter(value: string) {
@@ -284,7 +284,7 @@ export default function DashboardPage() {
     setBulkSaving(true);
     const ids = Array.from(selectedIds);
 
-    const res = await fetch("/api/aktionen/bulk-kategorie", {
+    const res = await fetch("/api/actions", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids, kategorie: bulkKategorie }),
@@ -324,10 +324,10 @@ export default function DashboardPage() {
         <div className="flex flex-wrap items-center gap-2">
           {filteredAktionen.length > 0 && (
             <>
-              <a href={`/api/export-aktionen?format=xlsx${exportQuery}`}>
+              <a href={`/api/actions/export?format=xlsx${exportQuery}`}>
                 <Button variant="outline" size="sm">Excel exportieren</Button>
               </a>
-              <a href={`/api/export-aktionen?format=txt${exportQuery}`}>
+              <a href={`/api/actions/export?format=txt${exportQuery}`}>
                 <Button variant="outline" size="sm">Signal-Text</Button>
               </a>
             </>

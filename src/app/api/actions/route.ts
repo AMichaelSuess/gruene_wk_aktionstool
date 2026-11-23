@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { ZodError } from "zod";
-import { aktionSchema } from "@/lib/validators";
+import { aktionSchema, bulkKategorieSchema } from "@/lib/validators";
 import { KATEGORIE_VALUES } from "@/lib/kategorien";
 import { geocodeAddress } from "@/lib/geocoding";
 import { hatBegonnen } from "@/lib/aktion-zeit";
@@ -38,11 +38,11 @@ export async function GET(req: NextRequest) {
   const session = await auth();
   const { searchParams } = new URL(req.url);
 
-  const wahlkreis = searchParams.get("wahlkreis");
-  const datum = searchParams.get("datum");
-  const datumBis = searchParams.get("datumBis");
-  const tageszeit = searchParams.get("tageszeit");
-  const kategorie = searchParams.get("kategorie");
+  const wahlkreis = searchParams.get("district");
+  const datum = searchParams.get("from");
+  const datumBis = searchParams.get("to");
+  const tageszeit = searchParams.get("timeOfDay");
+  const kategorie = searchParams.get("category");
   const teamId = searchParams.get("teamId");
   const isPublic = searchParams.get("public") === "true";
 
@@ -196,7 +196,50 @@ export async function POST(req: NextRequest) {
       const firstMessage = error.issues[0]?.message ?? "Validierungsfehler";
       return NextResponse.json({ error: firstMessage, details: error }, { status: 400 });
     }
-    logServerError("POST /api/aktionen", error);
+    logServerError("POST /api/actions", error);
+    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
+  }
+}
+
+
+/**
+ * PATCH: Kategorie mehrerer Aktionen auf einmal setzen.
+ *
+ * Bewusst ohne aktionSchema und ohne Datumspruefung — auch vergangene Aktionen
+ * muessen nachtraeglich umkategorisiert werden koennen. Es werden keine E-Mails
+ * verschickt und der Status bleibt unveraendert.
+ */
+export async function PATCH(req: NextRequest) {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    const validated = bulkKategorieSchema.parse(body);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = { id: { in: validated.ids } };
+
+    // Team-Isolation: EXPERT darf nur Aktionen seiner Teams oder selbst
+    // angelegte umkategorisieren
+    if (session.user.role === "EXPERT") {
+      Object.assign(where, expertAktionWhere(session.user));
+    }
+
+    const result = await prisma.aktion.updateMany({
+      where,
+      data: { kategorie: validated.kategorie },
+    });
+
+    return NextResponse.json({ count: result.count });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      const firstMessage = error.issues[0]?.message ?? "Validierungsfehler";
+      return NextResponse.json({ error: firstMessage, details: error }, { status: 400 });
+    }
+    logServerError("PATCH /api/actions", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

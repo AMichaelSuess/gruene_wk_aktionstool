@@ -31,8 +31,8 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/aktionen/${id}/anmeldungen`).then((r) => r.json()),
-      fetch(`/api/aktionen/${id}`).then((r) => r.json()),
+      fetch(`/api/actions/${id}/signups`).then((r) => r.json()),
+      fetch(`/api/actions/${id}`).then((r) => r.json()),
     ]).then(([anm, akt]) => {
       setAnmeldungen(anm);
       setAktion(akt);
@@ -44,7 +44,7 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
     if (!deleteTarget) return;
     const anmeldungId = deleteTarget.id;
     setDeleteTarget(null);
-    const res = await fetch(`/api/aktionen/${id}/anmeldungen?anmeldungId=${anmeldungId}`, {
+    const res = await fetch(`/api/actions/${id}/signups?anmeldungId=${anmeldungId}`, {
       method: "DELETE",
     });
     if (res.ok) {
@@ -56,7 +56,7 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
   }
 
   function downloadExport(format: "xlsx" | "txt") {
-    window.open(`/api/export?aktionId=${id}&format=${format}`, "_blank");
+    window.open(`/api/signups/export?actionId=${id}&format=${format}`, "_blank");
   }
 
   if (loading) {

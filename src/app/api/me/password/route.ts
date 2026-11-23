@@ -10,7 +10,7 @@ import { passwortAendernSchema } from "@/lib/validators";
 const failures = createFailureCounter(5, 15 * 60 * 1000);
 
 // POST: eigenes Passwort aendern; erfordert das aktuelle Passwort
-export async function POST(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: "Passwort geändert" });
   } catch (error) {
-    logServerError("POST /api/user/passwort", error);
+    logServerError("PUT /api/me/password", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

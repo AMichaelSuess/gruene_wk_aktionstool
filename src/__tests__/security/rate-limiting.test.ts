@@ -28,7 +28,7 @@ beforeEach(() => {
 });
 
 function createAnmeldungRequest(ip: string) {
-  return new Request("http://localhost:3000/api/anmeldungen", {
+  return new Request("http://localhost:3000/api/signups", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -47,7 +47,7 @@ function createAnmeldungRequest(ip: string) {
 
 describe("Rate-Limiting für öffentliche Anmeldungen", () => {
   it("Erlaubt 10 Anfragen pro IP, blockiert die 11.", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const { prisma } = await import("@/lib/db");
 
     // Mock: Aktion existiert und ist aktiv
@@ -78,7 +78,7 @@ describe("Rate-Limiting für öffentliche Anmeldungen", () => {
   });
 
   it("Unterschiedliche IPs werden unabhängig limitiert", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const { prisma } = await import("@/lib/db");
 
     (prisma.aktion.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -104,10 +104,10 @@ describe("Rate-Limiting für öffentliche Anmeldungen", () => {
 
 describe("Honeypot-Schutz gegen Spam-Bots", () => {
   it("Anfrage mit ausgefülltem Honeypot-Feld wird still akzeptiert aber nicht verarbeitet", async () => {
-    const { POST } = await import("@/app/api/anmeldungen/route");
+    const { POST } = await import("@/app/api/signups/route");
     const { prisma } = await import("@/lib/db");
 
-    const req = new Request("http://localhost:3000/api/anmeldungen", {
+    const req = new Request("http://localhost:3000/api/signups", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

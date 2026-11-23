@@ -51,7 +51,7 @@ export async function PATCH(req: NextRequest) {
     audit("USER_GEAENDERT", session.user.id, { userId: session.user.id, fields: ["name"] });
     return NextResponse.json({ name: parsed.data.name });
   } catch (error) {
-    logServerError("PATCH /api/user/konto", error);
+    logServerError("PATCH /api/me", error);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

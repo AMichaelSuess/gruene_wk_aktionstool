@@ -236,7 +236,7 @@ export async function POST(req: NextRequest) {
     // Preview mode: return validation results
     return NextResponse.json({ results, total: rows.length });
   } catch (error) {
-    logServerError("POST /api/upload", error);
+    logServerError("POST /api/actions/import", error);
     return NextResponse.json({ error: "Fehler beim Verarbeiten der Datei" }, { status: 500 });
   }
 }
