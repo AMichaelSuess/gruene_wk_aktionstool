@@ -36,6 +36,8 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   // No "X-Powered-By: Next.js": it only helps attackers pick exploits
   poweredByHeader: false,
+  // Don't let `next dev` write AGENTS.md when an AI agent starts it
+  agentRules: false,
   headers: async () => [
     {
       // All non-embed routes: full iframe lockdown
