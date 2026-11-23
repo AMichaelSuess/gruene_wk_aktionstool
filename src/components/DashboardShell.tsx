@@ -8,6 +8,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useState, type ReactNode } from "react";
 import { WAHLKREIS_LABEL_PLURAL } from "@/lib/wahlkreis-label";
 import NavIcon, { type NavIconName } from "@/components/NavIcon";
+import Toaster from "@/components/ui/Toaster";
 
 interface NavItem {
   href: string;
@@ -175,6 +176,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
 
         <main className="flex-1 min-w-0 p-4 md:p-8">{children}</main>
       </div>
+      <Toaster />
     </div>
   );
 }

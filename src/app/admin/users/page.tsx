@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Dialog from "@/components/ui/Dialog";
+import { toast } from "@/components/ui/Toaster";
 
 interface Team {
   id: string;
@@ -31,7 +32,6 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/users")
@@ -43,7 +43,6 @@ export default function UsersPage() {
   }, []);
 
   async function toggleActive(user: User) {
-    setDeleteError("");
     const res = await fetch("/api/admin/users", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -51,27 +50,28 @@ export default function UsersPage() {
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setDeleteError(data.error || "Der Status konnte nicht geändert werden.");
+      toast.error(data.error || "Der Status konnte nicht geändert werden.");
       return;
     }
     setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, active: !u.active } : u)));
+    toast.success(`${user.name} wurde ${user.active ? "deaktiviert" : "aktiviert"}.`);
   }
 
   async function confirmDelete() {
     if (!deleteTarget) return;
-    const id = deleteTarget.id;
+    const { id, name } = deleteTarget;
     setDeleting(true);
-    setDeleteError("");
     const res = await fetch(`/api/admin/users?id=${id}`, { method: "DELETE" });
     setDeleting(false);
     setDeleteTarget(null);
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setDeleteError(data.error || "Die Person konnte nicht gelöscht werden.");
+      toast.error(data.error || "Die Person konnte nicht gelöscht werden.");
       return;
     }
     // Anonymisierte Konten erscheinen nicht mehr in der Liste
     setUsers((prev) => prev.filter((u) => u.id !== id));
+    toast.success(`${name} wurde gelöscht.`);
   }
 
   if (loading) {
@@ -98,7 +98,6 @@ export default function UsersPage() {
         )}
       </div>
 
-      {deleteError && <p className="mb-4 text-sm font-bold text-danger">{deleteError}</p>}
 
       <div className="rounded-card border-ui border-line overflow-hidden shadow-ui">
         <table className="w-full">

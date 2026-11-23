@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Dialog from "@/components/ui/Dialog";
+import { toast, useToastLift } from "@/components/ui/Toaster";
 import Select from "@/components/ui/Select";
 import { format, isToday, isTomorrow, isThisWeek } from "date-fns";
 import { de } from "date-fns/locale";
@@ -41,7 +42,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Aktion | null>(null);
-  const [deleteError, setDeleteError] = useState("");
 
   // Filter States
   const [dateFilter, setDateFilter] = useState<"alle" | "heute" | "morgen" | "woche">("alle");
@@ -57,7 +57,8 @@ export default function DashboardPage() {
   const [bulkKategorie, setBulkKategorie] = useState("");
   const [bulkConfirm, setBulkConfirm] = useState(false);
   const [bulkSaving, setBulkSaving] = useState(false);
-  const [bulkError, setBulkError] = useState("");
+  const bulkBarRef = useRef<HTMLDivElement>(null);
+  useToastLift(bulkBarRef, selectedIds.size > 0);
 
   useEffect(() => {
     fetch("/api/aktionen")
@@ -89,15 +90,17 @@ export default function DashboardPage() {
     setCancelId(null);
     const res = await fetch(`/api/aktionen/${id}`, { method: "DELETE" });
     if (res.ok) {
-      setAktionen(aktionen.map((a) => (a.id === id ? { ...a, status: "ABGESAGT" } : a)));
+      setAktionen((prev) => prev.map((a) => (a.id === id ? { ...a, status: "ABGESAGT" } : a)));
+      toast.success("Die Aktion wurde abgesagt.");
+    } else {
+      toast.error("Die Aktion konnte nicht abgesagt werden.");
     }
   }
 
   async function confirmDelete() {
     if (!deleteTarget) return;
-    const id = deleteTarget.id;
+    const { id, titel } = deleteTarget;
     setDeleteTarget(null);
-    setDeleteError("");
     const res = await fetch(`/api/admin/aktionen/${id}`, { method: "DELETE" });
     if (res.ok) {
       setAktionen((prev) => prev.filter((a) => a.id !== id));
@@ -106,8 +109,9 @@ export default function DashboardPage() {
         next.delete(id);
         return next;
       });
+      toast.success(`„${titel}“ wurde gelöscht.`);
     } else {
-      setDeleteError("Die Aktion konnte nicht gelöscht werden.");
+      toast.error("Die Aktion konnte nicht gelöscht werden.");
     }
   }
 
@@ -178,7 +182,6 @@ export default function DashboardPage() {
   async function confirmBulkKategorie() {
     if (!bulkKategorie || selectedIds.size === 0) return;
     setBulkSaving(true);
-    setBulkError("");
     const ids = Array.from(selectedIds);
 
     const res = await fetch("/api/aktionen/bulk-kategorie", {
@@ -192,7 +195,7 @@ export default function DashboardPage() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setBulkError(data.error || "Die Kategorie konnte nicht geändert werden.");
+      toast.error(data.error || "Die Kategorie konnte nicht geändert werden.");
       return;
     }
 
@@ -201,6 +204,9 @@ export default function DashboardPage() {
     );
     setSelectedIds(new Set());
     setBulkKategorie("");
+    toast.success(
+      `Kategorie von ${ids.length} Aktion${ids.length !== 1 ? "en" : ""} geändert.`
+    );
   }
 
   if (loading) {
@@ -330,10 +336,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {deleteError && (
-        <p className="mb-4 text-sm font-bold text-danger">{deleteError}</p>
-      )}
-
       {filteredAktionen.length === 0 ? (
         <div className="bg-white rounded-card border-ui border-line shadow-ui p-8 text-center text-gray-500">
           <p>Keine Aktionen für diese Filter gefunden.</p>
@@ -444,7 +446,7 @@ export default function DashboardPage() {
       )}
       {/* Aktionsleiste fuer die Mehrfachauswahl */}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-ui border-line p-4 shadow-ui-up">
+        <div ref={bulkBarRef} className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-ui border-line p-4 shadow-ui-up">
           <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-end gap-3">
             <p className="text-sm font-bold case-ui sm:mb-2">
               {selectedIds.size} Aktion{selectedIds.size !== 1 ? "en" : ""} ausgewählt
@@ -470,9 +472,6 @@ export default function DashboardPage() {
               </Button>
             </div>
           </div>
-          {bulkError && (
-            <p className="max-w-5xl mx-auto mt-2 text-sm font-bold text-danger">{bulkError}</p>
-          )}
         </div>
       )}
 

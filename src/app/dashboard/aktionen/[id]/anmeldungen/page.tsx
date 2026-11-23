@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import Button from "@/components/ui/Button";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
+import { toast } from "@/components/ui/Toaster";
 
 interface Anmeldung {
   id: string;
@@ -44,8 +45,9 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
     });
     if (res.ok) {
       setAnmeldungen((prev) => prev.filter((a) => a.id !== anmeldungId));
+      toast.success("Die Anmeldung wurde gelöscht.");
     } else {
-      alert("Fehler beim Löschen der Anmeldung");
+      toast.error("Die Anmeldung konnte nicht gelöscht werden.");
     }
   }
 

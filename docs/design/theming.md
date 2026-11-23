@@ -175,6 +175,8 @@ Label: `text-sm font-bold case-ui tracking-ui text-ink`.
 
 **Dialog:** `<dialog class="backdrop:bg-ink/60 bg-white rounded-card border-ui border-line shadow-ui-xl p-0 max-w-lg w-full mx-4">`, header divider `border-b-ui border-line`.
 
+**Toast** (`src/components/ui/Toaster.tsx`, built on `sonner` in unstyled mode, mounted in `DashboardShell`): card `rounded-card border-ui border-line bg-white font-sans text-ink shadow-ui-lg overflow-hidden`; a full-height band on the left in the signal color (`bg-success` / `bg-danger` / `bg-info` with a white icon, `bg-warning` with an `ink` icon). Call `toast.success|error|warning|info` from that module; errors and warnings stay 10 s, successes 5 s, and every toast has a close button. Toasts sit bottom right; a bar fixed to the bottom of the screen lifts them above itself with `useToastLift(ref, visible)`. Use toasts for the result of an action in a list (delete, cancel, import, bulk change). Errors in a form stay inline next to the form.
+
 **Header:** `bg-chrome text-white sticky top-0 z-50 border-b-ui-thick border-line`. Nav links: active `text-accent`, idle `text-white/70 hover:text-white`.
 **Footer:** `bg-chrome text-white/70 text-sm border-t-ui-thick border-line`
 **Logo:** `<BrandLogo variant="onDark" size={36} />`. It renders nothing when the theme has no logo, so add `wordmarkClass` to the organisation name next to it.

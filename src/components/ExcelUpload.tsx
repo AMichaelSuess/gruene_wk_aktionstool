@@ -8,6 +8,7 @@ import Badge from "@/components/ui/Badge";
 import TeamAuswahl from "@/components/TeamAuswahl";
 import { kategorieLabel } from "@/lib/kategorien";
 import { WAHLKREIS_LABEL_SHORT } from "@/lib/wahlkreis-label";
+import { toast } from "@/components/ui/Toaster";
 
 interface ValidationResult {
   index: number;
@@ -77,7 +78,7 @@ export default function ExcelUpload({
       (r) => r.valid && !(Array.isArray(r.row.teams) && r.row.teams.length > 0)
     );
     if (!isAdmin && teams.length > 0 && teamIds.length === 0 && rowsWithoutTeams) {
-      alert("Bitte wähle mindestens ein Team aus.");
+      toast.warning("Bitte wähle mindestens ein Team aus.");
       return;
     }
 
@@ -104,12 +105,13 @@ export default function ExcelUpload({
     if (res.ok) {
       // Hinweis, wenn nicht alle Aktionen einen Kartenpunkt bekommen haben
       const data = await res.json().catch(() => null);
-      if (data?.ohneKoordinaten > 0) alert(data.message);
+      if (data?.ohneKoordinaten > 0) toast.warning(data.message);
+      else toast.success(data?.message || "Der Import ist abgeschlossen.");
       router.push("/dashboard");
     } else {
       // Begruendung vom Server anzeigen (z. B. unbekanntes Team), falls vorhanden
       const data = await res.json().catch(() => null);
-      alert(data?.error ? `Fehler beim Import: ${data.error}` : "Fehler beim Import");
+      toast.error("Der Import ist fehlgeschlagen.", { description: data?.error });
     }
     setImporting(false);
   }

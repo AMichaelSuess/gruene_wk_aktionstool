@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { WAHLKREIS_LABEL, formatWahlkreisMitLabel } from "@/lib/wahlkreis-label";
+import { toast } from "@/components/ui/Toaster";
 
 interface Team {
   id: string;
@@ -29,10 +30,11 @@ export default function TeamsPage() {
     if (!confirm("Team wirklich löschen?")) return;
     const res = await fetch(`/api/admin/teams?id=${id}`, { method: "DELETE" });
     if (res.ok) {
-      setTeams(teams.filter((t) => t.id !== id));
+      setTeams((prev) => prev.filter((t) => t.id !== id));
+      toast.success("Das Team wurde gelöscht.");
     } else {
-      const data = await res.json();
-      alert(data.error || "Fehler beim Löschen");
+      const data = await res.json().catch(() => ({}));
+      toast.error(data.error || "Das Team konnte nicht gelöscht werden.");
     }
   }
 
