@@ -12,6 +12,9 @@ export default defineConfig({
     // timeout. That alone takes ~2.5 s and exceeded the 5 s default under
     // parallel load, failing the Docker build at random.
     testTimeout: 30_000,
+    // The code under test logs audit events and config warnings. Show that
+    // output only for failing tests, so the build log stays readable.
+    silent: "passed-only",
   },
   resolve: {
     alias: {
