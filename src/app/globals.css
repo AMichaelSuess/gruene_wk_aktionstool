@@ -342,19 +342,16 @@
   color-scheme: light;
 }
 
-/* Safari on macOS colors the parts of date/time fields itself (seen as
-   cyan digits, hard to read), the separators inherit; keep all parts in
-   the field's text color */
-::-webkit-datetime-edit-year-field,
-::-webkit-datetime-edit-month-field,
-::-webkit-datetime-edit-day-field,
-::-webkit-datetime-edit-hour-field,
-::-webkit-datetime-edit-minute-field,
-::-webkit-datetime-edit-second-field,
-::-webkit-datetime-edit-millisecond-field,
-::-webkit-datetime-edit-meridiem-field,
-::-webkit-datetime-edit-text {
-  color: inherit;
+/* Safari on macOS shows today's date/the current time as placeholder in
+   empty date/time fields and colors it by lightening the field's text
+   color in HSL, keeping hue and saturation (WebKit
+   RenderTheme::datePlaceholderTextColor; CSS cannot override it). A
+   saturated ink like emerald's #002D2D turns into bright cyan, so these
+   fields get a neutral dark color, which yields a gray placeholder. */
+@layer base {
+  input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"]) {
+    color: var(--color-gray-900);
+  }
 }
 
 body {
