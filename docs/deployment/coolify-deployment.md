@@ -259,8 +259,8 @@ Redeploy nötig** (Neubau des Images) – ein Restart reicht nicht.
 
 | Variable | Beispiel | Wirkung |
 |---|---|---|
-| `NEXT_PUBLIC_ORG_SHORT_NAME` | `B90/GRÜNE Leipzig` | Kurzname in Kopfzeilen, Login, Seitentitel |
-| `ORG_FULL_NAME` | `BÜNDNIS 90/DIE GRÜNEN Leipzig` | Meta-Beschreibung (statisch gerenderte Seiten) und Texte |
+| `NEXT_PUBLIC_ORG_SHORT_NAME` | `B90/GRÜNE Leipzig` | Kurzname: Browser-Tab, E-Mail-Betreffs, Kopfzeilen auf schmalen Bildschirmen |
+| `NEXT_PUBLIC_ORG_FULL_NAME` | `BÜNDNIS 90/DIE GRÜNEN Leipzig` | Voller Name: Kopfzeilen, E-Mails, Fußzeile, Datenschutz, Meta-Beschreibung (bis November 2026 `ORG_FULL_NAME`) |
 | `NEXT_PUBLIC_MAP_CENTER` | `51.3397,12.3731` | Startansicht der Karte (Breitengrad,Längengrad) |
 | `NEXT_PUBLIC_MAP_ZOOM` | `12` | Zoomstufe der Startansicht |
 | `NEXT_PUBLIC_WAHLKREIS_LABEL` | `Stadtbezirk` | Bezeichnung der Gebietseinheit (Default „Wahlkreis“; hier „Stadtbezirk“) |
@@ -349,7 +349,7 @@ BOOTSTRAP_ADMIN_NAME=<Vorname Nachname>
 
 # ── Build-Variablen: Buildtime UND Runtime ──
 NEXT_PUBLIC_ORG_SHORT_NAME=B90/GRÜNE Leipzig
-ORG_FULL_NAME=BÜNDNIS 90/DIE GRÜNEN Leipzig
+NEXT_PUBLIC_ORG_FULL_NAME=BÜNDNIS 90/DIE GRÜNEN Leipzig
 NEXT_PUBLIC_MAP_CENTER=51.3397,12.3731
 NEXT_PUBLIC_MAP_ZOOM=12
 NEXT_PUBLIC_WAHLKREIS_LABEL=Stadtbezirk

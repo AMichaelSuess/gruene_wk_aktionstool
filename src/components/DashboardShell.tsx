@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import BrandLogo, { wordmarkClass } from "@/components/BrandLogo";
-import { districtConfig } from "@/lib/district-config";
+import BrandLogo from "@/components/BrandLogo";
+import HeaderRow from "@/components/HeaderRow";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useState, type ReactNode } from "react";
@@ -60,7 +60,6 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const { data: session } = useSession();
-
   const isAdmin = session?.user.role === "ADMIN";
   const sections = isAdmin ? adminSections : expertSections;
 
@@ -68,8 +67,9 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-canvas">
       {/* Feste Hoehe h-16, damit die Seitenleiste darunter exakt andocken kann */}
       <header className="bg-chrome text-white focus-chrome sticky top-0 z-50 h-16 border-b-ui-thick border-line">
-        <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <HeaderRow
+          className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between gap-4"
+          start={
             <button
               className="md:hidden text-xl"
               onClick={() => setMenuOpen(!menuOpen)}
@@ -77,26 +77,23 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             >
               ☰
             </button>
-            <Link href="/manage/actions" className="flex items-center gap-2">
-              <BrandLogo variant="onDark" size={36} />
-              <div>
-                <span className={`font-headline font-bold text-lg case-ui tracking-ui ${wordmarkClass}`}>
-                  {districtConfig.orgShortName}
-                </span>
-                <span className="hidden sm:inline text-sm text-white/70 ml-2">
-                  Wahlkampfaktionen
-                  <span className="text-accent font-bold"> · Interner Bereich</span>
-                </span>
-              </div>
-            </Link>
-          </div>
-          <Link
-            href="/"
-            className="hidden md:block text-sm font-medium text-white/70 hover:text-white transition-colors"
-          >
-            Öffentliche Seite ansehen →
-          </Link>
-        </div>
+          }
+          brandHref="/manage/actions"
+          logo={<BrandLogo variant="onDark" size={36} />}
+          nameClass="font-headline font-bold text-lg case-ui tracking-ui"
+          subtitle={
+            <span className="hidden sm:inline text-sm text-white/70 ml-2">
+              Wahlkampfaktionen
+              <span className="text-accent font-bold"> · Interner Bereich</span>
+            </span>
+          }
+          link={{
+            href: "/",
+            label: "Öffentliche Seite ansehen →",
+            mobileLabel: "Öffentliche Seite →",
+            icon: "oeffentlich",
+          }}
+        />
       </header>
 
       <div className="max-w-7xl mx-auto flex">
@@ -140,13 +137,6 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="mt-auto pt-4 border-t-ui border-line">
-            <Link
-              href="/"
-              onClick={() => setMenuOpen(false)}
-              className={`md:hidden ${itemClass} ${idleItemClass}`}
-            >
-              <NavIcon name="oeffentlich" /> Öffentliche Seite ansehen
-            </Link>
             {session && (
               <div className="px-3 my-3">
                 <p className="text-sm font-bold text-ink break-words">{session.user.name}</p>

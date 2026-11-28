@@ -201,7 +201,7 @@ NODE_ENV=production
 
 # Organisation & Branding
 NEXT_PUBLIC_ORG_SHORT_NAME="B90/GRÜNE Berlin-Mitte"
-ORG_FULL_NAME="BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte"
+NEXT_PUBLIC_ORG_FULL_NAME="BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte"
 ORG_LEGAL_NAME="BÜNDNIS 90/DIE GRÜNEN Kreisverband Berlin-Mitte"
 ORG_RESPONSIBLE="Kreisvorstand BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte"
 ORG_SUBTITLE="Kreisvorstand"
@@ -747,7 +747,7 @@ journalctl -u gruene-aktionen | grep -i "email\|smtp\|mail"
 | Variable | Beschreibung |
 |---|---|
 | `NEXT_PUBLIC_ORG_SHORT_NAME` | Kurzname der Organisation (erscheint in der UI) |
-| `ORG_FULL_NAME` | Vollständiger Name der Organisation |
+| `NEXT_PUBLIC_ORG_FULL_NAME` | Vollständiger Name der Organisation |
 | `ORG_LEGAL_NAME` | Rechtlicher Name (für Datenschutz und Impressum) |
 | `ORG_RESPONSIBLE` | Verantwortliche Person oder Rolle |
 | `ORG_SUBTITLE` | Untertitel (E-Mail-Header) |

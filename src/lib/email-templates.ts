@@ -112,7 +112,7 @@ function baseLayout(content: string): string {
             </td>` : ""}
             <td valign="middle">
               <p class="subtitle" style="color: ${t.headerSubtitle}; font-size: 16px; letter-spacing: ${ls("0.2em")}; text-transform: ${t.textTransform}; margin: 0 0 4px 0; font-weight: 700;">${districtConfig.orgSubtitle}</p>
-              <h1 style="color: ${t.headerText}; font-size: 20px; margin: 0; font-weight: 700; text-transform: ${t.textTransform}; letter-spacing: ${ls("0.08em")}; line-height: 1.2;">${districtConfig.orgShortName}</h1>
+              <h1 style="color: ${t.headerText}; font-size: 20px; margin: 0; font-weight: 700; text-transform: ${t.textTransform}; letter-spacing: ${ls("0.08em")}; line-height: 1.2;">${districtConfig.orgFullName}</h1>
             </td>
           </tr>
         </table>

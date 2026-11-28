@@ -31,8 +31,10 @@ function parseWahlkreise(): WahlkreisConfig[] {
 
 export const districtConfig = {
   // Organisation
+  // Beide Namen stehen in den Kopfzeilen (Client-Komponenten), daher NEXT_PUBLIC_:
+  // der volle Name, solange er passt, sonst der Kurzname
   orgShortName: process.env.NEXT_PUBLIC_ORG_SHORT_NAME || "B90/GRÜNE Berlin-Mitte",
-  orgFullName: process.env.ORG_FULL_NAME || "BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte",
+  orgFullName: process.env.NEXT_PUBLIC_ORG_FULL_NAME || "BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte",
   orgLegalName: process.env.ORG_LEGAL_NAME || "BÜNDNIS 90/DIE GRÜNEN Kreisverband Berlin-Mitte",
   orgResponsible: process.env.ORG_RESPONSIBLE || "Kreisvorstand BÜNDNIS 90/DIE GRÜNEN Berlin-Mitte",
   orgSubtitle: process.env.ORG_SUBTITLE || "Kreisvorstand",

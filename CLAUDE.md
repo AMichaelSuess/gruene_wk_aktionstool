@@ -369,4 +369,4 @@ This repository is a fork of `maassfm/gruene_wk_aktionstool` (remote `upstream`,
 - **Upstream candidates:** keep general fixes (bugs, tests, features useful to other Kreisverbände) in separate commits from fork-specific changes, so they can be cherry-picked onto a branch from `upstream/main` for a PR.
 - **Keep the diff small:** configure the Kreisverband via environment variables (`.env` locally, Coolify in production), never by changing code. Avoid repo-wide reformatting.
 - **Tests gate the Docker build:** `npm test` runs inside the image build, so a failing test blocks every deployment.
-- **Build-time variables:** `NEXT_PUBLIC_*`, `ORG_FULL_NAME` and `ALLOWED_EMBED_DOMAIN` are baked in at build time and must be declared as `ARG` in the `Dockerfile`; a new variable of that kind needs an `ARG` there too.
+- **Build-time variables:** `NEXT_PUBLIC_*` and `ALLOWED_EMBED_DOMAIN` are baked in at build time and must be declared as `ARG` in the `Dockerfile`; a new variable of that kind needs an `ARG` there too.

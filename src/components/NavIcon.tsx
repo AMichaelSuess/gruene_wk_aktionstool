@@ -10,7 +10,8 @@ export type NavIconName =
   | "benutzer"
   | "konto"
   | "abmelden"
-  | "oeffentlich";
+  | "oeffentlich"
+  | "intern";
 
 const paths: Record<NavIconName, React.ReactNode> = {
   aktionen: (
@@ -62,6 +63,13 @@ const paths: Record<NavIconName, React.ReactNode> = {
     <>
       <circle cx="12" cy="12" r="10" />
       <path d="M2 12h20M12 2a15 15 0 0 1 0 20a15 15 0 0 1 0-20" />
+    </>
+  ),
+  // Gegenstueck zu "abmelden": Pfeil in die Tuer hinein
+  intern: (
+    <>
+      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+      <path d="m10 17 5-5-5-5M15 12H3" />
     </>
   ),
 };

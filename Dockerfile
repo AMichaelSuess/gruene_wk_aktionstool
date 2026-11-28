@@ -18,6 +18,7 @@ FROM base AS builder
 # Build-Argumente, wenn sie dort als "Build Variable" markiert sind.
 # Nach einer Änderung ist ein Redeploy (Neubau) nötig, kein Restart.
 ARG NEXT_PUBLIC_ORG_SHORT_NAME
+ARG NEXT_PUBLIC_ORG_FULL_NAME
 ARG NEXT_PUBLIC_MAP_CENTER
 ARG NEXT_PUBLIC_MAP_ZOOM
 # Kachelserver der Karte; next.config.ts übernimmt den Host in die CSP
@@ -32,8 +33,6 @@ ARG NEXT_PUBLIC_THEME
 # Texte im Kampagnen-Kopfbereich der Startseite (nur Theme "emerald")
 ARG NEXT_PUBLIC_HERO_TITLE
 ARG NEXT_PUBLIC_HERO_TEXT
-# Meta-Beschreibung im Root-Layout, landet in den statisch gerenderten Seiten
-ARG ORG_FULL_NAME
 # Wird von next.config.ts in die Header-Regeln (CSP frame-ancestors) übernommen
 ARG ALLOWED_EMBED_DOMAIN
 

@@ -2,7 +2,7 @@
 
 Die App wird vollständig über Umgebungsvariablen konfiguriert. Eine kommentierte Vorlage steht in [`.env.example`](../.env.example), die Einrichtung in Coolify beschreibt [deployment/coolify-deployment.md](deployment/coolify-deployment.md).
 
-**Build-Variablen:** Alle `NEXT_PUBLIC_*`-Variablen sowie `ORG_FULL_NAME` und `ALLOWED_EMBED_DOMAIN` werden beim Build eingebettet. Nach einer Änderung muss neu gebaut werden; im Docker-Build müssen sie als Build-Argument übergeben werden (im `Dockerfile` als `ARG` deklariert).
+**Build-Variablen:** Alle `NEXT_PUBLIC_*`-Variablen sowie `ALLOWED_EMBED_DOMAIN` werden beim Build eingebettet. Nach einer Änderung muss neu gebaut werden; im Docker-Build müssen sie als Build-Argument übergeben werden (im `Dockerfile` als `ARG` deklariert).
 
 ## Infrastruktur
 
@@ -40,8 +40,8 @@ Alle folgenden Variablen sind **optional** – ohne Angabe gelten die Werte von 
 
 | Variable                      | Beschreibung                                    | Beispiel                                   |
 |-------------------------------|-------------------------------------------------|--------------------------------------------|
-| `NEXT_PUBLIC_ORG_SHORT_NAME`  | Kurzname in der Oberfläche                      | `B90/GRÜNE Köln`                           |
-| `ORG_FULL_NAME`               | Vollständiger Name                              | `BÜNDNIS 90/DIE GRÜNEN Köln`               |
+| `NEXT_PUBLIC_ORG_SHORT_NAME`  | Kurzname: Browser-Tab, E-Mail-Betreffs, Kopfzeilen auf schmalen Bildschirmen | `B90/GRÜNE Köln`                           |
+| `NEXT_PUBLIC_ORG_FULL_NAME`   | Vollständiger Name: Kopfzeilen, E-Mails, Fußzeile, Datenschutz | `BÜNDNIS 90/DIE GRÜNEN Köln`               |
 | `ORG_LEGAL_NAME`              | Rechtlicher Name (Datenschutz, Impressum)       | `BÜNDNIS 90/DIE GRÜNEN Kreisverband Köln`  |
 | `ORG_RESPONSIBLE`             | Verantwortliche Person oder Rolle               | `Kreisvorstand BÜNDNIS 90/DIE GRÜNEN Köln` |
 | `ORG_SUBTITLE`                | Untertitel in E-Mail-Kopfzeilen                 | `Kreisvorstand`                            |
