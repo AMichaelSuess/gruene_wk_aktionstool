@@ -42,7 +42,7 @@ export default function AktionCard({ aktion, selected, onToggle }: AktionCardPro
     >
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-3">
-          <h3 className="font-headline font-bold text-primary text-xl leading-tight case-ui tracking-ui">
+          <h3 className="min-w-0 break-words hyphens-auto font-headline font-bold text-primary text-xl leading-tight case-ui tracking-ui">
             {aktion.titel}
           </h3>
           <div className="flex items-center gap-2 shrink-0">

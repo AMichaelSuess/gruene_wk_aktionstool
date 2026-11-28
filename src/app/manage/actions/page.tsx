@@ -461,9 +461,9 @@ export default function DashboardPage() {
                     aria-label={`${aktion.titel} auswählen`}
                     className="w-4 h-4 mt-1 accent-primary cursor-pointer shrink-0"
                   />
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center flex-wrap gap-2 mb-1">
-                    <h3 className="font-headline font-bold text-primary case-ui tracking-ui">{aktion.titel}</h3>
+                    <h3 className="min-w-0 break-words hyphens-auto font-headline font-bold text-primary case-ui tracking-ui">{aktion.titel}</h3>
                     <StatusBadge status={aktion.status} />
                     {aktion.kategorie && (
                       <Badge variant="info">{kategorieLabel(aktion.kategorie)}</Badge>
