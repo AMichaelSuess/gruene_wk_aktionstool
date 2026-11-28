@@ -7,6 +7,7 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import { WAHLKREIS_LABEL, formatWahlkreisMitLabel } from "@/lib/wahlkreis-label";
+import PageHeader from "@/components/PageHeader";
 
 interface Wahlkreis {
   id: string;
@@ -71,9 +72,7 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
 
   return (
     <div className="max-w-xl">
-      <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-6">
-        Team bearbeiten
-      </h1>
+      <PageHeader title="Team bearbeiten" />
 
       <Card>
         <CardHeader>
@@ -102,7 +101,7 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
             </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Button type="submit" loading={loading}>
               Speichern
             </Button>

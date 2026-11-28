@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Dialog from "@/components/ui/Dialog";
 import { toast } from "@/components/ui/Toaster";
+import PageHeader from "@/components/PageHeader";
 
 interface Team {
   id: string;
@@ -22,6 +23,28 @@ interface User {
   teams: Team[];
   // Nur fuer Admins: Anzahl selbst angelegter Aktionen (entscheidet Loeschen vs. Anonymisieren)
   _count?: { aktionen: number };
+}
+
+// Admins haben ueber ihre Rolle Zugriff auf alle Teams
+function teamsText(user: User) {
+  if (user.role === "ADMIN") return "Alle Teams";
+  return user.teams.length > 0 ? user.teams.map((t) => t.name).join(", ") : "–";
+}
+
+function RolleBadge({ user }: { user: User }) {
+  return (
+    <Badge variant={user.role === "ADMIN" ? "info" : "default"}>
+      {user.role === "ADMIN" ? "Admin" : "Expert*in"}
+    </Badge>
+  );
+}
+
+function StatusBadge({ user }: { user: User }) {
+  return (
+    <Badge variant={user.active ? "success" : "danger"}>
+      {user.active ? "Aktiv" : "Inaktiv"}
+    </Badge>
+  );
 }
 
 export default function UsersPage() {
@@ -80,26 +103,62 @@ export default function UsersPage() {
 
   const anzahlAktionen = deleteTarget?._count?.aktionen ?? 0;
 
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-headline text-2xl font-bold text-primary case-ui">
-            Benutzer*innen
-          </h1>
-          {!isAdmin && (
-            <p className="text-sm text-gray-600 mt-1">Die Mitglieder deiner Teams und die Admins.</p>
-          )}
-        </div>
-        {isAdmin && (
-          <Link href="/manage/users/new">
-            <Button>Neue*r Benutzer*in</Button>
-          </Link>
+  function renderActions(user: User, align: string) {
+    return (
+      <div className={`flex flex-wrap gap-2 ${align}`}>
+        <Link href={`/manage/users/${user.id}`}>
+          <Button variant="outline" size="sm">Bearbeiten</Button>
+        </Link>
+        {/* Sich selbst deaktivieren oder loeschen sperrt sich aus */}
+        {user.id !== session?.user.id && (
+          <>
+            <Button variant="outline" size="sm" onClick={() => toggleActive(user)}>
+              {user.active ? "Deaktivieren" : "Aktivieren"}
+            </Button>
+            <Button variant="danger" size="sm" onClick={() => setDeleteTarget(user)}>
+              Löschen
+            </Button>
+          </>
         )}
       </div>
+    );
+  }
 
+  return (
+    <div>
+      <PageHeader
+        title="Benutzer*innen"
+        description={!isAdmin && "Die Mitglieder deiner Teams und die Admins."}
+        actions={
+          isAdmin && (
+            <Link href="/manage/users/new">
+              <Button>Neue*r Benutzer*in</Button>
+            </Link>
+          )
+        }
+      />
 
-      <div className="rounded-card border-ui border-line overflow-hidden shadow-ui">
+      {/* Bis 1280px Karten: neben der Seitenleiste ist die Tabelle sonst zu breit
+          und E-Mail oder Knoepfe waeren abgeschnitten */}
+      <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+        {users.map((user) => (
+          <div key={user.id} className="bg-white rounded-card border-ui border-line p-4 shadow-ui">
+            <div className="font-medium">{user.name}</div>
+            <div className="text-sm text-gray-700 break-all">{user.email}</div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <RolleBadge user={user} />
+              {isAdmin && <StatusBadge user={user} />}
+            </div>
+            <div className="text-sm text-gray-700 mt-2">
+              <span className="font-bold">Teams:</span> {teamsText(user)}
+            </div>
+            {isAdmin && <div className="mt-3">{renderActions(user, "justify-start")}</div>}
+          </div>
+        ))}
+      </div>
+
+      {/* Breite Bildschirme: Tabelle */}
+      <div className="hidden xl:block rounded-card border-ui border-line overflow-x-auto shadow-ui">
         <table className="w-full">
           <thead className="bg-muted border-b-ui border-line">
             <tr>
@@ -121,43 +180,15 @@ export default function UsersPage() {
                 <td className="px-4 py-3 font-medium">{user.name}</td>
                 <td className="px-4 py-3 text-gray-700">{user.email}</td>
                 <td className="px-4 py-3">
-                  <Badge variant={user.role === "ADMIN" ? "info" : "default"}>
-                    {user.role === "ADMIN" ? "Admin" : "Expert*in"}
-                  </Badge>
+                  <RolleBadge user={user} />
                 </td>
-                <td className="px-4 py-3 text-gray-700 text-sm">
-                  {/* Admins haben ueber ihre Rolle Zugriff auf alle Teams */}
-                  {user.role === "ADMIN"
-                    ? "Alle Teams"
-                    : user.teams.length > 0
-                      ? user.teams.map((t) => t.name).join(", ")
-                      : "–"}
-                </td>
+                <td className="px-4 py-3 text-gray-700 text-sm">{teamsText(user)}</td>
                 {isAdmin && (
                   <>
                     <td className="px-4 py-3">
-                      <Badge variant={user.active ? "success" : "danger"}>
-                        {user.active ? "Aktiv" : "Inaktiv"}
-                      </Badge>
+                      <StatusBadge user={user} />
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-2 justify-end">
-                        <Link href={`/manage/users/${user.id}`}>
-                          <Button variant="outline" size="sm">Bearbeiten</Button>
-                        </Link>
-                        {/* Sich selbst deaktivieren oder loeschen sperrt sich aus */}
-                        {user.id !== session?.user.id && (
-                          <>
-                            <Button variant="outline" size="sm" onClick={() => toggleActive(user)}>
-                              {user.active ? "Deaktivieren" : "Aktivieren"}
-                            </Button>
-                            <Button variant="danger" size="sm" onClick={() => setDeleteTarget(user)}>
-                              Löschen
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </td>
+                    <td className="px-4 py-3">{renderActions(user, "justify-end")}</td>
                   </>
                 )}
               </tr>
@@ -189,7 +220,7 @@ export default function UsersPage() {
           Ist die Person bei Aktionen als Ansprechperson eingetragen, bleiben diese Kontaktdaten
           stehen. Bitte bei den Aktionen selbst ändern.
         </p>
-        <div className="flex gap-3 justify-end">
+        <div className="flex flex-wrap gap-3 justify-end">
           <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
             Abbrechen
           </Button>

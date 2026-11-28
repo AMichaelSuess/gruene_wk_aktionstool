@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
 import { WAHLKREIS_LABEL, formatWahlkreisMitLabel } from "@/lib/wahlkreis-label";
 import { toast } from "@/components/ui/Toaster";
+import PageHeader from "@/components/PageHeader";
 
 interface Team {
   id: string;
@@ -48,12 +49,14 @@ export default function TeamsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-headline text-2xl font-bold text-primary case-ui">Teams</h1>
-        <Link href="/manage/teams/new">
-          <Button>Neues Team</Button>
-        </Link>
-      </div>
+      <PageHeader
+        title="Teams"
+        actions={
+          <Link href="/manage/teams/new">
+            <Button>Neues Team</Button>
+          </Link>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {teams.map((team) => (
@@ -119,7 +122,7 @@ export default function TeamsPage() {
               &bdquo;{deleteTarget?.name}&ldquo; wird endgültig gelöscht. Das kann nicht rückgängig
               gemacht werden.
             </p>
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-wrap gap-3 justify-end">
               <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
                 Abbrechen
               </Button>

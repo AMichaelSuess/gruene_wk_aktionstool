@@ -11,6 +11,7 @@ import Select from "@/components/ui/Select";
 import { format, isToday, isTomorrow, isThisWeek } from "date-fns";
 import { de } from "date-fns/locale";
 import { KATEGORIEN, kategorieLabel } from "@/lib/kategorien";
+import PageHeader from "@/components/PageHeader";
 
 interface Aktion {
   id: string;
@@ -317,26 +318,26 @@ export default function DashboardPage() {
 
   return (
     <div className={selectedIds.size > 0 ? "pb-40 sm:pb-28" : ""}>
-      <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-headline text-2xl font-bold text-primary case-ui">
-          Aktionen
-        </h1>
-        <div className="flex flex-wrap items-center gap-2">
-          {filteredAktionen.length > 0 && (
-            <>
-              <a href={`/api/actions/export?format=xlsx${exportQuery}`}>
-                <Button variant="outline" size="sm">Excel exportieren</Button>
-              </a>
-              <a href={`/api/actions/export?format=txt${exportQuery}`}>
-                <Button variant="outline" size="sm">Signal-Text</Button>
-              </a>
-            </>
-          )}
-          <Link href="/manage/actions/new">
-            <Button>Neue Aktion</Button>
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        title="Aktionen"
+        actions={
+          <>
+            {filteredAktionen.length > 0 && (
+              <>
+                <a href={`/api/actions/export?format=xlsx${exportQuery}`}>
+                  <Button variant="outline" size="sm">Excel exportieren</Button>
+                </a>
+                <a href={`/api/actions/export?format=txt${exportQuery}`}>
+                  <Button variant="outline" size="sm">Signal-Text</Button>
+                </a>
+              </>
+            )}
+            <Link href="/manage/actions/new">
+              <Button>Neue Aktion</Button>
+            </Link>
+          </>
+        }
+      />
 
       {/* Filter */}
       <div className="mb-8 bg-white rounded-card border-ui border-line p-4 shadow-ui">
@@ -494,13 +495,14 @@ export default function DashboardPage() {
                 </div>
                 </div>
 
-                <div className="flex flex-col gap-2 shrink-0 sm:flex-row sm:flex-wrap items-start">
+                {/* Neben dem Text hoechstens 20rem breit, damit die Knoepfe auf Tablets umbrechen */}
+                <div className="flex flex-col gap-2 shrink-0 sm:max-w-xs xl:max-w-none sm:flex-row sm:flex-wrap items-start">
                   <Link href={`/manage/actions/${aktion.id}/signups`} className="sm:w-auto self-start">
                     <Button variant="outline" size="sm" className="w-full sm:w-auto">
                       Anmeldungen
                     </Button>
                   </Link>
-                  <div className="flex gap-2 w-full sm:w-auto self-start items-center">
+                  <div className="flex flex-wrap gap-2 w-full sm:w-auto self-start items-center">
                     <Link href={`/manage/actions/${aktion.id}`} className="flex-1 sm:flex-none self-start">
                       <Button variant="outline" size="sm" className="w-full sm:w-auto">
                         Bearbeiten
@@ -574,7 +576,7 @@ export default function DashboardPage() {
           &bdquo;{kategorieLabel(bulkKategorie)}&ldquo; geändert. Es werden keine E-Mails
           verschickt.
         </p>
-        <div className="flex gap-3 justify-end">
+        <div className="flex flex-wrap gap-3 justify-end">
           <Button variant="secondary" onClick={() => setBulkConfirm(false)}>
             Abbrechen
           </Button>
@@ -592,7 +594,7 @@ export default function DashboardPage() {
         <p className="mb-6 text-gray-700">
           Aktion wirklich absagen? Alle Angemeldeten werden benachrichtigt.
         </p>
-        <div className="flex gap-3 justify-end">
+        <div className="flex flex-wrap gap-3 justify-end">
           <Button variant="secondary" onClick={() => setCancelId(null)}>
             Abbrechen
           </Button>
@@ -615,7 +617,7 @@ export default function DashboardPage() {
           . Es werden <strong>keine</strong> E-Mails verschickt. Das kann nicht rückgängig gemacht
           werden. Wenn die Angemeldeten benachrichtigt werden sollen, sage die Aktion stattdessen ab.
         </p>
-        <div className="flex gap-3 justify-end">
+        <div className="flex flex-wrap gap-3 justify-end">
           <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
             Abbrechen
           </Button>

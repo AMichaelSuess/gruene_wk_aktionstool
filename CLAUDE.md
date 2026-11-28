@@ -260,6 +260,7 @@ All UI must work in every theme. See `docs/design/theming.md` for the token tabl
   - Labels/buttons/badges: `case-ui tracking-ui`; headings: `font-headline`
 - **Every bordered surface needs a radius token.** It is `0` in brutalist, so a missing one is only visible in other themes.
 - **Reuse `src/components/ui/`** (Button, Card, Input, Select, Badge, Dialog, Toaster/`toast` for results of list actions; form errors stay inline), `BrandLogo` (renders nothing when the theme uses a wordmark; pair the org name with `wordmarkClass`) and `CampaignHero` (via `PublicHeader`).
+- **Internal pages fit every width:** the title row is always `PageHeader` (enforced by `src/__tests__/layout/manage-page-header.test.ts`); rows of buttons use `flex-wrap`; tables get a card layout for narrow widths. The e2e test "keine interne Seite ist zu breit" checks every internal page at 320, 900 and 1280px — add new pages to its list.
 - **Contrast:** light accents (`accent`, `warning`, `highlight`, `cta` in emerald) are fills or text on dark surfaces, never text on white.
 - **New visual values** go into every theme block in `globals.css` (a missing `--t-*` silently falls back to brutalist); email colors go into `theme.email` in `src/lib/theme.ts`.
 - **Verify UI changes in both themes**, e.g. `NEXT_PUBLIC_THEME=emerald npm run build && NEXT_PUBLIC_THEME=emerald npx next start -p 3210`.

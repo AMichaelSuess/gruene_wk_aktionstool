@@ -14,9 +14,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={inputId} className="flex items-baseline gap-2 mb-1">
-            <span className="text-sm font-bold case-ui tracking-ui text-ink whitespace-nowrap">{label}</span>
-            {hint && <span className="text-xs text-gray-500 font-normal normal-case tracking-normal whitespace-nowrap">{hint}</span>}
+          // Darf umbrechen: lange Beschriftungen waren auf dem Handy sonst breiter als der Bildschirm
+          <label htmlFor={inputId} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mb-1">
+            <span className="text-sm font-bold case-ui tracking-ui text-ink">{label}</span>
+            {hint && <span className="text-xs text-gray-500 font-normal normal-case tracking-normal">{hint}</span>}
           </label>
         )}
         <input

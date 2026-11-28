@@ -7,6 +7,7 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import { ADMIN_TEAMS_HINWEIS } from "@/lib/teams";
+import PageHeader from "@/components/PageHeader";
 
 interface Team {
   id: string;
@@ -66,9 +67,7 @@ export default function NewUserPage() {
 
   return (
     <div className="max-w-xl">
-      <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-6">
-        Neue*r Benutzer*in
-      </h1>
+      <PageHeader title="Neue*r Benutzer*in" />
 
       <Card>
         <CardHeader>
@@ -139,7 +138,7 @@ export default function NewUserPage() {
             </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Button type="submit" loading={loading}>
               Erstellen
             </Button>

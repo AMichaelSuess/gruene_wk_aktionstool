@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { WAHLKREIS_LABEL, WAHLKREIS_LABEL_PLURAL, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
+import PageHeader from "@/components/PageHeader";
 
 interface Wahlkreis {
   id: string;
@@ -31,9 +32,7 @@ export default function WahlkreisePage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-headline text-2xl font-bold text-primary case-ui">{WAHLKREIS_LABEL_PLURAL}</h1>
-      </div>
+      <PageHeader title={WAHLKREIS_LABEL_PLURAL} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {wahlkreise.map((wk) => (

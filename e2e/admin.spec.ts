@@ -36,7 +36,7 @@ test.describe("Admin: Verwaltung", () => {
     await page.getByRole("button", { name: "Erstellen" }).click();
 
     await expect(page).toHaveURL("/manage/users");
-    await expect(page.getByText("Erik E2E")).toBeVisible();
+    await expect(page.getByRole("cell", { name: "Erik E2E" })).toBeVisible();
     expect((await db.user.findUnique({ where: { email: "erik@e2e.test" } }))?.role).toBe("EXPERT");
   });
 
@@ -77,5 +77,68 @@ test.describe("Admin: Verwaltung", () => {
 
     await expect(page.getByText(`„${titel}“ wurde gelöscht.`)).toBeVisible();
     expect(await db.aktion.findUnique({ where: { id } })).toBeNull();
+  });
+});
+
+test.describe("Admin: schmale Bildschirme", () => {
+  // Kein interner Inhalt darf breiter sein als sein Platz: sonst scrollt die
+  // Seite seitlich, oder Spalten und Knoepfe liegen ausserhalb einer Box.
+  // 320px = schmalstes uebliches Handy, 900px = Tablet mit Seitenleiste (dort ist
+  // der Inhalt am schmalsten), 1280px = Desktop. 320 statt 375 laesst Luft, weil Schriften in echten
+  // Browsern oft etwas breiter laufen als im Test-Chromium.
+  test("keine interne Seite ist zu breit", async ({ page }) => {
+    const [aktion, team, user, wahlkreis] = await Promise.all([
+      db.aktion.findFirstOrThrow(),
+      db.team.findFirstOrThrow(),
+      db.user.findFirstOrThrow({ where: { role: "EXPERT" } }),
+      db.wahlkreis.findFirstOrThrow(),
+    ]);
+    const pfade = [
+      "/manage/actions",
+      "/manage/actions/new",
+      `/manage/actions/${aktion.id}`,
+      `/manage/actions/${aktion.id}/signups`,
+      "/manage/statistics",
+      "/manage/users",
+      "/manage/users/new",
+      `/manage/users/${user.id}`,
+      "/manage/teams",
+      "/manage/teams/new",
+      `/manage/teams/${team.id}`,
+      "/manage/districts",
+      `/manage/districts/${wahlkreis.id}`,
+      "/manage/account",
+    ];
+
+    for (const breite of [320, 900, 1280]) {
+      await page.setViewportSize({ width: breite, height: 800 });
+      for (const pfad of pfade) {
+        await page.goto(pfad);
+        await expect(page.getByRole("heading", { level: 1 }), pfad).toBeVisible();
+        const ergebnis = await page.evaluate(() => {
+          const main = document.querySelector("main")!;
+          // Sichtbare Boxen mit eigenem Scrollbereich, deren Inhalt nicht passt.
+          // Eingabefelder scrollen langen Text immer, das ist gewollt.
+          const zuBreit = [...main.querySelectorAll<HTMLElement>("*")]
+            .filter((e) => !["INPUT", "TEXTAREA", "SELECT"].includes(e.tagName))
+            .filter((e) => e.offsetParent !== null && getComputedStyle(e).overflowX !== "visible")
+            .filter((e) => e.scrollWidth > e.clientWidth + 1)
+            .map((e) => `${e.tagName.toLowerCase()}.${e.className}`);
+          // Nennt bei einem Fehler die Elemente, die rechts aus dem Inhalt ragen
+          const rand = main.getBoundingClientRect().left + main.clientWidth;
+          const ragtHeraus = [...main.querySelectorAll<HTMLElement>("*")]
+            .filter((e) => e.offsetParent !== null && e.getBoundingClientRect().right > rand + 0.5)
+            .map((e) => `${e.tagName.toLowerCase()} "${(e.textContent ?? "").trim().slice(0, 40)}"`)
+            .slice(0, 5);
+          return {
+            seite: document.documentElement.scrollWidth - window.innerWidth,
+            inhalt: main.scrollWidth - main.clientWidth,
+            zuBreit,
+            ragtHeraus,
+          };
+        });
+        expect(ergebnis, `${pfad} bei ${breite}px`).toEqual({ seite: 0, inhalt: 0, zuBreit: [], ragtHeraus: [] });
+      }
+    }
   });
 });

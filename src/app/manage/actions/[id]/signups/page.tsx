@@ -5,6 +5,7 @@ import Button from "@/components/ui/Button";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import Dialog from "@/components/ui/Dialog";
 import { toast } from "@/components/ui/Toaster";
+import PageHeader from "@/components/PageHeader";
 
 interface Anmeldung {
   id: string;
@@ -65,24 +66,20 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div>
-      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
-        <div>
-          <h1 className="font-headline text-2xl font-bold text-primary case-ui">
-            Anmeldungen
-          </h1>
-          {aktion && (
-            <p className="text-gray-600 mt-1">{aktion.titel}</p>
-          )}
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <Button variant="outline" size="sm" onClick={() => downloadExport("xlsx")}>
-            Excel-Export
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => downloadExport("txt")}>
-            TXT (Signal)
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Anmeldungen"
+        description={aktion?.titel}
+        actions={
+          <>
+            <Button variant="outline" size="sm" onClick={() => downloadExport("xlsx")}>
+              Excel-Export
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => downloadExport("txt")}>
+              TXT (Signal)
+            </Button>
+          </>
+        }
+      />
 
       {anmeldungen.length === 0 ? (
         <Card>
@@ -150,7 +147,7 @@ export default function AnmeldungenPage({ params }: { params: Promise<{ id: stri
           Die Anmeldung von &bdquo;{deleteTarget?.vorname} {deleteTarget?.nachname}&ldquo; wird
           endgültig gelöscht. Die Person wird darüber nicht per E-Mail benachrichtigt.
         </p>
-        <div className="flex gap-3 justify-end">
+        <div className="flex flex-wrap gap-3 justify-end">
           <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
             Abbrechen
           </Button>

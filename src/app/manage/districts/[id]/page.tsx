@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import { WAHLKREIS_LABEL, WAHLKREIS_NUMMERN_ANZEIGEN } from "@/lib/wahlkreis-label";
+import PageHeader from "@/components/PageHeader";
 
 interface WahlkreisDetail {
   id: string;
@@ -74,9 +75,7 @@ export default function EditWahlkreisPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="max-w-xl">
-      <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-6">
-        {WAHLKREIS_LABEL} bearbeiten
-      </h1>
+      <PageHeader title={`${WAHLKREIS_LABEL} bearbeiten`} />
 
       <Card>
         <CardHeader>
@@ -112,7 +111,7 @@ export default function EditWahlkreisPage({ params }: { params: Promise<{ id: st
             </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Button type="submit" loading={loading}>
               Speichern
             </Button>

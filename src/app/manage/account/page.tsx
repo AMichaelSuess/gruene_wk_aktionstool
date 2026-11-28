@@ -5,6 +5,7 @@ import { signOut, useSession } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import Card, { CardHeader, CardTitle } from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
+import PageHeader from "@/components/PageHeader";
 
 const leeresPasswortFormular = { aktuellesPasswort: "", neuesPasswort: "", wiederholung: "" };
 
@@ -105,7 +106,7 @@ export default function KontoPage() {
 
   return (
     <div className="max-w-lg space-y-6">
-      <h1 className="font-headline text-2xl font-bold text-primary case-ui">Mein Konto</h1>
+      <PageHeader title="Mein Konto" />
 
       <Card>
         <CardHeader>

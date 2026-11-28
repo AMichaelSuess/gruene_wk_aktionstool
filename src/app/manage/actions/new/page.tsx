@@ -11,6 +11,7 @@ import ExcelUpload from "@/components/ExcelUpload";
 import { KATEGORIEN } from "@/lib/kategorien";
 import { WAHLKREIS_LABEL, formatWahlkreis } from "@/lib/wahlkreis-label";
 import TeamAuswahl from "@/components/TeamAuswahl";
+import PageHeader from "@/components/PageHeader";
 
 interface Wahlkreis {
   id: string;
@@ -105,9 +106,7 @@ export default function NewAktionPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="font-headline text-2xl font-bold text-primary case-ui mb-6">
-        Neue Aktion
-      </h1>
+      <PageHeader title="Neue Aktion" />
 
       {/* Tab Toggle */}
       <div className="flex gap-2 mb-6">
@@ -255,7 +254,7 @@ export default function NewAktionPage() {
               </div>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Button type="submit" loading={loading}>
                 Aktion erstellen
               </Button>

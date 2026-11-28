@@ -165,7 +165,9 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
-        <main className="flex-1 min-w-0 p-4 md:p-8">{children}</main>
+        {/* Zu breiter Inhalt scrollt hier drin, statt die ganze Seite samt Kopfzeile
+            seitlich zu verschieben. Achtung: sticky gilt darin relativ zu main. */}
+        <main className="flex-1 min-w-0 overflow-x-auto p-4 md:p-8">{children}</main>
       </div>
       <Toaster />
     </div>
