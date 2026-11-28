@@ -493,7 +493,7 @@ describe("PII-Schutz: Oeffentlicher Aktionszugriff", () => {
     expect(res.status).toBe(200);
     const data = await res.json();
 
-    expect(data.ansprechpersonName).toBe("Max Muster");
+    expect(data.ansprechpersonName).toBe("M.M.");
     expect(data.ansprechpersonEmail).toBeUndefined();
     expect(data.ansprechpersonTelefon).toBeUndefined();
   });
@@ -510,6 +510,7 @@ describe("PII-Schutz: Oeffentlicher Aktionszugriff", () => {
     expect(res.status).toBe(200);
     const data = await res.json();
 
+    expect(data.ansprechpersonName).toBe("Max Muster");
     expect(data.ansprechpersonEmail).toBe("max@test.de");
     expect(data.ansprechpersonTelefon).toBe("0171234");
   });

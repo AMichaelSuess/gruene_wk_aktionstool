@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { initialen } from "@/lib/initialen";
 import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { ZodError } from "zod";
 import { aktionSchema } from "@/lib/validators";
@@ -69,7 +70,10 @@ export async function GET(
       createdById: _c,
       ...publicAktion
     } = aktion;
-    return NextResponse.json(publicAktion);
+    return NextResponse.json({
+      ...publicAktion,
+      ansprechpersonName: initialen(publicAktion.ansprechpersonName),
+    });
   }
 
   return NextResponse.json(aktion);

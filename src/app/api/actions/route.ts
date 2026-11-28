@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { initialen } from "@/lib/initialen";
 import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { ZodError } from "zod";
 import { aktionSchema, bulkKategorieSchema } from "@/lib/validators";
@@ -123,12 +124,14 @@ export async function GET(req: NextRequest) {
   }
 
   // Public view: never expose the contact person's email/phone or internal user IDs.
-  // The public pages only show the contact person's name.
+  // The public pages only show the contact person's initials.
   if (!session || isPublic) {
     return NextResponse.json(
       filtered.map(
-        ({ ansprechpersonEmail: _e, ansprechpersonTelefon: _t, createdById: _c, ...publicAktion }) =>
-          publicAktion
+        ({ ansprechpersonEmail: _e, ansprechpersonTelefon: _t, createdById: _c, ...publicAktion }) => ({
+          ...publicAktion,
+          ansprechpersonName: initialen(publicAktion.ansprechpersonName),
+        })
       )
     );
   }

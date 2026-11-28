@@ -177,7 +177,7 @@ describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
     expect(data[0]).not.toHaveProperty("anmeldungen");
 
     // Kontaktdaten der Ansprechperson und interne User-IDs sind nicht öffentlich
-    expect(data[0].ansprechpersonName).toBe("Kontakt Person");
+    expect(data[0].ansprechpersonName).toBe("K.P.");
     expect(data[0]).not.toHaveProperty("ansprechpersonEmail");
     expect(data[0]).not.toHaveProperty("ansprechpersonTelefon");
     expect(data[0]).not.toHaveProperty("createdById");
@@ -232,7 +232,7 @@ describe("Öffentliche Endpunkte leaken keine persönlichen Daten", () => {
     const data = await res.json();
 
     expect(res.status).toBe(200);
-    expect(data.ansprechpersonName).toBe("Kontakt Person");
+    expect(data.ansprechpersonName).toBe("K.P.");
     expect(data).not.toHaveProperty("ansprechpersonEmail");
     expect(data).not.toHaveProperty("ansprechpersonTelefon");
     expect(data).not.toHaveProperty("createdById");
